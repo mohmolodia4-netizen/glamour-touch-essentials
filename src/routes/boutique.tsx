@@ -7,12 +7,14 @@ import { SiteHeader } from "@/components/site/SiteHeader";
 import { categoriesQuery, productsQuery } from "@/lib/store";
 import { cn } from "@/lib/utils";
 
-type BoutiqueSearch = { categorie?: string };
+type BoutiqueSearch = { categorie?: string | undefined };
 
 export const Route = createFileRoute("/boutique")({
   validateSearch: (search: Record<string, unknown>): BoutiqueSearch => ({
-    categorie: typeof search.categorie === "string" ? search.categorie : undefined,
+    categorie:
+      typeof search["categorie"] === "string" ? search["categorie"] : undefined,
   }),
+
   head: () => ({
     meta: [
       { title: "Boutique — Glamour Touch" },
