@@ -314,6 +314,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      claim_first_admin: { Args: never; Returns: boolean }
       get_public_settings: {
         Args: never
         Returns: {
