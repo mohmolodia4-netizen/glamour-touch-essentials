@@ -107,18 +107,32 @@ export function OrderForm({ product }: { product: Product }) {
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
-    if (!code) return toast.error("Veuillez choisir une wilaya.");
-    if (fullName.trim().length < 3) return toast.error("Nom complet requis.");
-    if (phone.replace(/\D/g, "").length < 9)
-      return toast.error("Numéro de téléphone invalide.");
-    if (!commune) return toast.error("Veuillez choisir une commune.");
+    if (!code) {
+      toast.error("Veuillez choisir une wilaya.");
+      return;
+    }
+    if (fullName.trim().length < 3) {
+      toast.error("Nom complet requis.");
+      return;
+    }
+    if (phone.replace(/\D/g, "").length < 9) {
+      toast.error("Numéro de téléphone invalide.");
+      return;
+    }
+    if (!commune) {
+      toast.error("Veuillez choisir une commune.");
+      return;
+    }
     const address = deliveryType === "domicile" ? adresse : deskAddress;
-    if (!address.trim())
-      return toast.error(
+    if (!address.trim()) {
+      toast.error(
         deliveryType === "domicile"
           ? "Adresse de livraison requise."
           : "Veuillez choisir un point Stop Desk.",
       );
+      return;
+    }
+
 
     setSubmitting(true);
     try {
