@@ -119,9 +119,29 @@ function AdminPage() {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-4 px-4 text-center">
         <h1 className="font-display text-2xl">Accès refusé</h1>
-        <p className="text-sm text-muted-foreground">
-          Ce compte n'a pas le rôle administrateur.
+        <p className="max-w-sm text-sm text-muted-foreground">
+          Ce compte n'a pas le rôle administrateur. Si vous êtes le propriétaire et
+          qu'aucun administrateur n'existe encore, activez-le ci-dessous.
         </p>
+        <Button
+          className="rounded-sm"
+          onClick={async () => {
+            const { data, error } = await supabase.rpc("claim_first_admin" as never);
+            if (error) {
+              toast.error(error.message);
+              return;
+            }
+            if (data) {
+              toast.success("Rôle administrateur activé");
+              window.location.reload();
+            } else {
+              toast.error("Un administrateur existe déjà.");
+            }
+          }}
+        >
+          Devenir administrateur
+        </Button>
+
         <Button
           variant="outline"
           className="rounded-sm"
