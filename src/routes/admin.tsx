@@ -33,20 +33,32 @@ export const Route = createFileRoute("/admin")({
 function LoginCard() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [busy, setBusy] = useState(false);
 
-  async function signIn(event: React.FormEvent) {
+  async function submit(event: React.FormEvent) {
     event.preventDefault();
     setBusy(true);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { error } =
+      mode === "signin"
+        ? await supabase.auth.signInWithPassword({ email, password })
+        : await supabase.auth.signUp({
+            email,
+            password,
+            options: { emailRedirectTo: `${window.location.origin}/admin` },
+          });
     setBusy(false);
-    if (error) toast.error(error.message);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    if (mode === "signup") toast.success("Compte créé. Vérifiez votre email si demandé.");
   }
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <form
-        onSubmit={signIn}
+        onSubmit={submit}
         className="w-full max-w-sm space-y-4 rounded-sm border border-border bg-card p-8"
       >
         <h1 className="font-display text-2xl">Administration</h1>
@@ -67,17 +79,28 @@ function LoginCard() {
             value={password}
             onChange={(event) => setPassword(event.target.value)}
             required
+            minLength={8}
             className="rounded-sm"
           />
         </div>
         <Button type="submit" disabled={busy} className="w-full rounded-sm">
           {busy ? <Loader2 className="mr-2 size-4 animate-spin" /> : null}
-          Se connecter
+          {mode === "signin" ? "Se connecter" : "Créer le compte"}
         </Button>
+        <button
+          type="button"
+          className="w-full text-xs text-muted-foreground underline"
+          onClick={() => setMode(mode === "signin" ? "signup" : "signin")}
+        >
+          {mode === "signin"
+            ? "Première utilisation ? Créer le compte administrateur"
+            : "J'ai déjà un compte"}
+        </button>
       </form>
     </div>
   );
 }
+
 
 function AdminPage() {
   const { session, isAdmin, loading } = useAdminAuth();
