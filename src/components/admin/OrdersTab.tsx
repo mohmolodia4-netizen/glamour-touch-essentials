@@ -74,17 +74,24 @@ export function OrdersTab() {
       .from("orders")
       .update({ status })
       .eq("id", id);
-    if (error) return toast.error(error.message);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
     toast.success("Statut mis à jour");
     void queryClient.invalidateQueries({ queryKey: ["admin", "orders"] });
   }
 
   async function remove(id: string) {
     const { error } = await (supabase as any).from("orders").delete().eq("id", id);
-    if (error) return toast.error(error.message);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
     toast.success("Commande supprimée");
     void queryClient.invalidateQueries({ queryKey: ["admin", "orders"] });
   }
+
 
   return (
     <div className="space-y-5">
