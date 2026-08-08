@@ -27,7 +27,7 @@ Deno.serve(async (req) => {
       supabase.from("orders").select("*").eq("id", order_id).maybeSingle(),
       supabase
         .from("app_settings")
-        .select("telegram_bot_token, telegram_chat_id, site_name")
+        .select("telegram_bot_token, telegram_chat_id, site_name, google_sheet_webhook_url")
         .eq("id", 1)
         .maybeSingle(),
     ]);
@@ -39,10 +39,42 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Google Sheet webhook — never blocks the Telegram notification
+    let sheet: "sent" | "skipped" | "failed" = "skipped";
+    const sheetUrl = settings?.google_sheet_webhook_url?.trim();
+    if (sheetUrl) {
+      try {
+        const res = await fetch(sheetUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            fullName: order.full_name,
+            phone: order.phone,
+            article: order.product_name,
+            quantity: order.quantity || 1,
+            address: order.adresse ?? "",
+            wilaya: order.wilaya_name || order.wilaya_id,
+            commune: order.commune,
+            totalPrice: order.total,
+            note: order.note || "",
+          }),
+        });
+        if (!res.ok) {
+          console.error("Google Sheet webhook error", res.status, await res.text());
+          sheet = "failed";
+        } else {
+          sheet = "sent";
+        }
+      } catch (sheetError) {
+        console.error("Google Sheet webhook failed", sheetError);
+        sheet = "failed";
+      }
+    }
+
     const token = settings?.telegram_bot_token;
     const chatId = settings?.telegram_chat_id;
     if (!token || !chatId) {
-      return new Response(JSON.stringify({ skipped: "telegram non configuré" }), {
+      return new Response(JSON.stringify({ sheet, skipped: "telegram non configuré" }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
@@ -74,13 +106,13 @@ Deno.serve(async (req) => {
     const result = await response.json();
     if (!response.ok || result.ok === false) {
       console.error("Telegram error", response.status, JSON.stringify(result));
-      return new Response(JSON.stringify({ error: result }), {
+      return new Response(JSON.stringify({ error: result, sheet }), {
         status: 502,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    return new Response(JSON.stringify({ ok: true }), {
+    return new Response(JSON.stringify({ ok: true, sheet }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {
