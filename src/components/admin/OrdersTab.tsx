@@ -79,6 +79,23 @@ export function OrdersTab() {
       return;
     }
     toast.success("Statut mis à jour");
+
+    if (status === "confirmed") {
+      try {
+        const { data, error: fnError } = await (supabase as any).functions.invoke(
+          "send-order-notifications",
+          { body: { order_id: id, mode: "sheet" } },
+        );
+        if (fnError) throw fnError;
+        if (data?.sheet === "sent") toast.success("Commande envoyée au Google Sheet");
+        else if (data?.sheet === "already_sent") toast.info("Déjà envoyée au Google Sheet");
+        else if (data?.sheet === "skipped")
+          toast.info("Aucune URL Google Sheet configurée");
+      } catch {
+        toast.error("Échec de l'envoi vers Google Sheet");
+      }
+    }
+
     void queryClient.invalidateQueries({ queryKey: ["admin", "orders"] });
   }
 
