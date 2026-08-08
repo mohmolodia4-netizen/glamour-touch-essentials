@@ -106,13 +106,13 @@ Deno.serve(async (req) => {
     const result = await response.json();
     if (!response.ok || result.ok === false) {
       console.error("Telegram error", response.status, JSON.stringify(result));
-      return new Response(JSON.stringify({ error: result }), {
+      return new Response(JSON.stringify({ error: result, sheet }), {
         status: 502,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    return new Response(JSON.stringify({ ok: true }), {
+    return new Response(JSON.stringify({ ok: true, sheet }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {
