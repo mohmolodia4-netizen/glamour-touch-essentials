@@ -39,6 +39,11 @@ const FIELDS: { key: keyof Settings; label: string; hint?: string }[] = [
     label: "Telegram — Chat ID",
     hint: "Identifiant du canal ou de la conversation à notifier.",
   },
+  {
+    key: "google_sheet_webhook_url",
+    label: "Google Sheet Webhook URL",
+    hint: "URL du script Google Apps qui reçoit les commandes.",
+  },
 ];
 
 const empty: Settings = {
@@ -51,6 +56,7 @@ const empty: Settings = {
   meta_pixel_id: "",
   telegram_bot_token: "",
   telegram_chat_id: "",
+  google_sheet_webhook_url: "",
 };
 
 export function SettingsTab() {
