@@ -129,6 +129,7 @@ export type Database = {
           product_name: string
           product_price: number
           quantity: number
+          sheet_sent_at: string | null
           shipping_fee: number
           status: string
           total: number
@@ -148,6 +149,7 @@ export type Database = {
           product_name: string
           product_price: number
           quantity?: number
+          sheet_sent_at?: string | null
           shipping_fee: number
           status?: string
           total: number
@@ -167,6 +169,7 @@ export type Database = {
           product_name?: string
           product_price?: number
           quantity?: number
+          sheet_sent_at?: string | null
           shipping_fee?: number
           status?: string
           total?: number

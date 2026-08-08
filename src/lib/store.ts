@@ -158,9 +158,10 @@ export async function placeOrder(input: {
   const orderId = data as string;
 
   // Fire-and-forget Telegram notification (edge function holds the credentials).
+  // Google Sheet is sent later, when an admin confirms the order.
   try {
     await (supabase as any).functions.invoke("send-order-notifications", {
-      body: { order_id: orderId },
+      body: { order_id: orderId, mode: "telegram" },
     });
   } catch {
     /* notification failures must never block the customer */

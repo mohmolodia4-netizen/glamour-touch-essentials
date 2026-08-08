@@ -9,7 +9,9 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { order_id } = await req.json();
+    const body = await req.json();
+    const order_id = body?.order_id;
+    const mode: "telegram" | "sheet" = body?.mode === "sheet" ? "sheet" : "telegram";
     if (!order_id || typeof order_id !== "string") {
       return new Response(JSON.stringify({ error: "order_id requis" }), {
         status: 400,
@@ -39,10 +41,19 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Google Sheet webhook — never blocks the Telegram notification
-    let sheet: "sent" | "skipped" | "failed" = "skipped";
-    const sheetUrl = settings?.google_sheet_webhook_url?.trim();
-    if (sheetUrl) {
+    // --- Google Sheet: only on admin confirmation, and only once per order ---
+    if (mode === "sheet") {
+      if (order.sheet_sent_at) {
+        return new Response(JSON.stringify({ sheet: "already_sent" }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const sheetUrl = settings?.google_sheet_webhook_url?.trim();
+      if (!sheetUrl) {
+        return new Response(JSON.stringify({ sheet: "skipped" }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
       try {
         const res = await fetch(sheetUrl, {
           method: "POST",
@@ -61,20 +72,33 @@ Deno.serve(async (req) => {
         });
         if (!res.ok) {
           console.error("Google Sheet webhook error", res.status, await res.text());
-          sheet = "failed";
-        } else {
-          sheet = "sent";
+          return new Response(JSON.stringify({ sheet: "failed" }), {
+            status: 502,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
         }
+        await supabase
+          .from("orders")
+          .update({ sheet_sent_at: new Date().toISOString() })
+          .eq("id", order_id)
+          .is("sheet_sent_at", null);
+        return new Response(JSON.stringify({ sheet: "sent" }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
       } catch (sheetError) {
         console.error("Google Sheet webhook failed", sheetError);
-        sheet = "failed";
+        return new Response(JSON.stringify({ sheet: "failed" }), {
+          status: 502,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
       }
     }
 
+    // --- Telegram: fires on order creation ---
     const token = settings?.telegram_bot_token;
     const chatId = settings?.telegram_chat_id;
     if (!token || !chatId) {
-      return new Response(JSON.stringify({ sheet, skipped: "telegram non configuré" }), {
+      return new Response(JSON.stringify({ skipped: "telegram non configuré" }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
@@ -106,13 +130,13 @@ Deno.serve(async (req) => {
     const result = await response.json();
     if (!response.ok || result.ok === false) {
       console.error("Telegram error", response.status, JSON.stringify(result));
-      return new Response(JSON.stringify({ error: result, sheet }), {
+      return new Response(JSON.stringify({ error: result }), {
         status: 502,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    return new Response(JSON.stringify({ ok: true, sheet }), {
+    return new Response(JSON.stringify({ ok: true }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {
