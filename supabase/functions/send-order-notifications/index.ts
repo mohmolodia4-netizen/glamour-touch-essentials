@@ -55,10 +55,18 @@ Deno.serve(async (req) => {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            action: "updateStatus",
+            action: "archiveOrder",
             phone: order.phone,
             orderId: order.id,
             status: "livré",
+            fullName: order.full_name,
+            article: order.product_name,
+            quantity: order.quantity || 1,
+            address: order.adresse ?? "",
+            wilaya: order.wilaya_name || order.wilaya_id,
+            commune: order.commune,
+            totalPrice: order.total,
+            note: order.note || "",
           }),
         });
         if (!res.ok) {
