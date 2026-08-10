@@ -11,7 +11,8 @@ Deno.serve(async (req) => {
   try {
     const body = await req.json();
     const order_id = body?.order_id;
-    const mode: "telegram" | "sheet" = body?.mode === "sheet" ? "sheet" : "telegram";
+    const mode: "telegram" | "sheet" | "status" =
+      body?.mode === "sheet" ? "sheet" : body?.mode === "status" ? "status" : "telegram";
     if (!order_id || typeof order_id !== "string") {
       return new Response(JSON.stringify({ error: "order_id requis" }), {
         status: 400,
@@ -39,6 +40,44 @@ Deno.serve(async (req) => {
         status: 404,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
+    }
+
+    // --- Google Sheet status update: fires when an order is marked delivered ---
+    if (mode === "status") {
+      const sheetUrl = settings?.google_sheet_webhook_url?.trim();
+      if (!sheetUrl) {
+        return new Response(JSON.stringify({ status_update: "skipped" }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      try {
+        const res = await fetch(sheetUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            action: "updateStatus",
+            phone: order.phone,
+            orderId: order.id,
+            status: "livré",
+          }),
+        });
+        if (!res.ok) {
+          console.error("Google Sheet status webhook error", res.status, await res.text());
+          return new Response(JSON.stringify({ status_update: "failed" }), {
+            status: 502,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+        return new Response(JSON.stringify({ status_update: "sent" }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      } catch (statusError) {
+        console.error("Google Sheet status webhook failed", statusError);
+        return new Response(JSON.stringify({ status_update: "failed" }), {
+          status: 502,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
     }
 
     // --- Google Sheet: only on admin confirmation, and only once per order ---

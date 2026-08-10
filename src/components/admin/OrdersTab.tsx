@@ -96,6 +96,22 @@ export function OrdersTab() {
       }
     }
 
+    if (status === "delivered") {
+      try {
+        const { data, error: fnError } = await (supabase as any).functions.invoke(
+          "send-order-notifications",
+          { body: { order_id: id, mode: "status" } },
+        );
+        if (fnError) throw fnError;
+        if (data?.status_update === "sent")
+          toast.success("Statut « livré » envoyé au Google Sheet");
+        else if (data?.status_update === "skipped")
+          toast.info("Aucune URL Google Sheet configurée");
+      } catch {
+        toast.error("Échec de la mise à jour du statut dans Google Sheet");
+      }
+    }
+
     void queryClient.invalidateQueries({ queryKey: ["admin", "orders"] });
   }
 
