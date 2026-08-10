@@ -143,6 +143,7 @@ export async function placeOrder(input: {
   commune: string;
   deliveryType: "domicile" | "stopdesk";
   adresse: string;
+  deskCode?: string;
 }) {
   const { data, error } = await rpc("place_order", {
     _product_id: input.productId,
@@ -153,6 +154,7 @@ export async function placeOrder(input: {
     _commune: input.commune,
     _delivery_type: input.deliveryType,
     _adresse: input.adresse,
+    _desk_code: input.deskCode,
   });
   if (error) throw new Error(error.message);
   const orderId = data as string;
