@@ -122,6 +122,7 @@ export type Database = {
           commune: string
           created_at: string
           delivery_type: string
+          desk_code: string | null
           full_name: string
           id: string
           phone: string
@@ -142,6 +143,7 @@ export type Database = {
           commune: string
           created_at?: string
           delivery_type: string
+          desk_code?: string | null
           full_name: string
           id?: string
           phone: string
@@ -162,6 +164,7 @@ export type Database = {
           commune?: string
           created_at?: string
           delivery_type?: string
+          desk_code?: string | null
           full_name?: string
           id?: string
           phone?: string
@@ -340,19 +343,34 @@ export type Database = {
         }
         Returns: boolean
       }
-      place_order: {
-        Args: {
-          _adresse: string
-          _commune: string
-          _delivery_type: string
-          _full_name: string
-          _phone: string
-          _product_id: string
-          _quantity: number
-          _wilaya_code: number
-        }
-        Returns: string
-      }
+      place_order:
+        | {
+            Args: {
+              _adresse: string
+              _commune: string
+              _delivery_type: string
+              _full_name: string
+              _phone: string
+              _product_id: string
+              _quantity: number
+              _wilaya_code: number
+            }
+            Returns: string
+          }
+        | {
+            Args: {
+              _adresse: string
+              _commune: string
+              _delivery_type: string
+              _desk_code: string
+              _full_name: string
+              _phone: string
+              _product_id: string
+              _quantity: number
+              _wilaya_code: number
+            }
+            Returns: string
+          }
     }
     Enums: {
       app_role: "admin" | "user"

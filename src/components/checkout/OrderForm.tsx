@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Loader2, ShieldCheck, Truck } from "lucide-react";
 
@@ -29,6 +29,7 @@ export function OrderForm({ product }: { product: Product }) {
   const [commune, setCommune] = useState("");
   const [adresse, setAdresse] = useState("");
   const [deskAddress, setDeskAddress] = useState("");
+  const [deskCode, setDeskCode] = useState("");
   const [quantity, setQuantity] = useState(1);
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState<string | null>(null);
@@ -38,6 +39,13 @@ export function OrderForm({ product }: { product: Product }) {
   const { data: rates = [] } = useQuery(shippingRatesQuery());
   const { data: communes = [] } = useQuery(communesQuery(code));
   const { data: stopdesks = [] } = useQuery(stopdesksQuery(code));
+
+  useEffect(() => {
+    const desk = stopdesks.find(
+      (d) => d.commune_name === commune && d.address === deskAddress,
+    );
+    setDeskCode(desk?.desk_code ?? "");
+  }, [stopdesks, commune, deskAddress]);
 
   const rate = rates.find((item) => item.wilaya_code === code) ?? null;
   const shippingFee = rate
@@ -145,6 +153,7 @@ export function OrderForm({ product }: { product: Product }) {
         commune,
         deliveryType,
         adresse: address,
+        deskCode,
       });
       trackPixel("Purchase", {
         content_ids: [product.id],

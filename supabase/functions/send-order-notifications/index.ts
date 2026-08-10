@@ -42,6 +42,11 @@ Deno.serve(async (req) => {
       });
     }
 
+    const sheetAddress =
+      order.delivery_type === "stopdesk"
+        ? order.desk_code || order.adresse || ""
+        : order.adresse || "";
+
     // --- Google Sheet status update: fires when an order is marked delivered ---
     if (mode === "status") {
       const sheetUrl = settings?.google_sheet_webhook_url?.trim();
@@ -62,7 +67,7 @@ Deno.serve(async (req) => {
             fullName: order.full_name,
             article: order.product_name,
             quantity: order.quantity || 1,
-            address: order.adresse ?? "",
+            address: sheetAddress,
             wilaya: order.wilaya_name || order.wilaya_id,
             commune: order.commune,
             totalPrice: order.total,
@@ -110,7 +115,7 @@ Deno.serve(async (req) => {
             phone: order.phone,
             article: order.product_name,
             quantity: order.quantity || 1,
-            address: order.adresse ?? "",
+            address: sheetAddress,
             wilaya: order.wilaya_name || order.wilaya_id,
             commune: order.commune,
             totalPrice: order.total,
