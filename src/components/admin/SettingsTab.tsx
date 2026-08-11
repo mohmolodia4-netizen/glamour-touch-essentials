@@ -36,9 +36,10 @@ const FIELDS: { key: keyof Settings; label: string; hint?: string }[] = [
   },
   {
     key: "telegram_chat_id",
-    label: "Telegram — Chat ID",
-    hint: "Identifiant du canal ou de la conversation à notifier.",
+    label: "Telegram — Chat ID(s)",
+    hint: "Un ou plusieurs identifiants séparés par des virgules (ex: 123456,-100987654).",
   },
+
   {
     key: "google_sheet_webhook_url",
     label: "Google Sheet Webhook URL",
