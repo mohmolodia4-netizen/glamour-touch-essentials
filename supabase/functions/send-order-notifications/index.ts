@@ -5,19 +5,30 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+const json = (body: unknown, status = 200) =>
+  new Response(JSON.stringify(body), {
+    status,
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
+  });
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
     const body = await req.json();
     const order_id = body?.order_id;
-    const mode: "telegram" | "sheet" | "status" =
-      body?.mode === "sheet" ? "sheet" : body?.mode === "status" ? "status" : "telegram";
+    const rawMode = body?.mode;
+    const mode: "telegram" | "sheet" | "status" | "cancel" =
+      rawMode === "sheet"
+        ? "sheet"
+        : rawMode === "status"
+          ? "status"
+          : rawMode === "cancel"
+            ? "cancel"
+            : "telegram";
+
     if (!order_id || typeof order_id !== "string") {
-      return new Response(JSON.stringify({ error: "order_id requis" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return json({ error: "order_id requis" }, 400);
     }
 
     const supabase = createClient(
@@ -35,124 +46,94 @@ Deno.serve(async (req) => {
         .maybeSingle(),
     ]);
 
-    if (!order) {
-      return new Response(JSON.stringify({ error: "Commande introuvable" }), {
-        status: 404,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+    if (!order) return json({ error: "Commande introuvable" }, 404);
+
+    const isStopdesk = order.delivery_type === "stopdesk";
+    const stopdeskCode = isStopdesk ? order.desk_code || "" : "";
+
+    const buildPayload = (status: string) => ({
+      nom_complet: order.full_name,
+      telephone: order.phone,
+      article: order.product_name,
+      quantite: order.quantity || 1,
+      adresse: isStopdesk ? stopdeskCode : order.adresse || "",
+      wilaya: order.wilaya_name || order.wilaya_id,
+      commune: order.commune,
+      total_a_ramasser: order.total,
+      id_externe: order.id,
+      oui_pour_echange: order.is_exchange ? "OUI" : "NON",
+      stopdesk_code: stopdeskCode,
+      ref_article: order.product_ref || "",
+      note: order.note || "",
+      status,
+    });
+
+    const sheetUrl = settings?.google_sheet_webhook_url?.trim();
+
+    async function postSheet(payload: Record<string, unknown>) {
+      const res = await fetch(sheetUrl!, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
       });
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(`Sheet webhook ${res.status}: ${text}`);
+      }
+      return res;
     }
 
-    const sheetAddress =
-      order.delivery_type === "stopdesk"
-        ? order.desk_code || order.adresse || ""
-        : order.adresse || "";
-
-    // --- Google Sheet status update: fires when an order is marked delivered ---
+    // --- Livré: move to "Archives" ---
     if (mode === "status") {
-      const sheetUrl = settings?.google_sheet_webhook_url?.trim();
-      if (!sheetUrl) {
-        return new Response(JSON.stringify({ status_update: "skipped" }), {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
+      if (!sheetUrl) return json({ status_update: "skipped" });
       try {
-        const res = await fetch(sheetUrl, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            action: "archiveOrder",
-            phone: order.phone,
-            orderId: order.id,
-            status: "livré",
-            fullName: order.full_name,
-            article: order.product_name,
-            quantity: order.quantity || 1,
-            address: sheetAddress,
-            wilaya: order.wilaya_name || order.wilaya_id,
-            commune: order.commune,
-            totalPrice: order.total,
-            note: order.note || "",
-          }),
-        });
-        if (!res.ok) {
-          console.error("Google Sheet status webhook error", res.status, await res.text());
-          return new Response(JSON.stringify({ status_update: "failed" }), {
-            status: 502,
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-          });
-        }
-        return new Response(JSON.stringify({ status_update: "sent" }), {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      } catch (statusError) {
-        console.error("Google Sheet status webhook failed", statusError);
-        return new Response(JSON.stringify({ status_update: "failed" }), {
-          status: 502,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
+        await postSheet({ action: "archiveOrder", ...buildPayload("Livré") });
+        return json({ status_update: "sent" });
+      } catch (error) {
+        console.error("Google Sheet archive webhook failed", error);
+        return json({ status_update: "failed" }, 502);
       }
     }
 
-    // --- Google Sheet: only on admin confirmation, and only once per order ---
-    if (mode === "sheet") {
-      if (order.sheet_sent_at) {
-        return new Response(JSON.stringify({ sheet: "already_sent" }), {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      const sheetUrl = settings?.google_sheet_webhook_url?.trim();
-      if (!sheetUrl) {
-        return new Response(JSON.stringify({ sheet: "skipped" }), {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
+    // --- Annulée: move to "annulée" ---
+    if (mode === "cancel") {
+      if (!sheetUrl) return json({ cancel: "skipped" });
       try {
-        const res = await fetch(sheetUrl, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            fullName: order.full_name,
-            phone: order.phone,
-            article: order.product_name,
-            quantity: order.quantity || 1,
-            address: sheetAddress,
-            wilaya: order.wilaya_name || order.wilaya_id,
-            commune: order.commune,
-            totalPrice: order.total,
-            note: order.note || "",
-          }),
-        });
-        if (!res.ok) {
-          console.error("Google Sheet webhook error", res.status, await res.text());
-          return new Response(JSON.stringify({ sheet: "failed" }), {
-            status: 502,
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-          });
-        }
+        await postSheet({ action: "cancelOrder", ...buildPayload("annulée") });
+        return json({ cancel: "sent" });
+      } catch (error) {
+        console.error("Google Sheet cancel webhook failed", error);
+        return json({ cancel: "failed" }, 502);
+      }
+    }
+
+    // --- Confirmé: append to "Commande", once per order ---
+    if (mode === "sheet") {
+      if (order.sheet_sent_at) return json({ sheet: "already_sent" });
+      if (!sheetUrl) return json({ sheet: "skipped" });
+      try {
+        await postSheet({ action: "addOrder", ...buildPayload("Confirmé") });
         await supabase
           .from("orders")
           .update({ sheet_sent_at: new Date().toISOString() })
           .eq("id", order_id)
           .is("sheet_sent_at", null);
-        return new Response(JSON.stringify({ sheet: "sent" }), {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      } catch (sheetError) {
-        console.error("Google Sheet webhook failed", sheetError);
-        return new Response(JSON.stringify({ sheet: "failed" }), {
-          status: 502,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
+        return json({ sheet: "sent" });
+      } catch (error) {
+        console.error("Google Sheet webhook failed", error);
+        return json({ sheet: "failed" }, 502);
       }
     }
 
-    // --- Telegram: fires on order creation ---
+    // --- Telegram: fires on order creation (supports multiple chat IDs) ---
     const token = settings?.telegram_bot_token;
-    const chatId = settings?.telegram_chat_id;
-    if (!token || !chatId) {
-      return new Response(JSON.stringify({ skipped: "telegram non configuré" }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+    const chatIds = String(settings?.telegram_chat_id ?? "")
+      .split(",")
+      .map((id: string) => id.trim())
+      .filter(Boolean);
+
+    if (!token || chatIds.length === 0) {
+      return json({ skipped: "telegram non configuré" });
     }
 
     const lines = [
@@ -163,39 +144,40 @@ Deno.serve(async (req) => {
       `<b>Téléphone:</b> ${order.phone}`,
       `<b>Wilaya:</b> ${order.wilaya_name}`,
       `<b>Commune:</b> ${order.commune}`,
-      `<b>Livraison:</b> ${order.delivery_type === "domicile" ? "À domicile" : "Stopdesk"}`,
+      `<b>Livraison:</b> ${isStopdesk ? "Stopdesk" : "À domicile"}`,
       order.adresse ? `<b>Adresse:</b> ${order.adresse}` : "",
       `<b>Frais:</b> ${order.shipping_fee} DA`,
       `<b>Total:</b> ${order.total} DA`,
     ].filter(Boolean);
 
-    const response = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        chat_id: chatId,
-        text: lines.join("\n"),
-        parse_mode: "HTML",
+    const results = await Promise.all(
+      chatIds.map(async (chatId: string) => {
+        try {
+          const response = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              chat_id: chatId,
+              text: lines.join("\n"),
+              parse_mode: "HTML",
+            }),
+          });
+          const result = await response.json();
+          if (!response.ok || result.ok === false) {
+            console.error("Telegram error", chatId, response.status, JSON.stringify(result));
+            return { chat_id: chatId, ok: false };
+          }
+          return { chat_id: chatId, ok: true };
+        } catch (error) {
+          console.error("Telegram send failed", chatId, error);
+          return { chat_id: chatId, ok: false };
+        }
       }),
-    });
+    );
 
-    const result = await response.json();
-    if (!response.ok || result.ok === false) {
-      console.error("Telegram error", response.status, JSON.stringify(result));
-      return new Response(JSON.stringify({ error: result }), {
-        status: 502,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    return new Response(JSON.stringify({ ok: true }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return json({ ok: results.some((r) => r.ok), results });
   } catch (error) {
     console.error(error);
-    return new Response(JSON.stringify({ error: String(error) }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return json({ error: String(error) }, 500);
   }
 });
