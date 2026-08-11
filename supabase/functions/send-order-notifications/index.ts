@@ -18,14 +18,8 @@ Deno.serve(async (req) => {
     const body = await req.json();
     const order_id = body?.order_id;
     const rawMode = body?.mode;
-    const mode: "telegram" | "sheet" | "status" | "cancel" =
-      rawMode === "sheet"
-        ? "sheet"
-        : rawMode === "status"
-          ? "status"
-          : rawMode === "cancel"
-            ? "cancel"
-            : "telegram";
+    const mode: string = typeof rawMode === "string" ? rawMode : "telegram";
+
 
     if (!order_id || typeof order_id !== "string") {
       return json({ error: "order_id requis" }, 400);
