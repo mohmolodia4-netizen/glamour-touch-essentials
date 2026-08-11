@@ -104,13 +104,30 @@ export function OrdersTab() {
         );
         if (fnError) throw fnError;
         if (data?.status_update === "sent")
-          toast.success("Statut « livré » envoyé au Google Sheet");
+          toast.success("Commande déplacée vers « Archives »");
         else if (data?.status_update === "skipped")
           toast.info("Aucune URL Google Sheet configurée");
       } catch {
         toast.error("Échec de la mise à jour du statut dans Google Sheet");
       }
     }
+
+    if (status === "cancelled") {
+      try {
+        const { data, error: fnError } = await (supabase as any).functions.invoke(
+          "send-order-notifications",
+          { body: { order_id: id, mode: "cancel" } },
+        );
+        if (fnError) throw fnError;
+        if (data?.cancel === "sent")
+          toast.success("Commande déplacée vers « annulée »");
+        else if (data?.cancel === "skipped")
+          toast.info("Aucune URL Google Sheet configurée");
+      } catch {
+        toast.error("Échec de l'envoi de l'annulation vers Google Sheet");
+      }
+    }
+
 
     void queryClient.invalidateQueries({ queryKey: ["admin", "orders"] });
   }
