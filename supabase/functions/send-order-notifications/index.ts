@@ -18,14 +18,8 @@ Deno.serve(async (req) => {
     const body = await req.json();
     const order_id = body?.order_id;
     const rawMode = body?.mode;
-    const mode: "telegram" | "sheet" | "status" | "cancel" =
-      rawMode === "sheet"
-        ? "sheet"
-        : rawMode === "status"
-          ? "status"
-          : rawMode === "cancel"
-            ? "cancel"
-            : "telegram";
+    const mode: string = typeof rawMode === "string" ? rawMode : "telegram";
+
 
     if (!order_id || typeof order_id !== "string") {
       return json({ error: "order_id requis" }, 400);
@@ -83,47 +77,48 @@ Deno.serve(async (req) => {
       return res;
     }
 
-    // --- Livré: move to "Archives" ---
-    if (mode === "status") {
-      if (!sheetUrl) return json({ status_update: "skipped" });
+    const STATUS_LABELS: Record<string, string> = {
+      pending: "En attente",
+      confirmed: "Confirmée",
+      shipped: "Expédiée",
+      delivered: "Livrée",
+      cancelled: "Annulée",
+    };
+
+    const ACTION_BY_STATUS: Record<string, string> = {
+      pending: "addOrder",
+      confirmed: "addOrder",
+      shipped: "updateStatus",
+      delivered: "archiveOrder",
+      cancelled: "cancelOrder",
+    };
+
+    // --- Sheet sync: fires on order creation and on every status change ---
+    if (mode === "sheet" || mode === "status" || mode === "cancel" || mode === "sync") {
+      if (!sheetUrl) return json({ sheet: "skipped", status_update: "skipped", cancel: "skipped" });
+
+      const statusKey = String(order.status ?? "pending");
+      const label = STATUS_LABELS[statusKey] ?? "En attente";
+      let action = ACTION_BY_STATUS[statusKey] ?? "updateStatus";
+      // Never append the same order twice into "Commande"
+      if (action === "addOrder" && order.sheet_sent_at) action = "updateStatus";
+
       try {
-        await postSheet({ action: "archiveOrder", ...buildPayload("Livré") });
-        return json({ status_update: "sent" });
+        await postSheet({ action, ...buildPayload(label) });
+        if (action === "addOrder") {
+          await supabase
+            .from("orders")
+            .update({ sheet_sent_at: new Date().toISOString() })
+            .eq("id", order_id)
+            .is("sheet_sent_at", null);
+        }
+        return json({ sheet: "sent", action, status: label });
       } catch (error) {
-        console.error("Google Sheet archive webhook failed", error);
-        return json({ status_update: "failed" }, 502);
+        console.error("Google Sheet webhook failed", action, error);
+        return json({ sheet: "failed", action, status: label }, 502);
       }
     }
 
-    // --- Annulée: move to "annulée" ---
-    if (mode === "cancel") {
-      if (!sheetUrl) return json({ cancel: "skipped" });
-      try {
-        await postSheet({ action: "cancelOrder", ...buildPayload("annulée") });
-        return json({ cancel: "sent" });
-      } catch (error) {
-        console.error("Google Sheet cancel webhook failed", error);
-        return json({ cancel: "failed" }, 502);
-      }
-    }
-
-    // --- Confirmé: append to "Commande", once per order ---
-    if (mode === "sheet") {
-      if (order.sheet_sent_at) return json({ sheet: "already_sent" });
-      if (!sheetUrl) return json({ sheet: "skipped" });
-      try {
-        await postSheet({ action: "addOrder", ...buildPayload("Confirmé") });
-        await supabase
-          .from("orders")
-          .update({ sheet_sent_at: new Date().toISOString() })
-          .eq("id", order_id)
-          .is("sheet_sent_at", null);
-        return json({ sheet: "sent" });
-      } catch (error) {
-        console.error("Google Sheet webhook failed", error);
-        return json({ sheet: "failed" }, 502);
-      }
-    }
 
     // --- Telegram: fires on order creation (supports multiple chat IDs) ---
     const token = settings?.telegram_bot_token;
