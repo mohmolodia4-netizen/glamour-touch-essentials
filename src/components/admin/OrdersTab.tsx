@@ -80,53 +80,22 @@ export function OrdersTab() {
     }
     toast.success("Statut mis à jour");
 
-    if (status === "confirmed") {
-      try {
-        const { data, error: fnError } = await (supabase as any).functions.invoke(
-          "send-order-notifications",
-          { body: { order_id: id, mode: "sheet" } },
-        );
-        if (fnError) throw fnError;
-        if (data?.sheet === "sent") toast.success("Commande envoyée au Google Sheet");
-        else if (data?.sheet === "already_sent") toast.info("Déjà envoyée au Google Sheet");
-        else if (data?.sheet === "skipped")
-          toast.info("Aucune URL Google Sheet configurée");
-      } catch {
-        toast.error("Échec de l'envoi vers Google Sheet");
-      }
+    try {
+      const { data, error: fnError } = await (supabase as any).functions.invoke(
+        "send-order-notifications",
+        { body: { order_id: id, mode: "sync" } },
+      );
+      if (fnError) throw fnError;
+      if (data?.sheet === "sent") toast.success("Google Sheet mis à jour");
+      else if (data?.sheet === "skipped")
+        toast.info("Aucune URL Google Sheet configurée");
+      else if (data?.sheet === "failed")
+        toast.error("Échec de la mise à jour du Google Sheet");
+    } catch {
+      toast.error("Échec de la mise à jour du Google Sheet");
     }
 
-    if (status === "delivered") {
-      try {
-        const { data, error: fnError } = await (supabase as any).functions.invoke(
-          "send-order-notifications",
-          { body: { order_id: id, mode: "status" } },
-        );
-        if (fnError) throw fnError;
-        if (data?.status_update === "sent")
-          toast.success("Commande déplacée vers « Archives »");
-        else if (data?.status_update === "skipped")
-          toast.info("Aucune URL Google Sheet configurée");
-      } catch {
-        toast.error("Échec de la mise à jour du statut dans Google Sheet");
-      }
-    }
 
-    if (status === "cancelled") {
-      try {
-        const { data, error: fnError } = await (supabase as any).functions.invoke(
-          "send-order-notifications",
-          { body: { order_id: id, mode: "cancel" } },
-        );
-        if (fnError) throw fnError;
-        if (data?.cancel === "sent")
-          toast.success("Commande déplacée vers « annulée »");
-        else if (data?.cancel === "skipped")
-          toast.info("Aucune URL Google Sheet configurée");
-      } catch {
-        toast.error("Échec de l'envoi de l'annulation vers Google Sheet");
-      }
-    }
 
 
     void queryClient.invalidateQueries({ queryKey: ["admin", "orders"] });
