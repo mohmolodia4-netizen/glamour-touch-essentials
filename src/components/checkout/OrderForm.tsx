@@ -162,18 +162,26 @@ export function OrderForm({ product }: { product: Product }) {
         value: total,
         currency: "DZD",
       });
-      trackTiktok("CompletePayment", {
+      const ttPayload = {
+        content_type: "product",
+        content_id: product.id,
+        content_name: product.name || "Order",
+        quantity,
+        price: Number(product.price) || 0,
         contents: [
           {
             content_id: product.id,
-            content_name: product.name,
+            content_type: "product",
+            content_name: product.name || "Order",
             quantity,
-            price: Number(product.price),
+            price: Number(product.price) || 0,
           },
         ],
-        value: total,
+        value: Number(total) || 0,
         currency: "DZD",
-      });
+      };
+      trackTiktok("CompletePayment", ttPayload);
+      trackTiktok("PlaceAnOrder", ttPayload);
       setDone(orderId);
       toast.success("Commande confirmée ! Nous vous appellerons bientôt.");
     } catch (error) {

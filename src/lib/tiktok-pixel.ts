@@ -69,5 +69,18 @@ export function initTiktokPixel(pixelId: string | null | undefined) {
 
 export function trackTiktok(event: string, params?: Record<string, unknown>) {
   if (typeof window === "undefined") return;
-  window.ttq?.track?.(event, params);
+  const send = () => {
+    if (window.ttq?.track) {
+      window.ttq.track(event, params, { event_id: `${event}-${Date.now()}` });
+      return true;
+    }
+    return false;
+  };
+  if (send()) return;
+  // Pixel script may still be loading — retry briefly.
+  let attempts = 0;
+  const timer = setInterval(() => {
+    attempts += 1;
+    if (send() || attempts > 20) clearInterval(timer);
+  }, 250);
 }
