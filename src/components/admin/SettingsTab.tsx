@@ -16,6 +16,7 @@ type Settings = {
   facebook_url: string;
   tiktok_url: string;
   meta_pixel_id: string;
+  tiktok_pixel_id: string;
   telegram_bot_token: string;
   telegram_chat_id: string;
   google_sheet_webhook_url: string;

@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
 
 import { initPixel } from "@/lib/pixel";
+import { initTiktokPixel } from "@/lib/tiktok-pixel";
 import { publicSettingsQuery } from "@/lib/store";
 
 export function PixelLoader() {
@@ -10,6 +11,10 @@ export function PixelLoader() {
   useEffect(() => {
     initPixel(settings?.meta_pixel_id);
   }, [settings?.meta_pixel_id]);
+
+  useEffect(() => {
+    initTiktokPixel(settings?.tiktok_pixel_id);
+  }, [settings?.tiktok_pixel_id]);
 
   return null;
 }
