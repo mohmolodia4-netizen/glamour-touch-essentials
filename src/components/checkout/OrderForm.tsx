@@ -162,6 +162,18 @@ export function OrderForm({ product }: { product: Product }) {
         value: total,
         currency: "DZD",
       });
+      trackTiktok("CompletePayment", {
+        contents: [
+          {
+            content_id: product.id,
+            content_name: product.name,
+            quantity,
+            price: Number(product.price),
+          },
+        ],
+        value: total,
+        currency: "DZD",
+      });
       setDone(orderId);
       toast.success("Commande confirmée ! Nous vous appellerons bientôt.");
     } catch (error) {
