@@ -47,6 +47,7 @@ export type PublicSettings = {
   facebook_url: string | null;
   tiktok_url: string | null;
   meta_pixel_id: string | null;
+  tiktok_pixel_id: string | null;
 };
 
 const table = (name: string) => (supabase as any).from(name);

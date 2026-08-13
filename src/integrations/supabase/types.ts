@@ -25,6 +25,7 @@ export type Database = {
           site_name: string
           telegram_bot_token: string | null
           telegram_chat_id: string | null
+          tiktok_pixel_id: string | null
           tiktok_url: string | null
           updated_at: string
           whatsapp: string | null
@@ -39,6 +40,7 @@ export type Database = {
           site_name?: string
           telegram_bot_token?: string | null
           telegram_chat_id?: string | null
+          tiktok_pixel_id?: string | null
           tiktok_url?: string | null
           updated_at?: string
           whatsapp?: string | null
@@ -53,6 +55,7 @@ export type Database = {
           site_name?: string
           telegram_bot_token?: string | null
           telegram_chat_id?: string | null
+          tiktok_pixel_id?: string | null
           tiktok_url?: string | null
           updated_at?: string
           whatsapp?: string | null
@@ -332,6 +335,7 @@ export type Database = {
           meta_pixel_id: string
           phone: string
           site_name: string
+          tiktok_pixel_id: string
           tiktok_url: string
           whatsapp: string
         }[]

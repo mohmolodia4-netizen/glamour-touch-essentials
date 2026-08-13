@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { trackPixel } from "@/lib/pixel";
+import { trackTiktok } from "@/lib/tiktok-pixel";
 import {
   communesQuery,
   formatDzd,
@@ -158,6 +159,18 @@ export function OrderForm({ product }: { product: Product }) {
       trackPixel("Purchase", {
         content_ids: [product.id],
         content_name: product.name,
+        value: total,
+        currency: "DZD",
+      });
+      trackTiktok("CompletePayment", {
+        contents: [
+          {
+            content_id: product.id,
+            content_name: product.name,
+            quantity,
+            price: Number(product.price),
+          },
+        ],
         value: total,
         currency: "DZD",
       });
