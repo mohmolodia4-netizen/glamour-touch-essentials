@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { trackPixel } from "@/lib/pixel";
+import { trackTiktok } from "@/lib/tiktok-pixel";
 import {
   communesQuery,
   formatDzd,

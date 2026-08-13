@@ -30,6 +30,7 @@ const FIELDS: { key: keyof Settings; label: string; hint?: string }[] = [
   { key: "facebook_url", label: "Facebook (URL)" },
   { key: "tiktok_url", label: "TikTok (URL)" },
   { key: "meta_pixel_id", label: "Meta Pixel ID" },
+  { key: "tiktok_pixel_id", label: "TikTok Pixel ID" },
   {
     key: "telegram_bot_token",
     label: "Telegram — Bot Token",
@@ -56,6 +57,7 @@ const empty: Settings = {
   facebook_url: "",
   tiktok_url: "",
   meta_pixel_id: "",
+  tiktok_pixel_id: "",
   telegram_bot_token: "",
   telegram_chat_id: "",
   google_sheet_webhook_url: "",
