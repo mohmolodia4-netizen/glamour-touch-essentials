@@ -212,7 +212,7 @@ export function OrderForm({ product }: { product: Product }) {
     <form
       onSubmit={handleSubmit}
       onFocus={touchCheckout}
-      className="rounded-sm border border-border bg-card p-6 shadow-soft sm:p-8"
+      className="w-full min-w-0 rounded-sm border border-border bg-card p-6 shadow-soft sm:p-8"
     >
       <div className="flex items-center gap-2 border-b border-border pb-5">
         <Truck className="size-4 text-primary" />
@@ -221,8 +221,8 @@ export function OrderForm({ product }: { product: Product }) {
         </h2>
       </div>
 
-      <div className="mt-6 grid gap-5">
-        <div className="grid gap-2">
+      <div className="mt-6 grid min-w-0 gap-5">
+        <div className="grid min-w-0 gap-2">
           <Label htmlFor="fullName">Nom complet *</Label>
           <Input
             id="fullName"
@@ -235,7 +235,7 @@ export function OrderForm({ product }: { product: Product }) {
           />
         </div>
 
-        <div className="grid gap-2">
+        <div className="grid min-w-0 gap-2">
           <Label htmlFor="phone">Numéro de téléphone *</Label>
           <Input
             id="phone"
@@ -250,7 +250,7 @@ export function OrderForm({ product }: { product: Product }) {
           />
         </div>
 
-        <div className="grid gap-2">
+        <div className="grid min-w-0 gap-2">
           <Label htmlFor="wilaya">Wilaya *</Label>
           <Combobox
             id="wilaya"
@@ -267,7 +267,7 @@ export function OrderForm({ product }: { product: Product }) {
           />
         </div>
 
-        <div className="grid gap-2">
+        <div className="grid min-w-0 gap-2">
           <Label>Mode de livraison *</Label>
           <div className="grid grid-cols-1 gap-2 rounded-sm bg-secondary p-1 sm:grid-cols-2">
             {(
@@ -281,7 +281,7 @@ export function OrderForm({ product }: { product: Product }) {
                 type="button"
                 onClick={() => switchDelivery(option.key)}
                 className={cn(
-                  "rounded-sm px-4 py-3 text-sm transition-colors",
+                  "min-w-0 break-words rounded-sm px-4 py-3 text-sm transition-colors",
                   deliveryType === option.key
                     ? "bg-primary text-primary-foreground"
                     : "text-muted-foreground hover:bg-card",
@@ -293,7 +293,7 @@ export function OrderForm({ product }: { product: Product }) {
           </div>
         </div>
 
-        <div className="grid gap-2">
+        <div className="grid min-w-0 gap-2">
           <Label htmlFor="commune">Commune *</Label>
           <Combobox
             id="commune"
@@ -316,7 +316,7 @@ export function OrderForm({ product }: { product: Product }) {
         </div>
 
         {deliveryType === "domicile" ? (
-          <div className="grid gap-2">
+          <div className="grid min-w-0 gap-2">
             <Label htmlFor="adresse">Adresse de livraison *</Label>
             <Textarea
               id="adresse"
@@ -329,7 +329,7 @@ export function OrderForm({ product }: { product: Product }) {
             />
           </div>
         ) : (
-          <div className="grid gap-2">
+          <div className="grid min-w-0 gap-2">
             <Label htmlFor="desk">Point Stop Desk *</Label>
             <Combobox
               id="desk"
@@ -345,7 +345,7 @@ export function OrderForm({ product }: { product: Product }) {
           </div>
         )}
 
-        <div className="grid gap-2">
+        <div className="grid min-w-0 gap-2">
           <Label htmlFor="quantity">Quantité</Label>
           <Input
             id="quantity"
