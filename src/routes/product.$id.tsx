@@ -126,8 +126,10 @@ function ProductPage() {
               ) : null}
             </div>
 
-            <div>
-              <h1 className="font-display text-4xl text-foreground">{product.name}</h1>
+            <div className="min-w-0">
+              <h1 className="font-display text-4xl break-words text-foreground">
+                {product.name}
+              </h1>
               <div className="mt-3 flex items-center gap-3">
                 <span className="text-2xl text-primary">{formatDzd(product.price)}</span>
                 {product.old_price && product.old_price > product.price ? (
