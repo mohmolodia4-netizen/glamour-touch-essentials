@@ -65,8 +65,8 @@ function ProductPage() {
             </Button>
           </div>
         ) : (
-          <div className="grid gap-10 lg:grid-cols-2">
-            <div>
+          <div className="grid w-full gap-10 lg:grid-cols-2">
+            <div className="min-w-0">
               <div className="relative aspect-4/5 overflow-hidden rounded-sm bg-secondary">
                 {images[index] ? (
                   <img
