@@ -51,13 +51,15 @@ export function OrderForm({ product }: { product: Product }) {
   );
 
   useEffect(() => {
-    if (!hasVariants || availableVariants.length === 0) return;
+    const first = availableVariants[0];
+    if (!hasVariants || !first) return;
     setLines((current) =>
       current.map((line) =>
-        line.color ? line : { ...line, color: availableVariants[0].color_name },
+        line.color ? line : { ...line, color: first.color_name },
       ),
     );
   }, [hasVariants, availableVariants]);
+
 
   useEffect(() => {
     const desk = stopdesks.find(
