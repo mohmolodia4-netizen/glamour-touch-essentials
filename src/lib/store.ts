@@ -24,6 +24,16 @@ export type Category = {
   sort_order: number;
 };
 
+export type ProductVariant = {
+  id: string;
+  product_id: string;
+  color_name: string;
+  color_hex: string;
+  image_url: string | null;
+  stock_quantity: number;
+  sort_order: number;
+};
+
 export type ShippingRate = {
   wilaya_code: number;
   wilaya_name: string;
