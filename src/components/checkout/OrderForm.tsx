@@ -375,20 +375,121 @@ export function OrderForm({ product }: { product: Product }) {
           </div>
         )}
 
-        <div className="grid min-w-0 gap-2">
-          <Label htmlFor="quantity">Quantité</Label>
-          <Input
-            id="quantity"
-            type="number"
-            min={1}
-            max={Math.max(product.stock_quantity, 1)}
-            value={quantity}
-            onChange={(event) =>
-              setQuantity(Math.max(1, Number(event.target.value) || 1))
-            }
-            className="h-12 w-28 rounded-sm"
-          />
+        <div className="grid min-w-0 gap-3">
+          <Label>Quantité{hasVariants ? " & couleurs" : ""}</Label>
+          {hasVariants ? (
+            <div className="grid gap-3">
+              {lines.map((line, position) => {
+                const selected = variants.find((v) => v.color_name === line.color);
+                return (
+                  <div
+                    key={position}
+                    className="flex min-w-0 flex-wrap items-center gap-3 rounded-sm border border-border p-3"
+                  >
+                    {selected ? (
+                      <span
+                        aria-hidden
+                        className="size-6 shrink-0 rounded-full border border-border"
+                        style={{ backgroundColor: selected.color_hex }}
+                      />
+                    ) : null}
+                    <select
+                      aria-label="Couleur"
+                      value={line.color}
+                      onChange={(event) =>
+                        setLines((current) =>
+                          current.map((item, index) =>
+                            index === position
+                              ? { ...item, color: event.target.value }
+                              : item,
+                          ),
+                        )
+                      }
+                      className="h-11 min-w-0 flex-1 rounded-sm border border-border bg-background px-3 text-sm"
+                    >
+                      {variants.map((variant) => (
+                        <option
+                          key={variant.id}
+                          value={variant.color_name}
+                          disabled={variant.stock_quantity <= 0}
+                        >
+                          {variant.color_name}
+                          {variant.stock_quantity <= 0 ? " — épuisé" : ""}
+                        </option>
+                      ))}
+                    </select>
+                    <Input
+                      type="number"
+                      aria-label="Quantité"
+                      min={1}
+                      max={Math.max(selected?.stock_quantity ?? 1, 1)}
+                      value={line.quantity}
+                      onChange={(event) =>
+                        setLines((current) =>
+                          current.map((item, index) =>
+                            index === position
+                              ? {
+                                  ...item,
+                                  quantity: Math.max(
+                                    1,
+                                    Number(event.target.value) || 1,
+                                  ),
+                                }
+                              : item,
+                          ),
+                        )
+                      }
+                      className="h-11 w-24 rounded-sm"
+                    />
+                    {lines.length > 1 ? (
+                      <button
+                        type="button"
+                        aria-label="Retirer la ligne"
+                        onClick={() =>
+                          setLines((current) =>
+                            current.filter((_, index) => index !== position),
+                          )
+                        }
+                        className="rounded-sm p-2 text-muted-foreground hover:text-destructive"
+                      >
+                        <X className="size-4" />
+                      </button>
+                    ) : null}
+                  </div>
+                );
+              })}
+              <Button
+                type="button"
+                variant="outline"
+                className="w-fit rounded-sm"
+                disabled={availableVariants.length === 0}
+                onClick={() =>
+                  setLines((current) => [
+                    ...current,
+                    { color: availableVariants[0]?.color_name ?? "", quantity: 1 },
+                  ])
+                }
+              >
+                <Plus className="mr-2 size-4" /> Ajouter une couleur
+              </Button>
+            </div>
+          ) : (
+            <Input
+              id="quantity"
+              type="number"
+              min={1}
+              max={Math.max(product.stock_quantity, 1)}
+              value={lines[0]?.quantity ?? 1}
+              onChange={(event) =>
+                setLines([
+                  { color: "", quantity: Math.max(1, Number(event.target.value) || 1) },
+                ])
+              }
+              className="h-12 w-28 rounded-sm"
+            />
+          )}
         </div>
+
       </div>
 
       <div className="mt-7 space-y-2 border-t border-border pt-5 text-sm">
