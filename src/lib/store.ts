@@ -145,9 +145,11 @@ export const publicSettingsQuery = () => ({
   },
 });
 
+export type OrderLine = { color_name: string | null; quantity: number };
+
 export async function placeOrder(input: {
   productId: string;
-  quantity: number;
+  items: OrderLine[];
   fullName: string;
   phone: string;
   wilayaCode: number;
@@ -156,9 +158,9 @@ export async function placeOrder(input: {
   adresse: string;
   deskCode?: string;
 }) {
-  const { data, error } = await rpc("place_order", {
+  const { data, error } = await rpc("place_order_items", {
     _product_id: input.productId,
-    _quantity: input.quantity,
+    _items: input.items,
     _full_name: input.fullName,
     _phone: input.phone,
     _wilaya_code: input.wilayaCode,
@@ -167,6 +169,7 @@ export async function placeOrder(input: {
     _adresse: input.adresse,
     _desk_code: input.deskCode,
   });
+
   if (error) throw new Error(error.message);
   const orderId = data as string;
 
