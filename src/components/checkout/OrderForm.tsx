@@ -15,12 +15,14 @@ import {
   communesQuery,
   formatDzd,
   placeOrder,
+  productVariantsQuery,
   shippingRatesQuery,
   stopdesksQuery,
   type Product,
 } from "@/lib/store";
 
 type DeliveryType = "domicile" | "stopdesk";
+type Line = { color: string; quantity: number };
 
 export function OrderForm({ product }: { product: Product }) {
   const [fullName, setFullName] = useState("");
@@ -31,7 +33,7 @@ export function OrderForm({ product }: { product: Product }) {
   const [adresse, setAdresse] = useState("");
   const [deskAddress, setDeskAddress] = useState("");
   const [deskCode, setDeskCode] = useState("");
-  const [quantity, setQuantity] = useState(1);
+  const [lines, setLines] = useState<Line[]>([{ color: "", quantity: 1 }]);
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState<string | null>(null);
   const [startedCheckout, setStartedCheckout] = useState(false);
@@ -40,6 +42,24 @@ export function OrderForm({ product }: { product: Product }) {
   const { data: rates = [] } = useQuery(shippingRatesQuery());
   const { data: communes = [] } = useQuery(communesQuery(code));
   const { data: stopdesks = [] } = useQuery(stopdesksQuery(code));
+  const { data: variants = [] } = useQuery(productVariantsQuery(product.id));
+
+  const hasVariants = variants.length > 0;
+  const availableVariants = useMemo(
+    () => variants.filter((variant) => variant.stock_quantity > 0),
+    [variants],
+  );
+
+  useEffect(() => {
+    const first = availableVariants[0];
+    if (!hasVariants || !first) return;
+    setLines((current) =>
+      current.map((line) =>
+        line.color ? line : { ...line, color: first.color_name },
+      ),
+    );
+  }, [hasVariants, availableVariants]);
+
 
   useEffect(() => {
     const desk = stopdesks.find(
@@ -54,8 +74,14 @@ export function OrderForm({ product }: { product: Product }) {
       ? rate.domicile_fee
       : rate.stopdesk_fee
     : 0;
+  const quantity = lines.reduce((sum, line) => sum + Math.max(1, line.quantity), 0);
   const subtotal = Number(product.price) * quantity;
   const total = subtotal + shippingFee;
+
+  const maxStock = hasVariants
+    ? variants.reduce((sum, variant) => sum + variant.stock_quantity, 0)
+    : product.stock_quantity;
+
 
   const wilayaOptions = useMemo(
     () =>
@@ -147,7 +173,11 @@ export function OrderForm({ product }: { product: Product }) {
     try {
       const orderId = await placeOrder({
         productId: product.id,
-        quantity,
+        items: lines.map((line) => ({
+          color_name: hasVariants ? line.color : null,
+          quantity: Math.max(1, line.quantity),
+        })),
+
         fullName,
         phone,
         wilayaCode: code,
@@ -345,20 +375,121 @@ export function OrderForm({ product }: { product: Product }) {
           </div>
         )}
 
-        <div className="grid min-w-0 gap-2">
-          <Label htmlFor="quantity">Quantité</Label>
-          <Input
-            id="quantity"
-            type="number"
-            min={1}
-            max={Math.max(product.stock_quantity, 1)}
-            value={quantity}
-            onChange={(event) =>
-              setQuantity(Math.max(1, Number(event.target.value) || 1))
-            }
-            className="h-12 w-28 rounded-sm"
-          />
+        <div className="grid min-w-0 gap-3">
+          <Label>Quantité{hasVariants ? " & couleurs" : ""}</Label>
+          {hasVariants ? (
+            <div className="grid gap-3">
+              {lines.map((line, position) => {
+                const selected = variants.find((v) => v.color_name === line.color);
+                return (
+                  <div
+                    key={position}
+                    className="flex min-w-0 flex-wrap items-center gap-3 rounded-sm border border-border p-3"
+                  >
+                    {selected ? (
+                      <span
+                        aria-hidden
+                        className="size-6 shrink-0 rounded-full border border-border"
+                        style={{ backgroundColor: selected.color_hex }}
+                      />
+                    ) : null}
+                    <select
+                      aria-label="Couleur"
+                      value={line.color}
+                      onChange={(event) =>
+                        setLines((current) =>
+                          current.map((item, index) =>
+                            index === position
+                              ? { ...item, color: event.target.value }
+                              : item,
+                          ),
+                        )
+                      }
+                      className="h-11 min-w-0 flex-1 rounded-sm border border-border bg-background px-3 text-sm"
+                    >
+                      {variants.map((variant) => (
+                        <option
+                          key={variant.id}
+                          value={variant.color_name}
+                          disabled={variant.stock_quantity <= 0}
+                        >
+                          {variant.color_name}
+                          {variant.stock_quantity <= 0 ? " — épuisé" : ""}
+                        </option>
+                      ))}
+                    </select>
+                    <Input
+                      type="number"
+                      aria-label="Quantité"
+                      min={1}
+                      max={Math.max(selected?.stock_quantity ?? 1, 1)}
+                      value={line.quantity}
+                      onChange={(event) =>
+                        setLines((current) =>
+                          current.map((item, index) =>
+                            index === position
+                              ? {
+                                  ...item,
+                                  quantity: Math.max(
+                                    1,
+                                    Number(event.target.value) || 1,
+                                  ),
+                                }
+                              : item,
+                          ),
+                        )
+                      }
+                      className="h-11 w-24 rounded-sm"
+                    />
+                    {lines.length > 1 ? (
+                      <button
+                        type="button"
+                        aria-label="Retirer la ligne"
+                        onClick={() =>
+                          setLines((current) =>
+                            current.filter((_, index) => index !== position),
+                          )
+                        }
+                        className="rounded-sm p-2 text-muted-foreground hover:text-destructive"
+                      >
+                        <X className="size-4" />
+                      </button>
+                    ) : null}
+                  </div>
+                );
+              })}
+              <Button
+                type="button"
+                variant="outline"
+                className="w-fit rounded-sm"
+                disabled={availableVariants.length === 0}
+                onClick={() =>
+                  setLines((current) => [
+                    ...current,
+                    { color: availableVariants[0]?.color_name ?? "", quantity: 1 },
+                  ])
+                }
+              >
+                <Plus className="mr-2 size-4" /> Ajouter une couleur
+              </Button>
+            </div>
+          ) : (
+            <Input
+              id="quantity"
+              type="number"
+              min={1}
+              max={Math.max(product.stock_quantity, 1)}
+              value={lines[0]?.quantity ?? 1}
+              onChange={(event) =>
+                setLines([
+                  { color: "", quantity: Math.max(1, Number(event.target.value) || 1) },
+                ])
+              }
+              className="h-12 w-28 rounded-sm"
+            />
+          )}
         </div>
+
       </div>
 
       <div className="mt-7 space-y-2 border-t border-border pt-5 text-sm">

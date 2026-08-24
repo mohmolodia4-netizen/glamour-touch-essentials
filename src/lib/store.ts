@@ -24,6 +24,16 @@ export type Category = {
   sort_order: number;
 };
 
+export type ProductVariant = {
+  id: string;
+  product_id: string;
+  color_name: string;
+  color_hex: string;
+  image_url: string | null;
+  stock_quantity: number;
+  sort_order: number;
+};
+
 export type ShippingRate = {
   wilaya_code: number;
   wilaya_name: string;
@@ -83,6 +93,17 @@ export const productQuery = (id: string) => ({
   },
 });
 
+export const productVariantsQuery = (productId: string) => ({
+  queryKey: ["product_variants", productId],
+  queryFn: async () =>
+    unwrap<ProductVariant[]>(
+      await table("product_variants")
+        .select("*")
+        .eq("product_id", productId)
+        .order("sort_order", { ascending: true }),
+    ),
+});
+
 export const categoriesQuery = () => ({
   queryKey: ["categories"],
   queryFn: async () =>
@@ -135,9 +156,11 @@ export const publicSettingsQuery = () => ({
   },
 });
 
+export type OrderLine = { color_name: string | null; quantity: number };
+
 export async function placeOrder(input: {
   productId: string;
-  quantity: number;
+  items: OrderLine[];
   fullName: string;
   phone: string;
   wilayaCode: number;
@@ -146,9 +169,9 @@ export async function placeOrder(input: {
   adresse: string;
   deskCode?: string;
 }) {
-  const { data, error } = await rpc("place_order", {
+  const { data, error } = await rpc("place_order_items", {
     _product_id: input.productId,
-    _quantity: input.quantity,
+    _items: input.items,
     _full_name: input.fullName,
     _phone: input.phone,
     _wilaya_code: input.wilayaCode,
@@ -157,6 +180,7 @@ export async function placeOrder(input: {
     _adresse: input.adresse,
     _desk_code: input.deskCode,
   });
+
   if (error) throw new Error(error.message);
   const orderId = data as string;
 

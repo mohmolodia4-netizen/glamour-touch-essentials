@@ -119,6 +119,38 @@ export type Database = {
         }
         Relationships: []
       }
+      order_items: {
+        Row: {
+          color_name: string | null
+          created_at: string
+          id: string
+          order_id: string
+          quantity: number
+        }
+        Insert: {
+          color_name?: string | null
+          created_at?: string
+          id?: string
+          order_id: string
+          quantity?: number
+        }
+        Update: {
+          color_name?: string | null
+          created_at?: string
+          id?: string
+          order_id?: string
+          quantity?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_items_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       orders: {
         Row: {
           adresse: string | null
@@ -186,6 +218,50 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "orders_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      product_variants: {
+        Row: {
+          color_hex: string
+          color_name: string
+          created_at: string
+          id: string
+          image_url: string | null
+          product_id: string
+          sort_order: number
+          stock_quantity: number
+          updated_at: string
+        }
+        Insert: {
+          color_hex?: string
+          color_name: string
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          product_id: string
+          sort_order?: number
+          stock_quantity?: number
+          updated_at?: string
+        }
+        Update: {
+          color_hex?: string
+          color_name?: string
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          product_id?: string
+          sort_order?: number
+          stock_quantity?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_variants_product_id_fkey"
             columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "products"
@@ -375,6 +451,20 @@ export type Database = {
             }
             Returns: string
           }
+      place_order_items: {
+        Args: {
+          _adresse: string
+          _commune: string
+          _delivery_type: string
+          _desk_code: string
+          _full_name: string
+          _items: Json
+          _phone: string
+          _product_id: string
+          _wilaya_code: number
+        }
+        Returns: string
+      }
     }
     Enums: {
       app_role: "admin" | "user"
