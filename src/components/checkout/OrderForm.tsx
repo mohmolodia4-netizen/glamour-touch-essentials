@@ -173,7 +173,11 @@ export function OrderForm({ product }: { product: Product }) {
     try {
       const orderId = await placeOrder({
         productId: product.id,
-        quantity,
+        items: lines.map((line) => ({
+          color_name: hasVariants ? line.color : null,
+          quantity: Math.max(1, line.quantity),
+        })),
+
         fullName,
         phone,
         wilayaCode: code,
