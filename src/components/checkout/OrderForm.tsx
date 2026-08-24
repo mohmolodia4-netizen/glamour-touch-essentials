@@ -15,12 +15,14 @@ import {
   communesQuery,
   formatDzd,
   placeOrder,
+  productVariantsQuery,
   shippingRatesQuery,
   stopdesksQuery,
   type Product,
 } from "@/lib/store";
 
 type DeliveryType = "domicile" | "stopdesk";
+type Line = { color: string; quantity: number };
 
 export function OrderForm({ product }: { product: Product }) {
   const [fullName, setFullName] = useState("");
@@ -31,7 +33,7 @@ export function OrderForm({ product }: { product: Product }) {
   const [adresse, setAdresse] = useState("");
   const [deskAddress, setDeskAddress] = useState("");
   const [deskCode, setDeskCode] = useState("");
-  const [quantity, setQuantity] = useState(1);
+  const [lines, setLines] = useState<Line[]>([{ color: "", quantity: 1 }]);
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState<string | null>(null);
   const [startedCheckout, setStartedCheckout] = useState(false);
@@ -40,6 +42,22 @@ export function OrderForm({ product }: { product: Product }) {
   const { data: rates = [] } = useQuery(shippingRatesQuery());
   const { data: communes = [] } = useQuery(communesQuery(code));
   const { data: stopdesks = [] } = useQuery(stopdesksQuery(code));
+  const { data: variants = [] } = useQuery(productVariantsQuery(product.id));
+
+  const hasVariants = variants.length > 0;
+  const availableVariants = useMemo(
+    () => variants.filter((variant) => variant.stock_quantity > 0),
+    [variants],
+  );
+
+  useEffect(() => {
+    if (!hasVariants || availableVariants.length === 0) return;
+    setLines((current) =>
+      current.map((line) =>
+        line.color ? line : { ...line, color: availableVariants[0].color_name },
+      ),
+    );
+  }, [hasVariants, availableVariants]);
 
   useEffect(() => {
     const desk = stopdesks.find(
@@ -54,8 +72,14 @@ export function OrderForm({ product }: { product: Product }) {
       ? rate.domicile_fee
       : rate.stopdesk_fee
     : 0;
+  const quantity = lines.reduce((sum, line) => sum + Math.max(1, line.quantity), 0);
   const subtotal = Number(product.price) * quantity;
   const total = subtotal + shippingFee;
+
+  const maxStock = hasVariants
+    ? variants.reduce((sum, variant) => sum + variant.stock_quantity, 0)
+    : product.stock_quantity;
+
 
   const wilayaOptions = useMemo(
     () =>
