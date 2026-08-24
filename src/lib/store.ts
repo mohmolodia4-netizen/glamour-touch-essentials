@@ -93,6 +93,17 @@ export const productQuery = (id: string) => ({
   },
 });
 
+export const productVariantsQuery = (productId: string) => ({
+  queryKey: ["product_variants", productId],
+  queryFn: async () =>
+    unwrap<ProductVariant[]>(
+      await table("product_variants")
+        .select("*")
+        .eq("product_id", productId)
+        .order("sort_order", { ascending: true }),
+    ),
+});
+
 export const categoriesQuery = () => ({
   queryKey: ["categories"],
   queryFn: async () =>
