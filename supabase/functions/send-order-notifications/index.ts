@@ -149,6 +149,12 @@ Deno.serve(async (req) => {
       `🛍️ <b>Nouvelle commande — ${settings?.site_name ?? "Glamour Touch"}</b>`,
       "",
       `<b>Produit:</b> ${order.product_name} × ${order.quantity}`,
+      ...(items.length > 0
+        ? items.map(
+            (item) =>
+              `   • ${item.color_name ?? "Standard"} × ${item.quantity}`,
+          )
+        : []),
       `<b>Client:</b> ${order.full_name}`,
       `<b>Téléphone:</b> ${order.phone}`,
       `<b>Wilaya:</b> ${order.wilaya_name}`,
