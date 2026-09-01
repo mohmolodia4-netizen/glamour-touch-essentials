@@ -509,14 +509,13 @@ export function OrderForm({ product }: { product: Product }) {
 
       <Button
         type="submit"
-        disabled={submitting || product.stock_quantity <= 0}
+        disabled={submitting || maxStock <= 0}
         className="mt-6 h-14 w-full rounded-sm text-sm uppercase tracking-[0.2em]"
       >
         {submitting ? <Loader2 className="mr-2 size-4 animate-spin" /> : null}
-        {product.stock_quantity <= 0
-          ? "Produit épuisé"
-          : "Confirmer la Commande — تأكيد الطلب"}
+        {maxStock <= 0 ? "Produit épuisé" : "Confirmer la Commande — تأكيد الطلب"}
       </Button>
+
     </form>
   );
 }
