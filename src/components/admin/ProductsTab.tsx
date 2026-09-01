@@ -75,7 +75,12 @@ export function ProductsTab() {
     },
   });
 
-  function edit(product: Product) {
+  async function edit(product: Product) {
+    const { data } = await (supabase as any)
+      .from("product_variants")
+      .select("*")
+      .eq("product_id", product.id)
+      .order("sort_order", { ascending: true });
     setDraft({
       id: product.id,
       name: product.name,
@@ -90,6 +95,13 @@ export function ProductsTab() {
         (value, index, all): value is string =>
           Boolean(value) && all.indexOf(value) === index,
       ),
+      variants: ((data ?? []) as any[]).map((variant) => ({
+        id: variant.id,
+        color_name: variant.color_name,
+        color_hex: variant.color_hex ?? "#000000",
+        image_url: variant.image_url ?? null,
+        stock_quantity: String(variant.stock_quantity ?? 0),
+      })),
     });
   }
 
@@ -106,6 +118,62 @@ export function ProductsTab() {
       setUploading(false);
       if (fileInput.current) fileInput.current.value = "";
     }
+  }
+
+  function updateVariant(position: number, patch: Partial<VariantDraft>) {
+    setDraft((current) =>
+      current
+        ? {
+            ...current,
+            variants: current.variants.map((variant, index) =>
+              index === position ? { ...variant, ...patch } : variant,
+            ),
+          }
+        : current,
+    );
+  }
+
+  async function handleVariantImage(position: number, file: File | undefined) {
+    if (!file) return;
+    setUploading(true);
+    try {
+      const url = await uploadImage(file);
+      updateVariant(position, { image_url: url });
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Échec de l'envoi");
+    } finally {
+      setUploading(false);
+    }
+  }
+
+  async function saveVariants(productId: string, variants: VariantDraft[]) {
+    const rows = variants.filter((variant) => variant.color_name.trim());
+    const keepIds = rows.map((variant) => variant.id).filter(Boolean) as string[];
+
+    let deleteQuery = (supabase as any)
+      .from("product_variants")
+      .delete()
+      .eq("product_id", productId);
+    if (keepIds.length > 0) {
+      deleteQuery = deleteQuery.not("id", "in", `(${keepIds.join(",")})`);
+    }
+    const { error: deleteError } = await deleteQuery;
+    if (deleteError) throw new Error(deleteError.message);
+
+    if (rows.length === 0) return;
+    const payload = rows.map((variant, index) => ({
+      ...(variant.id ? { id: variant.id } : {}),
+      product_id: productId,
+      color_name: variant.color_name.trim(),
+      color_hex: variant.color_hex || "#000000",
+      image_url: variant.image_url,
+      stock_quantity: Number(variant.stock_quantity) || 0,
+      sort_order: index,
+    }));
+    const { error } = await (supabase as any)
+      .from("product_variants")
+      .upsert(payload);
+    if (error) throw new Error(error.message);
   }
 
   async function save() {
@@ -128,19 +196,38 @@ export function ProductsTab() {
       image_urls: draft.images.slice(1),
     };
     const query = draft.id
-      ? (supabase as any).from("products").update(payload).eq("id", draft.id)
-      : (supabase as any).from("products").insert(payload);
-    const { error } = await query;
-    setSaving(false);
+      ? (supabase as any)
+          .from("products")
+          .update(payload)
+          .eq("id", draft.id)
+          .select("id")
+          .single()
+      : (supabase as any).from("products").insert(payload).select("id").single();
+    const { data, error } = await query;
     if (error) {
+      setSaving(false);
       toast.error(error.message);
       return;
     }
+    try {
+      await saveVariants(data.id as string, draft.variants);
+    } catch (variantError) {
+      setSaving(false);
+      toast.error(
+        variantError instanceof Error
+          ? variantError.message
+          : "Échec de l'enregistrement des variantes",
+      );
+      return;
+    }
+    setSaving(false);
     toast.success("Produit enregistré");
     setDraft(null);
     void queryClient.invalidateQueries({ queryKey: ["admin", "products"] });
     void queryClient.invalidateQueries({ queryKey: ["products"] });
+    void queryClient.invalidateQueries({ queryKey: ["product_variants"] });
   }
+
 
   async function remove(id: string) {
     const { error } = await (supabase as any).from("products").delete().eq("id", id);
