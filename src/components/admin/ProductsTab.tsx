@@ -390,6 +390,110 @@ export function ProductsTab() {
             </div>
           </div>
 
+          <div className="grid gap-3">
+            <Label>Couleurs (variantes)</Label>
+            {draft.variants.length === 0 ? (
+              <p className="text-xs text-muted-foreground">
+                Aucune couleur — le produit utilisera le stock global.
+              </p>
+            ) : null}
+            {draft.variants.map((variant, position) => (
+              <div
+                key={variant.id ?? `new-${position}`}
+                className="flex flex-wrap items-end gap-3 rounded-sm border border-border p-3"
+              >
+                <div className="grid gap-1">
+                  <Label className="text-xs">Nom</Label>
+                  <Input
+                    value={variant.color_name}
+                    placeholder="Noir"
+                    onChange={(event) =>
+                      updateVariant(position, { color_name: event.target.value })
+                    }
+                    className="h-10 w-40 rounded-sm"
+                  />
+                </div>
+                <div className="grid gap-1">
+                  <Label className="text-xs">Couleur</Label>
+                  <Input
+                    type="color"
+                    value={variant.color_hex}
+                    onChange={(event) =>
+                      updateVariant(position, { color_hex: event.target.value })
+                    }
+                    className="h-10 w-16 rounded-sm p-1"
+                  />
+                </div>
+                <div className="grid gap-1">
+                  <Label className="text-xs">Stock</Label>
+                  <Input
+                    type="number"
+                    min={0}
+                    value={variant.stock_quantity}
+                    onChange={(event) =>
+                      updateVariant(position, { stock_quantity: event.target.value })
+                    }
+                    className="h-10 w-24 rounded-sm"
+                  />
+                </div>
+                <div className="grid gap-1">
+                  <Label className="text-xs">Image</Label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(event) =>
+                      void handleVariantImage(position, event.target.files?.[0])
+                    }
+                    className="text-xs"
+                  />
+                </div>
+                {variant.image_url ? (
+                  <img
+                    src={variant.image_url}
+                    alt=""
+                    className="size-12 rounded-sm object-cover"
+                  />
+                ) : null}
+                <button
+                  type="button"
+                  aria-label="Supprimer la couleur"
+                  onClick={() =>
+                    setDraft({
+                      ...draft,
+                      variants: draft.variants.filter((_, index) => index !== position),
+                    })
+                  }
+                  className="rounded-sm p-2 text-muted-foreground hover:text-destructive"
+                >
+                  <X className="size-4" />
+                </button>
+              </div>
+            ))}
+            <Button
+              type="button"
+              variant="outline"
+              className="w-fit rounded-sm"
+              onClick={() =>
+                setDraft({
+                  ...draft,
+                  variants: [
+                    ...draft.variants,
+                    {
+                      color_name: "",
+                      color_hex: "#000000",
+                      image_url: null,
+                      stock_quantity: "0",
+                    },
+                  ],
+                })
+              }
+            >
+              Ajouter une couleur
+            </Button>
+          </div>
+
+
+
           <Button onClick={save} disabled={saving} className="rounded-sm">
             {saving ? <Loader2 className="mr-2 size-4 animate-spin" /> : null}
             Enregistrer
