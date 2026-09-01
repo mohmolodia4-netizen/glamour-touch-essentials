@@ -8,7 +8,7 @@ import { SiteFooter } from "@/components/site/SiteFooter";
 import { SiteHeader } from "@/components/site/SiteHeader";
 import { Button } from "@/components/ui/button";
 import { trackPixel } from "@/lib/pixel";
-import { formatDzd, productQuery } from "@/lib/store";
+import { formatDzd, productQuery, productVariantsQuery } from "@/lib/store";
 
 export const Route = createFileRoute("/product/$id")({
   head: () => ({
