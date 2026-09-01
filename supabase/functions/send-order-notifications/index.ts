@@ -32,7 +32,11 @@ Deno.serve(async (req) => {
     );
 
     const [{ data: order }, { data: settings }] = await Promise.all([
-      supabase.from("orders").select("*").eq("id", order_id).maybeSingle(),
+      supabase
+        .from("orders")
+        .select("*, order_items(color_name, quantity)")
+        .eq("id", order_id)
+        .maybeSingle(),
       supabase
         .from("app_settings")
         .select("telegram_bot_token, telegram_chat_id, site_name, google_sheet_webhook_url")
@@ -42,8 +46,16 @@ Deno.serve(async (req) => {
 
     if (!order) return json({ error: "Commande introuvable" }, 404);
 
+    const items: Array<{ color_name: string | null; quantity: number }> =
+      order.order_items ?? [];
+    const colorSummary = items
+      .filter((item) => item.color_name)
+      .map((item) => `${item.quantity}x ${item.color_name}`)
+      .join(", ");
+
     const isStopdesk = order.delivery_type === "stopdesk";
     const stopdeskCode = isStopdesk ? order.desk_code || "" : "";
+
 
     const buildPayload = (status: string) => ({
       nom_complet: order.full_name,
