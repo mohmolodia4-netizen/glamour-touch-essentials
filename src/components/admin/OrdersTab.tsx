@@ -166,6 +166,12 @@ export function OrdersTab() {
                     {order.product_name} × {order.quantity} ·{" "}
                     {order.delivery_type === "domicile" ? "À domicile" : "Stopdesk"}
                   </p>
+                  {itemsLabel(order) ? (
+                    <p className="text-muted-foreground">
+                      Couleurs : {itemsLabel(order)}
+                    </p>
+                  ) : null}
+
                   <p className="text-muted-foreground">
                     {order.wilaya_name} / {order.commune}
                     {order.adresse ? ` — ${order.adresse}` : ""}
