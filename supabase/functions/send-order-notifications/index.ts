@@ -60,7 +60,9 @@ Deno.serve(async (req) => {
     const buildPayload = (status: string) => ({
       nom_complet: order.full_name,
       telephone: order.phone,
-      article: order.product_name,
+      article: colorSummary
+        ? `${order.product_name} (${colorSummary})`
+        : order.product_name,
       quantite: order.quantity || 1,
       adresse: isStopdesk ? stopdeskCode : order.adresse || "",
       wilaya: order.wilaya_name || order.wilaya_id,
