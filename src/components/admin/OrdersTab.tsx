@@ -15,6 +15,8 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { formatDzd } from "@/lib/store";
 
+type OrderItem = { color_name: string | null; quantity: number };
+
 type Order = {
   id: string;
   created_at: string;
@@ -29,6 +31,7 @@ type Order = {
   shipping_fee: number;
   total: number;
   status: string;
+  order_items: OrderItem[] | null;
 };
 
 const STATUSES = ["pending", "confirmed", "shipped", "delivered", "cancelled"];
@@ -40,6 +43,12 @@ const STATUS_LABELS: Record<string, string> = {
   cancelled: "Annulée",
 };
 
+function itemsLabel(order: Order) {
+  const items = (order.order_items ?? []).filter((item) => item.color_name);
+  if (items.length === 0) return null;
+  return items.map((item) => `${item.quantity}x ${item.color_name}`).join(", ");
+}
+
 export function OrdersTab() {
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
@@ -50,12 +59,13 @@ export function OrdersTab() {
     queryFn: async () => {
       const { data, error } = await (supabase as any)
         .from("orders")
-        .select("*")
+        .select("*, order_items(color_name, quantity)")
         .order("created_at", { ascending: false });
       if (error) throw new Error(error.message);
       return (data ?? []) as Order[];
     },
   });
+
 
   const visible = orders.filter((order) => {
     const matchesStatus = statusFilter === "all" || order.status === statusFilter;
