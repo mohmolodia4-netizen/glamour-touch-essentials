@@ -32,14 +32,20 @@ export const Route = createFileRoute("/product/$id")({
 function ProductPage() {
   const { id } = Route.useParams();
   const { data: product, isLoading } = useQuery(productQuery(id));
+  const { data: variants = [] } = useQuery(productVariantsQuery(id));
   const [index, setIndex] = useState(0);
 
+  const variantImages = variants
+    .map((variant) => variant.image_url)
+    .filter((value): value is string => Boolean(value));
+
   const images = product
-    ? [product.image_url, ...(product.image_urls ?? [])].filter(
+    ? [product.image_url, ...variantImages, ...(product.image_urls ?? [])].filter(
         (value, position, all): value is string =>
           Boolean(value) && all.indexOf(value) === position,
       )
     : [];
+
 
   useEffect(() => {
     if (!product) return;
