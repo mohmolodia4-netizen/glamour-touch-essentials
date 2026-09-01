@@ -167,6 +167,10 @@ export function OrderForm({ product }: { product: Product }) {
       );
       return;
     }
+    if (hasVariants && lines.some((line) => !line.color)) {
+      toast.error("Veuillez choisir une couleur pour chaque ligne.");
+      return;
+    }
 
 
     setSubmitting(true);
