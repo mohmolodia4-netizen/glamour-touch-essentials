@@ -19,6 +19,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { categoriesQuery, formatDzd, type Product } from "@/lib/store";
 import { uploadImage } from "@/lib/upload";
 
+type VariantDraft = {
+  id?: string;
+  color_name: string;
+  color_hex: string;
+  image_url: string | null;
+  stock_quantity: string;
+};
+
 type Draft = {
   id?: string;
   name: string;
@@ -30,6 +38,7 @@ type Draft = {
   status: string;
   featured: boolean;
   images: string[];
+  variants: VariantDraft[];
 };
 
 const emptyDraft: Draft = {
@@ -42,7 +51,9 @@ const emptyDraft: Draft = {
   status: "published",
   featured: false,
   images: [],
+  variants: [],
 };
+
 
 export function ProductsTab() {
   const queryClient = useQueryClient();
