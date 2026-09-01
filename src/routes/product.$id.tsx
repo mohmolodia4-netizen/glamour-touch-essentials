@@ -8,7 +8,7 @@ import { SiteFooter } from "@/components/site/SiteFooter";
 import { SiteHeader } from "@/components/site/SiteHeader";
 import { Button } from "@/components/ui/button";
 import { trackPixel } from "@/lib/pixel";
-import { formatDzd, productQuery } from "@/lib/store";
+import { formatDzd, productQuery, productVariantsQuery } from "@/lib/store";
 
 export const Route = createFileRoute("/product/$id")({
   head: () => ({
@@ -32,14 +32,20 @@ export const Route = createFileRoute("/product/$id")({
 function ProductPage() {
   const { id } = Route.useParams();
   const { data: product, isLoading } = useQuery(productQuery(id));
+  const { data: variants = [] } = useQuery(productVariantsQuery(id));
   const [index, setIndex] = useState(0);
 
+  const variantImages = variants
+    .map((variant) => variant.image_url)
+    .filter((value): value is string => Boolean(value));
+
   const images = product
-    ? [product.image_url, ...(product.image_urls ?? [])].filter(
+    ? [product.image_url, ...variantImages, ...(product.image_urls ?? [])].filter(
         (value, position, all): value is string =>
           Boolean(value) && all.indexOf(value) === position,
       )
     : [];
+
 
   useEffect(() => {
     if (!product) return;
@@ -124,7 +130,41 @@ function ProductPage() {
                   ))}
                 </div>
               ) : null}
+
+              {variants.length > 0 ? (
+                <div className="mt-5">
+                  <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
+                    Couleurs disponibles
+                  </p>
+                  <div className="mt-3 flex flex-wrap items-center gap-3">
+                    {variants.map((variant) => {
+                      const position = variant.image_url
+                        ? images.indexOf(variant.image_url)
+                        : -1;
+                      const active = position >= 0 && position === index;
+                      return (
+                        <button
+                          key={variant.id}
+                          type="button"
+                          title={`${variant.color_name}${variant.stock_quantity <= 0 ? " — épuisé" : ""}`}
+                          aria-label={variant.color_name}
+                          onClick={() => {
+                            if (position >= 0) setIndex(position);
+                          }}
+                          className={
+                            "size-9 rounded-full border-2 transition-opacity " +
+                            (active ? "border-primary" : "border-border") +
+                            (variant.stock_quantity <= 0 ? " opacity-40" : "")
+                          }
+                          style={{ backgroundColor: variant.color_hex }}
+                        />
+                      );
+                    })}
+                  </div>
+                </div>
+              ) : null}
             </div>
+
 
             <div className="min-w-0">
               <h1 className="font-display text-4xl break-words text-foreground">

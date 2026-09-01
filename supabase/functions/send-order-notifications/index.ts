@@ -32,7 +32,11 @@ Deno.serve(async (req) => {
     );
 
     const [{ data: order }, { data: settings }] = await Promise.all([
-      supabase.from("orders").select("*").eq("id", order_id).maybeSingle(),
+      supabase
+        .from("orders")
+        .select("*, order_items(color_name, quantity)")
+        .eq("id", order_id)
+        .maybeSingle(),
       supabase
         .from("app_settings")
         .select("telegram_bot_token, telegram_chat_id, site_name, google_sheet_webhook_url")
@@ -42,13 +46,23 @@ Deno.serve(async (req) => {
 
     if (!order) return json({ error: "Commande introuvable" }, 404);
 
+    const items: Array<{ color_name: string | null; quantity: number }> =
+      order.order_items ?? [];
+    const colorSummary = items
+      .filter((item) => item.color_name)
+      .map((item) => `${item.quantity}x ${item.color_name}`)
+      .join(", ");
+
     const isStopdesk = order.delivery_type === "stopdesk";
     const stopdeskCode = isStopdesk ? order.desk_code || "" : "";
+
 
     const buildPayload = (status: string) => ({
       nom_complet: order.full_name,
       telephone: order.phone,
-      article: order.product_name,
+      article: colorSummary
+        ? `${order.product_name} (${colorSummary})`
+        : order.product_name,
       quantite: order.quantity || 1,
       adresse: isStopdesk ? stopdeskCode : order.adresse || "",
       wilaya: order.wilaya_name || order.wilaya_id,
@@ -135,6 +149,12 @@ Deno.serve(async (req) => {
       `🛍️ <b>Nouvelle commande — ${settings?.site_name ?? "Glamour Touch"}</b>`,
       "",
       `<b>Produit:</b> ${order.product_name} × ${order.quantity}`,
+      ...(items.length > 0
+        ? items.map(
+            (item) =>
+              `   • ${item.color_name ?? "Standard"} × ${item.quantity}`,
+          )
+        : []),
       `<b>Client:</b> ${order.full_name}`,
       `<b>Téléphone:</b> ${order.phone}`,
       `<b>Wilaya:</b> ${order.wilaya_name}`,

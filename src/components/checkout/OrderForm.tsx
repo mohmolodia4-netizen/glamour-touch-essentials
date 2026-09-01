@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { Loader2, ShieldCheck, Truck } from "lucide-react";
+import { Loader2, Plus, ShieldCheck, Truck, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Combobox } from "@/components/ui/combobox";
@@ -165,6 +165,10 @@ export function OrderForm({ product }: { product: Product }) {
           ? "Adresse de livraison requise."
           : "Veuillez choisir un point Stop Desk.",
       );
+      return;
+    }
+    if (hasVariants && lines.some((line) => !line.color)) {
+      toast.error("Veuillez choisir une couleur pour chaque ligne.");
       return;
     }
 
@@ -509,14 +513,13 @@ export function OrderForm({ product }: { product: Product }) {
 
       <Button
         type="submit"
-        disabled={submitting || product.stock_quantity <= 0}
+        disabled={submitting || maxStock <= 0}
         className="mt-6 h-14 w-full rounded-sm text-sm uppercase tracking-[0.2em]"
       >
         {submitting ? <Loader2 className="mr-2 size-4 animate-spin" /> : null}
-        {product.stock_quantity <= 0
-          ? "Produit épuisé"
-          : "Confirmer la Commande — تأكيد الطلب"}
+        {maxStock <= 0 ? "Produit épuisé" : "Confirmer la Commande — تأكيد الطلب"}
       </Button>
+
     </form>
   );
 }

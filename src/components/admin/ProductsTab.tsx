@@ -19,6 +19,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { categoriesQuery, formatDzd, type Product } from "@/lib/store";
 import { uploadImage } from "@/lib/upload";
 
+type VariantDraft = {
+  id?: string;
+  color_name: string;
+  color_hex: string;
+  image_url: string | null;
+  stock_quantity: string;
+};
+
 type Draft = {
   id?: string;
   name: string;
@@ -30,6 +38,7 @@ type Draft = {
   status: string;
   featured: boolean;
   images: string[];
+  variants: VariantDraft[];
 };
 
 const emptyDraft: Draft = {
@@ -42,7 +51,9 @@ const emptyDraft: Draft = {
   status: "published",
   featured: false,
   images: [],
+  variants: [],
 };
+
 
 export function ProductsTab() {
   const queryClient = useQueryClient();
@@ -64,7 +75,12 @@ export function ProductsTab() {
     },
   });
 
-  function edit(product: Product) {
+  async function edit(product: Product) {
+    const { data } = await (supabase as any)
+      .from("product_variants")
+      .select("*")
+      .eq("product_id", product.id)
+      .order("sort_order", { ascending: true });
     setDraft({
       id: product.id,
       name: product.name,
@@ -79,6 +95,13 @@ export function ProductsTab() {
         (value, index, all): value is string =>
           Boolean(value) && all.indexOf(value) === index,
       ),
+      variants: ((data ?? []) as any[]).map((variant) => ({
+        id: variant.id,
+        color_name: variant.color_name,
+        color_hex: variant.color_hex ?? "#000000",
+        image_url: variant.image_url ?? null,
+        stock_quantity: String(variant.stock_quantity ?? 0),
+      })),
     });
   }
 
@@ -95,6 +118,62 @@ export function ProductsTab() {
       setUploading(false);
       if (fileInput.current) fileInput.current.value = "";
     }
+  }
+
+  function updateVariant(position: number, patch: Partial<VariantDraft>) {
+    setDraft((current) =>
+      current
+        ? {
+            ...current,
+            variants: current.variants.map((variant, index) =>
+              index === position ? { ...variant, ...patch } : variant,
+            ),
+          }
+        : current,
+    );
+  }
+
+  async function handleVariantImage(position: number, file: File | undefined) {
+    if (!file) return;
+    setUploading(true);
+    try {
+      const url = await uploadImage(file);
+      updateVariant(position, { image_url: url });
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Échec de l'envoi");
+    } finally {
+      setUploading(false);
+    }
+  }
+
+  async function saveVariants(productId: string, variants: VariantDraft[]) {
+    const rows = variants.filter((variant) => variant.color_name.trim());
+    const keepIds = rows.map((variant) => variant.id).filter(Boolean) as string[];
+
+    let deleteQuery = (supabase as any)
+      .from("product_variants")
+      .delete()
+      .eq("product_id", productId);
+    if (keepIds.length > 0) {
+      deleteQuery = deleteQuery.not("id", "in", `(${keepIds.join(",")})`);
+    }
+    const { error: deleteError } = await deleteQuery;
+    if (deleteError) throw new Error(deleteError.message);
+
+    if (rows.length === 0) return;
+    const payload = rows.map((variant, index) => ({
+      ...(variant.id ? { id: variant.id } : {}),
+      product_id: productId,
+      color_name: variant.color_name.trim(),
+      color_hex: variant.color_hex || "#000000",
+      image_url: variant.image_url,
+      stock_quantity: Number(variant.stock_quantity) || 0,
+      sort_order: index,
+    }));
+    const { error } = await (supabase as any)
+      .from("product_variants")
+      .upsert(payload);
+    if (error) throw new Error(error.message);
   }
 
   async function save() {
@@ -117,19 +196,38 @@ export function ProductsTab() {
       image_urls: draft.images.slice(1),
     };
     const query = draft.id
-      ? (supabase as any).from("products").update(payload).eq("id", draft.id)
-      : (supabase as any).from("products").insert(payload);
-    const { error } = await query;
-    setSaving(false);
+      ? (supabase as any)
+          .from("products")
+          .update(payload)
+          .eq("id", draft.id)
+          .select("id")
+          .single()
+      : (supabase as any).from("products").insert(payload).select("id").single();
+    const { data, error } = await query;
     if (error) {
+      setSaving(false);
       toast.error(error.message);
       return;
     }
+    try {
+      await saveVariants(data.id as string, draft.variants);
+    } catch (variantError) {
+      setSaving(false);
+      toast.error(
+        variantError instanceof Error
+          ? variantError.message
+          : "Échec de l'enregistrement des variantes",
+      );
+      return;
+    }
+    setSaving(false);
     toast.success("Produit enregistré");
     setDraft(null);
     void queryClient.invalidateQueries({ queryKey: ["admin", "products"] });
     void queryClient.invalidateQueries({ queryKey: ["products"] });
+    void queryClient.invalidateQueries({ queryKey: ["product_variants"] });
   }
+
 
   async function remove(id: string) {
     const { error } = await (supabase as any).from("products").delete().eq("id", id);
@@ -291,6 +389,110 @@ export function ProductsTab() {
               ))}
             </div>
           </div>
+
+          <div className="grid gap-3">
+            <Label>Couleurs (variantes)</Label>
+            {draft.variants.length === 0 ? (
+              <p className="text-xs text-muted-foreground">
+                Aucune couleur — le produit utilisera le stock global.
+              </p>
+            ) : null}
+            {draft.variants.map((variant, position) => (
+              <div
+                key={variant.id ?? `new-${position}`}
+                className="flex flex-wrap items-end gap-3 rounded-sm border border-border p-3"
+              >
+                <div className="grid gap-1">
+                  <Label className="text-xs">Nom</Label>
+                  <Input
+                    value={variant.color_name}
+                    placeholder="Noir"
+                    onChange={(event) =>
+                      updateVariant(position, { color_name: event.target.value })
+                    }
+                    className="h-10 w-40 rounded-sm"
+                  />
+                </div>
+                <div className="grid gap-1">
+                  <Label className="text-xs">Couleur</Label>
+                  <Input
+                    type="color"
+                    value={variant.color_hex}
+                    onChange={(event) =>
+                      updateVariant(position, { color_hex: event.target.value })
+                    }
+                    className="h-10 w-16 rounded-sm p-1"
+                  />
+                </div>
+                <div className="grid gap-1">
+                  <Label className="text-xs">Stock</Label>
+                  <Input
+                    type="number"
+                    min={0}
+                    value={variant.stock_quantity}
+                    onChange={(event) =>
+                      updateVariant(position, { stock_quantity: event.target.value })
+                    }
+                    className="h-10 w-24 rounded-sm"
+                  />
+                </div>
+                <div className="grid gap-1">
+                  <Label className="text-xs">Image</Label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(event) =>
+                      void handleVariantImage(position, event.target.files?.[0])
+                    }
+                    className="text-xs"
+                  />
+                </div>
+                {variant.image_url ? (
+                  <img
+                    src={variant.image_url}
+                    alt=""
+                    className="size-12 rounded-sm object-cover"
+                  />
+                ) : null}
+                <button
+                  type="button"
+                  aria-label="Supprimer la couleur"
+                  onClick={() =>
+                    setDraft({
+                      ...draft,
+                      variants: draft.variants.filter((_, index) => index !== position),
+                    })
+                  }
+                  className="rounded-sm p-2 text-muted-foreground hover:text-destructive"
+                >
+                  <X className="size-4" />
+                </button>
+              </div>
+            ))}
+            <Button
+              type="button"
+              variant="outline"
+              className="w-fit rounded-sm"
+              onClick={() =>
+                setDraft({
+                  ...draft,
+                  variants: [
+                    ...draft.variants,
+                    {
+                      color_name: "",
+                      color_hex: "#000000",
+                      image_url: null,
+                      stock_quantity: "0",
+                    },
+                  ],
+                })
+              }
+            >
+              Ajouter une couleur
+            </Button>
+          </div>
+
+
 
           <Button onClick={save} disabled={saving} className="rounded-sm">
             {saving ? <Loader2 className="mr-2 size-4 animate-spin" /> : null}
