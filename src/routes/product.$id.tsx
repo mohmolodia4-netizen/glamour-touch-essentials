@@ -130,7 +130,41 @@ function ProductPage() {
                   ))}
                 </div>
               ) : null}
+
+              {variants.length > 0 ? (
+                <div className="mt-5">
+                  <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
+                    Couleurs disponibles
+                  </p>
+                  <div className="mt-3 flex flex-wrap items-center gap-3">
+                    {variants.map((variant) => {
+                      const position = variant.image_url
+                        ? images.indexOf(variant.image_url)
+                        : -1;
+                      const active = position >= 0 && position === index;
+                      return (
+                        <button
+                          key={variant.id}
+                          type="button"
+                          title={`${variant.color_name}${variant.stock_quantity <= 0 ? " — épuisé" : ""}`}
+                          aria-label={variant.color_name}
+                          onClick={() => {
+                            if (position >= 0) setIndex(position);
+                          }}
+                          className={
+                            "size-9 rounded-full border-2 transition-opacity " +
+                            (active ? "border-primary" : "border-border") +
+                            (variant.stock_quantity <= 0 ? " opacity-40" : "")
+                          }
+                          style={{ backgroundColor: variant.color_hex }}
+                        />
+                      );
+                    })}
+                  </div>
+                </div>
+              ) : null}
             </div>
+
 
             <div className="min-w-0">
               <h1 className="font-display text-4xl break-words text-foreground">
