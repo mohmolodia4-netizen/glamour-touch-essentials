@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, ImageIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { OrderForm } from "@/components/checkout/OrderForm";
@@ -35,12 +35,22 @@ function ProductPage() {
   const { data: variants = [] } = useQuery(productVariantsQuery(id));
   const [index, setIndex] = useState(0);
 
-  const variantImages = variants
+  const orderedVariants = [...variants].sort((a, b) => a.sort_order - b.sort_order);
+  const defaultVariant =
+    orderedVariants.find((variant) => variant.is_default && variant.image_url) ??
+    orderedVariants.find((variant) => variant.image_url) ??
+    null;
+  const variantImages = orderedVariants
     .map((variant) => variant.image_url)
     .filter((value): value is string => Boolean(value));
 
   const images = product
-    ? [product.image_url, ...variantImages, ...(product.image_urls ?? [])].filter(
+    ? [
+        defaultVariant?.image_url ?? null,
+        ...variantImages,
+        product.image_url,
+        ...(product.image_urls ?? []),
+      ].filter(
         (value, position, all): value is string =>
           Boolean(value) && all.indexOf(value) === position,
       )
@@ -80,7 +90,12 @@ function ProductPage() {
                     alt={product.name}
                     className="size-full object-cover"
                   />
-                ) : null}
+                ) : (
+                  <div className="flex size-full flex-col items-center justify-center gap-2 text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                    <ImageIcon className="size-8 opacity-50" aria-hidden="true" />
+                    Glamour Touch
+                  </div>
+                )}
                 {images.length > 1 ? (
                   <>
                     <button

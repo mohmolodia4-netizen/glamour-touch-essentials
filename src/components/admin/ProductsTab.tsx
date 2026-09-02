@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Loader2, Plus, Trash2, X } from "lucide-react";
+import { Loader2, Plus, Star, Trash2, X } from "lucide-react";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
 
@@ -25,6 +25,7 @@ type VariantDraft = {
   color_hex: string;
   image_url: string | null;
   stock_quantity: string;
+  is_default: boolean;
 };
 
 type Draft = {
@@ -101,6 +102,7 @@ export function ProductsTab() {
         color_hex: variant.color_hex ?? "#000000",
         image_url: variant.image_url ?? null,
         stock_quantity: String(variant.stock_quantity ?? 0),
+        is_default: Boolean(variant.is_default),
       })),
     });
   }
@@ -169,6 +171,9 @@ export function ProductsTab() {
       image_url: variant.image_url,
       stock_quantity: Number(variant.stock_quantity) || 0,
       sort_order: index,
+      is_default: rows.some((row) => row.is_default)
+        ? variant.is_default
+        : index === 0,
     }));
     const { error } = await (supabase as any)
       .from("product_variants")
@@ -226,6 +231,7 @@ export function ProductsTab() {
     void queryClient.invalidateQueries({ queryKey: ["admin", "products"] });
     void queryClient.invalidateQueries({ queryKey: ["products"] });
     void queryClient.invalidateQueries({ queryKey: ["product_variants"] });
+    void queryClient.invalidateQueries({ queryKey: ["variant_covers"] });
   }
 
 
@@ -354,7 +360,7 @@ export function ProductsTab() {
           </div>
 
           <div className="grid gap-2">
-            <Label>Images</Label>
+            <Label>Images (optionnel)</Label>
             <input
               ref={fileInput}
               type="file"
@@ -456,6 +462,30 @@ export function ProductsTab() {
                 ) : null}
                 <button
                   type="button"
+                  aria-pressed={variant.is_default}
+                  onClick={() =>
+                    setDraft({
+                      ...draft,
+                      variants: draft.variants.map((item, index) => ({
+                        ...item,
+                        is_default: index === position,
+                      })),
+                    })
+                  }
+                  className={
+                    "flex items-center gap-1 rounded-sm border px-2 py-2 text-xs " +
+                    (variant.is_default
+                      ? "border-primary text-primary"
+                      : "border-border text-muted-foreground")
+                  }
+                >
+                  <Star
+                    className={"size-4 " + (variant.is_default ? "fill-current" : "")}
+                  />
+                  Image par défaut
+                </button>
+                <button
+                  type="button"
                   aria-label="Supprimer la couleur"
                   onClick={() =>
                     setDraft({
@@ -483,6 +513,7 @@ export function ProductsTab() {
                       color_hex: "#000000",
                       image_url: null,
                       stock_quantity: "0",
+                      is_default: draft.variants.length === 0,
                     },
                   ],
                 })

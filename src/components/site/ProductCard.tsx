@@ -1,9 +1,23 @@
 import { Link } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import { ImageIcon } from "lucide-react";
 
-import { formatDzd, type Product } from "@/lib/store";
+import {
+  formatDzd,
+  pickVariantCover,
+  variantCoversQuery,
+  type Product,
+} from "@/lib/store";
 
 export function ProductCard({ product }: { product: Product }) {
   const discounted = product.old_price && product.old_price > product.price;
+  const { data: covers = [] } = useQuery(variantCoversQuery());
+
+  const cover =
+    pickVariantCover(covers, product.id) ??
+    product.image_url ??
+    product.image_urls?.[0] ??
+    null;
 
   return (
     <Link
@@ -13,15 +27,16 @@ export function ProductCard({ product }: { product: Product }) {
       aria-label={product.name}
     >
       <div className="relative aspect-4/5 overflow-hidden rounded-sm bg-secondary">
-        {product.image_url ? (
+        {cover ? (
           <img
-            src={product.image_url}
+            src={cover}
             alt={product.name}
             loading="lazy"
             className="size-full object-cover transition-transform duration-700 group-hover:scale-105"
           />
         ) : (
-          <div className="flex size-full items-center justify-center text-xs uppercase tracking-[0.2em] text-muted-foreground">
+          <div className="flex size-full flex-col items-center justify-center gap-2 text-xs uppercase tracking-[0.2em] text-muted-foreground">
+            <ImageIcon className="size-6 opacity-50" aria-hidden="true" />
             Glamour Touch
           </div>
         )}
