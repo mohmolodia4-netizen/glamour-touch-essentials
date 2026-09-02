@@ -35,12 +35,22 @@ function ProductPage() {
   const { data: variants = [] } = useQuery(productVariantsQuery(id));
   const [index, setIndex] = useState(0);
 
-  const variantImages = variants
+  const orderedVariants = [...variants].sort((a, b) => a.sort_order - b.sort_order);
+  const defaultVariant =
+    orderedVariants.find((variant) => variant.is_default && variant.image_url) ??
+    orderedVariants.find((variant) => variant.image_url) ??
+    null;
+  const variantImages = orderedVariants
     .map((variant) => variant.image_url)
     .filter((value): value is string => Boolean(value));
 
   const images = product
-    ? [product.image_url, ...variantImages, ...(product.image_urls ?? [])].filter(
+    ? [
+        defaultVariant?.image_url ?? null,
+        ...variantImages,
+        product.image_url,
+        ...(product.image_urls ?? []),
+      ].filter(
         (value, position, all): value is string =>
           Boolean(value) && all.indexOf(value) === position,
       )
