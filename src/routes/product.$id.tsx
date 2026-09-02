@@ -90,7 +90,12 @@ function ProductPage() {
                     alt={product.name}
                     className="size-full object-cover"
                   />
-                ) : null}
+                ) : (
+                  <div className="flex size-full flex-col items-center justify-center gap-2 text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                    <ImageIcon className="size-8 opacity-50" aria-hidden="true" />
+                    Glamour Touch
+                  </div>
+                )}
                 {images.length > 1 ? (
                   <>
                     <button
