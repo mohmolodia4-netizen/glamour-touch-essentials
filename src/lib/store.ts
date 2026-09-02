@@ -124,6 +124,16 @@ export const productVariantsQuery = (productId: string) => ({
     ),
 });
 
+export const variantCoversQuery = () => ({
+  queryKey: ["variant_covers"],
+  queryFn: async () =>
+    unwrap<VariantCover[]>(
+      await table("product_variants")
+        .select("product_id, image_url, is_default, sort_order")
+        .order("sort_order", { ascending: true }),
+    ),
+});
+
 export const categoriesQuery = () => ({
   queryKey: ["categories"],
   queryFn: async () =>
