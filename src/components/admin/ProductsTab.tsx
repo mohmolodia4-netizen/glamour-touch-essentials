@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Loader2, Plus, Star, Trash2, X } from "lucide-react";
+import { ImageIcon, Loader2, Plus, Star, Trash2, X } from "lucide-react";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
 
@@ -16,7 +16,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
-import { categoriesQuery, formatDzd, type Product } from "@/lib/store";
+import {
+  categoriesQuery,
+  formatDzd,
+  pickVariantCover,
+  variantCoversQuery,
+  type Product,
+} from "@/lib/store";
 import { uploadImage } from "@/lib/upload";
 
 type VariantDraft = {
