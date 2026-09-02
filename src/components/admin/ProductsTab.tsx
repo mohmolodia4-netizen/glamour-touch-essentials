@@ -461,6 +461,30 @@ export function ProductsTab() {
                 ) : null}
                 <button
                   type="button"
+                  aria-pressed={variant.is_default}
+                  onClick={() =>
+                    setDraft({
+                      ...draft,
+                      variants: draft.variants.map((item, index) => ({
+                        ...item,
+                        is_default: index === position,
+                      })),
+                    })
+                  }
+                  className={
+                    "flex items-center gap-1 rounded-sm border px-2 py-2 text-xs " +
+                    (variant.is_default
+                      ? "border-primary text-primary"
+                      : "border-border text-muted-foreground")
+                  }
+                >
+                  <Star
+                    className={"size-4 " + (variant.is_default ? "fill-current" : "")}
+                  />
+                  Image par défaut
+                </button>
+                <button
+                  type="button"
                   aria-label="Supprimer la couleur"
                   onClick={() =>
                     setDraft({
@@ -488,6 +512,7 @@ export function ProductsTab() {
                       color_hex: "#000000",
                       image_url: null,
                       stock_quantity: "0",
+                      is_default: draft.variants.length === 0,
                     },
                   ],
                 })
