@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Loader2, Plus, Trash2, X } from "lucide-react";
+import { Loader2, Plus, Star, Trash2, X } from "lucide-react";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
 
