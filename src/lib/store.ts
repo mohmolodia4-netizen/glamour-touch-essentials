@@ -32,7 +32,27 @@ export type ProductVariant = {
   image_url: string | null;
   stock_quantity: number;
   sort_order: number;
+  is_default: boolean;
 };
+
+export type VariantCover = {
+  product_id: string;
+  image_url: string | null;
+  is_default: boolean;
+  sort_order: number;
+};
+
+/** Default (featured) image for a product, based on its color variants. */
+export function pickVariantCover(
+  covers: VariantCover[],
+  productId: string,
+): string | null {
+  const rows = covers
+    .filter((cover) => cover.product_id === productId && cover.image_url)
+    .sort((a, b) => a.sort_order - b.sort_order);
+  if (rows.length === 0) return null;
+  return (rows.find((row) => row.is_default) ?? rows[0])?.image_url ?? null;
+}
 
 export type ShippingRate = {
   wilaya_code: number;
