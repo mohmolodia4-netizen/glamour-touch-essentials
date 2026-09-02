@@ -102,6 +102,7 @@ export function ProductsTab() {
         color_hex: variant.color_hex ?? "#000000",
         image_url: variant.image_url ?? null,
         stock_quantity: String(variant.stock_quantity ?? 0),
+        is_default: Boolean(variant.is_default),
       })),
     });
   }
@@ -170,6 +171,9 @@ export function ProductsTab() {
       image_url: variant.image_url,
       stock_quantity: Number(variant.stock_quantity) || 0,
       sort_order: index,
+      is_default: rows.some((row) => row.is_default)
+        ? variant.is_default
+        : index === 0,
     }));
     const { error } = await (supabase as any)
       .from("product_variants")
