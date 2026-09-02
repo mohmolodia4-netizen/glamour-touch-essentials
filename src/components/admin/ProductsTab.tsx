@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Loader2, Plus, Star, Trash2, X } from "lucide-react";
+import { ImageIcon, Loader2, Plus, Star, Trash2, X } from "lucide-react";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
 
@@ -16,7 +16,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
-import { categoriesQuery, formatDzd, type Product } from "@/lib/store";
+import {
+  categoriesQuery,
+  formatDzd,
+  pickVariantCover,
+  variantCoversQuery,
+  type Product,
+} from "@/lib/store";
 import { uploadImage } from "@/lib/upload";
 
 type VariantDraft = {
@@ -64,6 +70,7 @@ export function ProductsTab() {
   const fileInput = useRef<HTMLInputElement>(null);
 
   const { data: categories = [] } = useQuery(categoriesQuery());
+  const { data: covers = [] } = useQuery(variantCoversQuery());
   const { data: products = [], isLoading } = useQuery({
     queryKey: ["admin", "products"],
     queryFn: async () => {
@@ -542,14 +549,25 @@ export function ProductsTab() {
               className="flex items-center gap-4 rounded-sm border border-border bg-card p-3"
             >
               <div className="size-14 shrink-0 overflow-hidden rounded-sm bg-secondary">
-                {product.image_url ? (
-                  <img
-                    src={product.image_url}
-                    alt=""
-                    loading="lazy"
-                    className="size-full object-cover"
-                  />
-                ) : null}
+                {(() => {
+                  const cover =
+                    pickVariantCover(covers, product.id) ??
+                    product.image_url ??
+                    product.image_urls?.[0] ??
+                    null;
+                  return cover ? (
+                    <img
+                      src={cover}
+                      alt=""
+                      loading="lazy"
+                      className="size-full object-cover"
+                    />
+                  ) : (
+                    <div className="flex size-full items-center justify-center text-muted-foreground/50">
+                      <ImageIcon className="size-5" aria-hidden="true" />
+                    </div>
+                  );
+                })()}
               </div>
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-medium">{product.name}</p>
