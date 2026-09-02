@@ -231,6 +231,7 @@ export function ProductsTab() {
     void queryClient.invalidateQueries({ queryKey: ["admin", "products"] });
     void queryClient.invalidateQueries({ queryKey: ["products"] });
     void queryClient.invalidateQueries({ queryKey: ["product_variants"] });
+    void queryClient.invalidateQueries({ queryKey: ["variant_covers"] });
   }
 
 
@@ -359,7 +360,7 @@ export function ProductsTab() {
           </div>
 
           <div className="grid gap-2">
-            <Label>Images</Label>
+            <Label>Images (optionnel)</Label>
             <input
               ref={fileInput}
               type="file"
