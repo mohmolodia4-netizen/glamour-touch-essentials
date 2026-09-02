@@ -25,6 +25,7 @@ type VariantDraft = {
   color_hex: string;
   image_url: string | null;
   stock_quantity: string;
+  is_default: boolean;
 };
 
 type Draft = {
