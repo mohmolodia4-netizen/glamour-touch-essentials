@@ -170,22 +170,41 @@ export function ProductsTab() {
     if (deleteError) throw new Error(deleteError.message);
 
     if (rows.length === 0) return;
-    const payload = rows.map((variant, index) => ({
-      ...(variant.id ? { id: variant.id } : {}),
+    const hasDefault = rows.some((row) => row.is_default);
+    const base = (variant: VariantDraft, index: number) => ({
       product_id: productId,
       color_name: variant.color_name.trim(),
       color_hex: variant.color_hex || "#000000",
       image_url: variant.image_url,
       stock_quantity: Number(variant.stock_quantity) || 0,
       sort_order: index,
-      is_default: rows.some((row) => row.is_default)
-        ? variant.is_default
-        : index === 0,
-    }));
-    const { error } = await (supabase as any)
-      .from("product_variants")
-      .upsert(payload);
-    if (error) throw new Error(error.message);
+      is_default: hasDefault ? variant.is_default : index === 0,
+    });
+    const existing = rows
+      .map((variant, index) => ({ variant, index }))
+      .filter(({ variant }) => variant.id);
+    const fresh = rows
+      .map((variant, index) => ({ variant, index }))
+      .filter(({ variant }) => !variant.id);
+
+    if (existing.length > 0) {
+      const { error } = await (supabase as any)
+        .from("product_variants")
+        .upsert(
+          existing.map(({ variant, index }) => ({
+            id: variant.id,
+            ...base(variant, index),
+          })),
+        );
+      if (error) throw new Error(error.message);
+    }
+    if (fresh.length > 0) {
+      // Insert without id so the database default generates it.
+      const { error } = await (supabase as any)
+        .from("product_variants")
+        .insert(fresh.map(({ variant, index }) => base(variant, index)));
+      if (error) throw new Error(error.message);
+    }
   }
 
   async function save() {
