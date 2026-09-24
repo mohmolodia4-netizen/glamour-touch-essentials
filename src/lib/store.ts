@@ -235,6 +235,47 @@ export async function placeOrder(input: {
   return orderId;
 }
 
+export type CartOrderLine = {
+  product_id: string;
+  color_name: string | null;
+  quantity: number;
+};
+
+export async function placeCartOrder(input: {
+  items: CartOrderLine[];
+  fullName: string;
+  phone: string;
+  wilayaCode: number;
+  commune: string;
+  deliveryType: "domicile" | "stopdesk";
+  adresse: string;
+  deskCode?: string;
+}) {
+  const { data, error } = await rpc("place_cart_order", {
+    _items: input.items,
+    _full_name: input.fullName,
+    _phone: input.phone,
+    _wilaya_code: input.wilayaCode,
+    _commune: input.commune,
+    _delivery_type: input.deliveryType,
+    _adresse: input.adresse,
+    _desk_code: input.deskCode ?? "",
+  });
+  if (error) throw new Error(error.message);
+  const orderId = data as string;
+
+  for (const mode of ["telegram", "sync"]) {
+    try {
+      await (supabase as any).functions.invoke("send-order-notifications", {
+        body: { order_id: orderId, mode },
+      });
+    } catch {
+      /* notification failures must never block the customer */
+    }
+  }
+  return orderId;
+}
+
 export function formatDzd(value: number) {
   return `${new Intl.NumberFormat("fr-DZ").format(Math.round(value))} DA`;
 }

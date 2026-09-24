@@ -8,6 +8,13 @@
       "when": 1788312874647,
       "tag": "0000_variant_default_image",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1790274781560,
+      "tag": "0001_cart_orders",
+      "breakpoints": true
     }
   ]
 }
