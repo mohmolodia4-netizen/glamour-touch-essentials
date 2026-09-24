@@ -6,6 +6,7 @@ import { useState } from "react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { categoriesQuery, publicSettingsQuery } from "@/lib/store";
+import { CartDrawer } from "@/components/cart/CartDrawer";
 
 const navLinks = [
   { to: "/", label: "Accueil" },
@@ -79,19 +80,19 @@ export function SiteHeader() {
           </span>
         </Link>
 
-        <div className="hidden w-40 justify-end md:flex">
+        <div className="flex items-center justify-end gap-4 md:w-40">
           {settings?.whatsapp ? (
             <a
               href={`https://wa.me/${settings.whatsapp.replace(/\D/g, "")}`}
               target="_blank"
               rel="noreferrer"
-              className="text-xs uppercase tracking-[0.22em] text-muted-foreground transition-colors hover:text-primary"
+              className="hidden text-xs uppercase tracking-[0.22em] text-muted-foreground transition-colors hover:text-primary md:inline"
             >
               Contact
             </a>
           ) : null}
+          <CartDrawer />
         </div>
-        <div className="w-10 md:hidden" />
       </div>
     </header>
   );
