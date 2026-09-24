@@ -125,21 +125,30 @@ export type Database = {
           created_at: string
           id: string
           order_id: string
+          product_id: string | null
+          product_name: string | null
           quantity: number
+          unit_price: number | null
         }
         Insert: {
           color_name?: string | null
           created_at?: string
           id?: string
           order_id: string
+          product_id?: string | null
+          product_name?: string | null
           quantity?: number
+          unit_price?: number | null
         }
         Update: {
           color_name?: string | null
           created_at?: string
           id?: string
           order_id?: string
+          product_id?: string | null
+          product_name?: string | null
           quantity?: number
+          unit_price?: number | null
         }
         Relationships: [
           {
@@ -147,6 +156,13 @@ export type Database = {
             columns: ["order_id"]
             isOneToOne: false
             referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
             referencedColumns: ["id"]
           },
         ]
@@ -425,6 +441,19 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      place_cart_order: {
+        Args: {
+          _adresse: string
+          _commune: string
+          _delivery_type: string
+          _desk_code: string
+          _full_name: string
+          _items: Json
+          _phone: string
+          _wilaya_code: number
+        }
+        Returns: string
       }
       place_order:
         | {
