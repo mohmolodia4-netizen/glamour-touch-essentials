@@ -91,7 +91,7 @@ function CheckoutPage() {
     setDeskAddress("");
   }, [wilayaCode, deliveryType]);
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent): Promise<unknown> {
     e.preventDefault();
     if (items.length === 0) return toast.error("Votre panier est vide.");
     if (!code) return toast.error("Veuillez choisir une wilaya.");
