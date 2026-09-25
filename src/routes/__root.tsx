@@ -13,6 +13,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Toaster } from "@/components/ui/sonner";
 import { PixelLoader } from "@/components/site/PixelLoader";
+import { CartProvider } from "@/lib/cart";
 
 
 function NotFoundComponent() {
@@ -132,7 +133,9 @@ function RootComponent() {
       <PixelLoader />
       <Toaster position="top-center" richColors />
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <Outlet />
+      <CartProvider>
+        <Outlet />
+      </CartProvider>
     </QueryClientProvider>
 
   );
