@@ -28,6 +28,16 @@ type CartContextValue = {
 };
 
 const STORAGE_KEY = "glamour-touch-cart";
+const noop = () => {};
+const EMPTY_CART: CartContextValue = {
+  items: [],
+  count: 0,
+  subtotal: 0,
+  addItem: noop,
+  updateQuantity: noop,
+  removeItem: noop,
+  clearCart: noop,
+};
 const CartContext = createContext<CartContextValue | null>(null);
 
 const same = (item: CartItem, productId: string, colorName: string | null) =>
@@ -104,6 +114,6 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
 export function useCart() {
   const ctx = useContext(CartContext);
-  if (!ctx) throw new Error("useCart must be used inside CartProvider");
-  return ctx;
+  // Pages rendered outside the provider (error/404 screens) get an empty cart.
+  return ctx ?? EMPTY_CART;
 }
