@@ -122,6 +122,7 @@ function CheckoutPage() {
     } finally {
       setSubmitting(false);
     }
+    return undefined;
   }
 
   return (
