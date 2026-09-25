@@ -15,11 +15,17 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { formatDzd } from "@/lib/store";
 
-type OrderItem = { color_name: string | null; quantity: number };
+type OrderItem = {
+  color_name: string | null;
+  quantity: number;
+  product_name: string | null;
+  unit_price: number | null;
+};
 
 type Order = {
   id: string;
   created_at: string;
+  product_id: string | null;
   product_name: string;
   quantity: number;
   full_name: string;
@@ -59,7 +65,7 @@ export function OrdersTab() {
     queryFn: async () => {
       const { data, error } = await (supabase as any)
         .from("orders")
-        .select("*, order_items(color_name, quantity)")
+        .select("*, order_items(color_name, quantity, product_name, unit_price)")
         .order("created_at", { ascending: false });
       if (error) throw new Error(error.message);
       return (data ?? []) as Order[];
@@ -166,7 +172,20 @@ export function OrdersTab() {
                     {order.product_name} × {order.quantity} ·{" "}
                     {order.delivery_type === "domicile" ? "À domicile" : "Stopdesk"}
                   </p>
-                  {itemsLabel(order) ? (
+                  {!order.product_id && (order.order_items ?? []).length > 0 ? (
+                    <ul className="my-1 list-disc pl-5 text-muted-foreground">
+                      {(order.order_items ?? []).map((item, i) => (
+                        <li key={i}>
+                          {item.quantity}× {item.product_name ?? "Produit"}
+                          {item.color_name ? ` — ${item.color_name}` : ""}
+                          {item.unit_price != null
+                            ? ` (${formatDzd(Number(item.unit_price))})`
+                            : ""}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : null}
+                  {order.product_id && itemsLabel(order) ? (
                     <p className="text-muted-foreground">
                       Couleurs : {itemsLabel(order)}
                     </p>

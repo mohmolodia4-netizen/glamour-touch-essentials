@@ -34,7 +34,7 @@ Deno.serve(async (req) => {
     const [{ data: order }, { data: settings }] = await Promise.all([
       supabase
         .from("orders")
-        .select("*, order_items(color_name, quantity)")
+        .select("*, order_items(color_name, quantity, product_name, unit_price)")
         .eq("id", order_id)
         .maybeSingle(),
       supabase
@@ -46,8 +46,19 @@ Deno.serve(async (req) => {
 
     if (!order) return json({ error: "Commande introuvable" }, 404);
 
-    const items: Array<{ color_name: string | null; quantity: number }> =
-      order.order_items ?? [];
+    const items: Array<{
+      color_name: string | null;
+      quantity: number;
+      product_name?: string | null;
+      unit_price?: number | null;
+    }> = order.order_items ?? [];
+    const isCart = !order.product_id && items.some((item) => item.product_name);
+    const cartSummary = items
+      .map(
+        (item) =>
+          `${item.quantity}x ${item.product_name ?? "Produit"}${item.color_name ? ` (${item.color_name})` : ""}`,
+      )
+      .join(", ");
     const colorSummary = items
       .filter((item) => item.color_name)
       .map((item) => `${item.quantity}x ${item.color_name}`)
@@ -60,9 +71,11 @@ Deno.serve(async (req) => {
     const buildPayload = (status: string) => ({
       nom_complet: order.full_name,
       telephone: order.phone,
-      article: colorSummary
-        ? `${order.product_name} (${colorSummary})`
-        : order.product_name,
+      article: isCart
+        ? cartSummary
+        : colorSummary
+          ? `${order.product_name} (${colorSummary})`
+          : order.product_name,
       quantite: order.quantity || 1,
       adresse: isStopdesk ? stopdeskCode : order.adresse || "",
       wilaya: order.wilaya_name || order.wilaya_id,
@@ -148,13 +161,20 @@ Deno.serve(async (req) => {
     const lines = [
       `🛍️ <b>Nouvelle commande — ${settings?.site_name ?? "Glamour Touch"}</b>`,
       "",
-      `<b>Produit:</b> ${order.product_name} × ${order.quantity}`,
-      ...(items.length > 0
+      isCart
+        ? `<b>Panier:</b> ${order.quantity} article(s)`
+        : `<b>Produit:</b> ${order.product_name} × ${order.quantity}`,
+      ...(isCart
         ? items.map(
             (item) =>
-              `   • ${item.color_name ?? "Standard"} × ${item.quantity}`,
+              `   • ${item.product_name ?? "Produit"}${item.color_name ? ` — ${item.color_name}` : ""} × ${item.quantity}${item.unit_price != null ? ` (${item.unit_price} DA)` : ""}`,
           )
-        : []),
+        : items.length > 0
+          ? items.map(
+              (item) =>
+                `   • ${item.color_name ?? "Standard"} × ${item.quantity}`,
+            )
+          : []),
       `<b>Client:</b> ${order.full_name}`,
       `<b>Téléphone:</b> ${order.phone}`,
       `<b>Wilaya:</b> ${order.wilaya_name}`,
