@@ -91,16 +91,16 @@ function CheckoutPage() {
     setDeskAddress("");
   }, [wilayaCode, deliveryType]);
 
-  async function handleSubmit(e: React.FormEvent): Promise<unknown> {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (items.length === 0) return toast.error("Votre panier est vide.");
-    if (!code) return toast.error("Veuillez choisir une wilaya.");
-    if (fullName.trim().length < 3) return toast.error("Nom complet requis.");
-    if (phone.replace(/\D/g, "").length < 9) return toast.error("Numéro de téléphone invalide.");
-    if (!commune) return toast.error("Veuillez choisir une commune.");
+    if (items.length === 0) { toast.error("Votre panier est vide."); return; }
+    if (!code) { toast.error("Veuillez choisir une wilaya."); return; }
+    if (fullName.trim().length < 3) { toast.error("Nom complet requis."); return; }
+    if (phone.replace(/\D/g, "").length < 9) { toast.error("Numéro de téléphone invalide."); return; }
+    if (!commune) { toast.error("Veuillez choisir une commune."); return; }
     const address = deliveryType === "domicile" ? adresse : deskAddress;
     if (!address.trim())
-      return toast.error(deliveryType === "domicile" ? "Adresse de livraison requise." : "Veuillez choisir un point Stop Desk.");
+      { toast.error(deliveryType === "domicile" ? "Adresse de livraison requise." : "Veuillez choisir un point Stop Desk."); return; }
 
     setSubmitting(true);
     try {
@@ -122,7 +122,6 @@ function CheckoutPage() {
     } finally {
       setSubmitting(false);
     }
-    return undefined;
   }
 
   return (
