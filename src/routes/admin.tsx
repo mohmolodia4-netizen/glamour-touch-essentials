@@ -1,3 +1,4 @@
+import { useForceFrench } from "@/lib/i18n";
 import { createFileRoute } from "@tanstack/react-router";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
@@ -103,6 +104,7 @@ function LoginCard() {
 
 
 function AdminPage() {
+  useForceFrench();
   const { session, isAdmin, loading } = useAdminAuth();
 
   if (loading) {

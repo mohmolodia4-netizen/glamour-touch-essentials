@@ -1,3 +1,4 @@
+import { useI18n } from "@/lib/i18n";
 import { Check, ChevronsUpDown } from "lucide-react";
 import { useState } from "react";
 
@@ -35,6 +36,7 @@ export function Combobox({
   id?: string;
 }) {
   const [open, setOpen] = useState(false);
+  const { t } = useI18n();
   const selected = options.find((option) => option.value === value);
 
   return (
