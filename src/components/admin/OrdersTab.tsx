@@ -264,6 +264,8 @@ export function OrdersTab() {
                     {new Date(order.created_at).toLocaleString("fr-DZ")}
                   </p>
                 </div>
+                  </div>
+                </div>
                 <div className="text-right">
                   <p className="font-display text-xl text-primary">
                     {formatDzd(Number(order.total))}
