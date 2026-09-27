@@ -205,13 +205,30 @@ export function OrdersTab() {
         <p className="text-sm text-muted-foreground">Aucune commande.</p>
       ) : (
         <div className="space-y-3">
+          <label className="flex items-center gap-2 text-sm text-muted-foreground">
+            <input
+              type="checkbox"
+              className="size-4 accent-primary"
+              checked={visible.length > 0 && visible.every((o) => selected.has(o.id))}
+              onChange={toggleSelectAll}
+            />
+            Tout sélectionner ({visible.length})
+          </label>
           {visible.map((order) => (
             <div
               key={order.id}
               className="rounded-sm border border-border bg-card p-4 text-sm"
             >
               <div className="flex flex-wrap items-start justify-between gap-3">
-                <div>
+                <div className="flex items-start gap-3">
+                  <input
+                    type="checkbox"
+                    className="mt-1 size-4 accent-primary"
+                    checked={selected.has(order.id)}
+                    onChange={() => toggleSelected(order.id)}
+                    aria-label={`Sélectionner la commande de ${order.full_name}`}
+                  />
+                  <div>
                   <p className="font-medium text-foreground">
                     {order.full_name} — {order.phone}
                   </p>
