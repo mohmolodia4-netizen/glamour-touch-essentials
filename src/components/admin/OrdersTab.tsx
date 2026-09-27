@@ -59,6 +59,9 @@ export function OrdersTab() {
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [bulkStatus, setBulkStatus] = useState("confirmed");
+  const [bulkBusy, setBulkBusy] = useState(false);
 
   const { data: orders = [], isLoading } = useQuery({
     queryKey: ["admin", "orders"],
@@ -117,6 +120,50 @@ export function OrdersTab() {
     void queryClient.invalidateQueries({ queryKey: ["admin", "orders"] });
   }
 
+  function toggleSelected(id: string) {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
+  function toggleSelectAll() {
+    const visibleIds = visible.map((o) => o.id);
+    const allSelected = visibleIds.length > 0 && visibleIds.every((id) => selected.has(id));
+    setSelected(allSelected ? new Set() : new Set(visibleIds));
+  }
+
+  async function applyBulkStatus() {
+    if (selected.size === 0) return;
+    setBulkBusy(true);
+    const ids = Array.from(selected);
+    const { error } = await (supabase as any)
+      .from("orders")
+      .update({ status: bulkStatus })
+      .in("id", ids);
+    if (error) {
+      toast.error(error.message);
+      setBulkBusy(false);
+      return;
+    }
+    toast.success(`${ids.length} commande(s) passée(s) en « ${STATUS_LABELS[bulkStatus]} »`);
+
+    // Sync Google Sheet for each updated order (best effort, non-blocking)
+    void Promise.allSettled(
+      ids.map((id) =>
+        (supabase as any).functions.invoke("send-order-notifications", {
+          body: { order_id: id, mode: "sync" },
+        }),
+      ),
+    );
+
+    setSelected(new Set());
+    setBulkBusy(false);
+    void queryClient.invalidateQueries({ queryKey: ["admin", "orders"] });
+  }
+
   async function remove(id: string) {
     const { error } = await (supabase as any).from("orders").delete().eq("id", id);
     if (error) {
@@ -158,13 +205,30 @@ export function OrdersTab() {
         <p className="text-sm text-muted-foreground">Aucune commande.</p>
       ) : (
         <div className="space-y-3">
+          <label className="flex items-center gap-2 text-sm text-muted-foreground">
+            <input
+              type="checkbox"
+              className="size-4 accent-primary"
+              checked={visible.length > 0 && visible.every((o) => selected.has(o.id))}
+              onChange={toggleSelectAll}
+            />
+            Tout sélectionner ({visible.length})
+          </label>
           {visible.map((order) => (
             <div
               key={order.id}
               className="rounded-sm border border-border bg-card p-4 text-sm"
             >
               <div className="flex flex-wrap items-start justify-between gap-3">
-                <div>
+                <div className="flex items-start gap-3">
+                  <input
+                    type="checkbox"
+                    className="mt-1 size-4 accent-primary"
+                    checked={selected.has(order.id)}
+                    onChange={() => toggleSelected(order.id)}
+                    aria-label={`Sélectionner la commande de ${order.full_name}`}
+                  />
+                  <div>
                   <p className="font-medium text-foreground">
                     {order.full_name} — {order.phone}
                   </p>
@@ -199,6 +263,7 @@ export function OrdersTab() {
                     Livraison {formatDzd(Number(order.shipping_fee))} ·{" "}
                     {new Date(order.created_at).toLocaleString("fr-DZ")}
                   </p>
+                  </div>
                 </div>
                 <div className="text-right">
                   <p className="font-display text-xl text-primary">
@@ -256,6 +321,44 @@ export function OrdersTab() {
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {selected.size > 0 && (
+        <div className="sticky bottom-4 z-20 flex flex-wrap items-center gap-2 rounded-sm border border-border bg-card p-3 shadow-lg">
+          <span className="text-sm font-medium text-foreground">
+            {selected.size} sélectionnée(s)
+          </span>
+          <Select value={bulkStatus} onValueChange={setBulkStatus}>
+            <SelectTrigger className="h-9 w-44 rounded-sm">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {STATUSES.map((status) => (
+                <SelectItem key={status} value={status}>
+                  {STATUS_LABELS[status]}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Button
+            type="button"
+            size="sm"
+            className="rounded-sm"
+            disabled={bulkBusy}
+            onClick={applyBulkStatus}
+          >
+            {bulkBusy ? "Application..." : "Appliquer"}
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="rounded-sm"
+            onClick={() => setSelected(new Set())}
+          >
+            Tout désélectionner
+          </Button>
         </div>
       )}
     </div>
