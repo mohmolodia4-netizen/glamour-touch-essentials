@@ -12,6 +12,7 @@ import {
 export function ProductCard({ product }: { product: Product }) {
   const discounted = product.old_price && product.old_price > product.price;
   const { data: covers = [] } = useQuery(variantCoversQuery());
+  const { t } = useI18n();
 
   const cover =
     pickVariantCover(covers, product.id) ??
@@ -41,13 +42,13 @@ export function ProductCard({ product }: { product: Product }) {
           </div>
         )}
         {discounted ? (
-          <span className="absolute left-3 top-3 rounded-sm bg-primary px-2 py-1 text-[10px] uppercase tracking-[0.18em] text-primary-foreground">
-            Promo
+          <span className="absolute start-3 top-3 rounded-sm bg-primary px-2 py-1 text-[10px] uppercase tracking-[0.18em] text-primary-foreground">
+            {t("card.promo")}
           </span>
         ) : null}
         {product.stock_quantity <= 0 ? (
-          <span className="absolute right-3 top-3 rounded-sm bg-card px-2 py-1 text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
-            Épuisé
+          <span className="absolute end-3 top-3 rounded-sm bg-card px-2 py-1 text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+            {t("card.soldOut")}
           </span>
         ) : null}
       </div>

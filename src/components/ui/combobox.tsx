@@ -47,12 +47,12 @@ export function Combobox({
           role="combobox"
           aria-expanded={open}
           disabled={disabled}
-          className="h-12 w-full justify-between rounded-sm border-border bg-card px-4 text-left font-normal"
+          className="h-12 w-full justify-between rounded-sm border-border bg-card px-4 text-start font-normal"
         >
           <span className={cn("truncate", !selected && "text-muted-foreground")}>
             {selected ? selected.label : placeholder}
           </span>
-          <ChevronsUpDown className="ml-2 size-4 shrink-0 opacity-50" />
+          <ChevronsUpDown className="ms-2 size-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent
@@ -79,7 +79,7 @@ export function Combobox({
                 >
                   <Check
                     className={cn(
-                      "mr-2 size-4",
+                      "me-2 size-4",
                       value === option.value ? "opacity-100" : "opacity-0",
                     )}
                   />

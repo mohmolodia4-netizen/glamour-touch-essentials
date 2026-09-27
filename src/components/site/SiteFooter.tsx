@@ -5,6 +5,7 @@ import { publicSettingsQuery } from "@/lib/store";
 
 export function SiteFooter() {
   const { data: settings } = useQuery(publicSettingsQuery());
+  const { t } = useI18n();
 
   return (
     <footer className="mt-24 border-t border-border bg-secondary/60">
@@ -14,20 +15,19 @@ export function SiteFooter() {
             {settings?.site_name ?? "GLAMOUR TOUCH"}
           </p>
           <p className="mt-3 max-w-xs text-sm leading-relaxed text-muted-foreground">
-            Sacs à main, accessoires, montres et bijoux sélectionnés pour la femme
-            élégante. Livraison partout en Algérie, paiement à la livraison.
+            {t("footer.about")}
           </p>
         </div>
         <div>
-          <p className="text-xs uppercase tracking-[0.22em] text-foreground">Service</p>
+          <p className="text-xs uppercase tracking-[0.22em] text-foreground">{t("footer.service")}</p>
           <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
-            <li>Paiement à la livraison</li>
-            <li>Livraison 58 wilayas</li>
-            <li>Retrait en bureau (Stopdesk)</li>
+            <li>{t("footer.cod")}</li>
+            <li>{t("footer.shipping")}</li>
+            <li>{t("footer.stopdesk")}</li>
           </ul>
         </div>
         <div>
-          <p className="text-xs uppercase tracking-[0.22em] text-foreground">Contact</p>
+          <p className="text-xs uppercase tracking-[0.22em] text-foreground">{t("footer.contact")}</p>
           <div className="mt-4 flex flex-col gap-3 text-sm text-muted-foreground">
             {settings?.phone ? (
               <a

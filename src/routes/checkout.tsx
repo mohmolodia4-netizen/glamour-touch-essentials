@@ -21,6 +21,7 @@ import {
   shippingRatesQuery,
   stopdesksQuery,
 } from "@/lib/store";
+import { useI18n } from "@/lib/i18n";
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({
@@ -47,6 +48,7 @@ function CheckoutPage() {
   const [deskAddress, setDeskAddress] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState<string | null>(null);
+  const { t } = useI18n();
 
   const code = wilayaCode ? Number(wilayaCode) : null;
   const { data: rates = [] } = useQuery(shippingRatesQuery());
@@ -93,14 +95,14 @@ function CheckoutPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (items.length === 0) { toast.error("Votre panier est vide."); return; }
-    if (!code) { toast.error("Veuillez choisir une wilaya."); return; }
-    if (fullName.trim().length < 3) { toast.error("Nom complet requis."); return; }
-    if (phone.replace(/\D/g, "").length < 9) { toast.error("Numéro de téléphone invalide."); return; }
-    if (!commune) { toast.error("Veuillez choisir une commune."); return; }
+    if (items.length === 0) { toast.error(t("err.cartEmpty")); return; }
+    if (!code) { toast.error(t("err.wilaya")); return; }
+    if (fullName.trim().length < 3) { toast.error(t("err.name")); return; }
+    if (phone.replace(/\D/g, "").length < 9) { toast.error(t("err.phone")); return; }
+    if (!commune) { toast.error(t("err.commune")); return; }
     const address = deliveryType === "domicile" ? adresse : deskAddress;
     if (!address.trim())
-      { toast.error(deliveryType === "domicile" ? "Adresse de livraison requise." : "Veuillez choisir un point Stop Desk."); return; }
+      { toast.error(deliveryType === "domicile" ? t("err.address") : t("err.desk")); return; }
 
     setSubmitting(true);
     try {
@@ -116,9 +118,9 @@ function CheckoutPage() {
       });
       clearCart();
       setDone(id);
-      toast.success("Commande confirmée ! Nous vous appellerons bientôt.");
+      toast.success(t("ok.order"));
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Une erreur est survenue.");
+      toast.error(error instanceof Error ? error.message : t("err.generic"));
     } finally {
       setSubmitting(false);
     }
@@ -131,51 +133,51 @@ function CheckoutPage() {
         {done ? (
           <div className="mx-auto max-w-lg rounded-sm border border-primary/30 bg-accent/50 p-8 text-center">
             <ShieldCheck className="mx-auto size-8 text-primary" />
-            <h1 className="mt-4 font-display text-2xl">Merci, votre commande est confirmée</h1>
+            <h1 className="mt-4 font-display text-2xl">{t("done.title")}</h1>
             <p className="mt-2 text-sm text-muted-foreground">
-              Référence : {done.slice(0, 8).toUpperCase()} — notre équipe vous contactera.
+              {t("done.ref", { ref: done.slice(0, 8).toUpperCase() })}
             </p>
             <Button asChild variant="outline" className="mt-6 rounded-sm">
-              <Link to="/boutique">Continuer mes achats</Link>
+              <Link to="/boutique">{t("done.continue")}</Link>
             </Button>
           </div>
         ) : items.length === 0 ? (
           <div className="py-24 text-center">
-            <h1 className="font-display text-3xl">Votre panier est vide</h1>
+            <h1 className="font-display text-3xl">{t("cart.emptyTitle")}</h1>
             <Button asChild variant="outline" className="mt-6 rounded-sm">
-              <Link to="/boutique">Découvrir la boutique</Link>
+              <Link to="/boutique">{t("cart.discover")}</Link>
             </Button>
           </div>
         ) : (
           <div className="grid w-full gap-10 lg:grid-cols-2">
             <section className="min-w-0">
-              <h1 className="font-display text-3xl">Mon panier</h1>
+              <h1 className="font-display text-3xl">{t("cart.title")}</h1>
               <CartLines />
             </section>
             <form onSubmit={handleSubmit} className="w-full min-w-0 rounded-sm border border-border bg-card p-6 shadow-soft sm:p-8">
               <div className="flex items-center gap-2 border-b border-border pb-5">
                 <Truck className="size-4 text-primary" />
-                <h2 className="font-display text-2xl">Paiement à la livraison</h2>
+                <h2 className="font-display text-2xl">{t("form.codTitle")}</h2>
               </div>
               <div className="mt-6 grid min-w-0 gap-5">
                 <div className="grid gap-2">
-                  <Label htmlFor="fullName">Nom complet *</Label>
+                  <Label htmlFor="fullName">{t("form.fullName")}</Label>
                   <Input id="fullName" value={fullName} onChange={(e) => setFullName(e.target.value)} maxLength={120} className="h-12 rounded-sm" />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="phone">Numéro de téléphone *</Label>
+                  <Label htmlFor="phone">{t("form.phone")}</Label>
                   <Input id="phone" type="tel" inputMode="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="05 00 00 00 00" maxLength={20} className="h-12 rounded-sm" />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="wilaya">Wilaya *</Label>
-                  <Combobox id="wilaya" options={wilayaOptions} value={wilayaCode} onChange={setWilayaCode} placeholder="Choisir votre wilaya" searchPlaceholder="Rechercher une wilaya..." />
+                  <Label htmlFor="wilaya">{t("form.wilaya")}</Label>
+                  <Combobox id="wilaya" options={wilayaOptions} value={wilayaCode} onChange={setWilayaCode} placeholder={t("form.wilayaPh")} searchPlaceholder={t("form.wilayaSearch")} />
                 </div>
                 <div className="grid gap-2">
-                  <Label>Mode de livraison *</Label>
+                  <Label>{t("form.delivery")}</Label>
                   <div className="grid grid-cols-1 gap-2 rounded-sm bg-secondary p-1 sm:grid-cols-2">
                     {([
-                      { key: "domicile", label: "التوصيل للمنزل (À Domicile)" },
-                      { key: "stopdesk", label: "الاستلام من المكتب (Stopdesk)" },
+                      { key: "domicile", label: "form.domicile" },
+                      { key: "stopdesk", label: "form.stopdesk" },
                     ] as const).map((o) => (
                       <button
                         key={o.key}
@@ -186,13 +188,13 @@ function CheckoutPage() {
                           deliveryType === o.key ? "bg-card text-foreground shadow-soft" : "text-muted-foreground",
                         )}
                       >
-                        {o.label}
+                        {t(o.label)}
                       </button>
                     ))}
                   </div>
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="commune">Commune *</Label>
+                  <Label htmlFor="commune">{t("form.commune")}</Label>
                   <Combobox
                     id="commune"
                     options={communeOptions}
@@ -201,39 +203,39 @@ function CheckoutPage() {
                       setCommune(v);
                       setDeskAddress("");
                     }}
-                    placeholder={code ? "Choisir votre commune" : "Choisissez d'abord une wilaya"}
-                    searchPlaceholder="Rechercher une commune..."
+                    placeholder={code ? t("form.communePh") : t("form.wilayaFirst")}
+                    searchPlaceholder={t("form.communeSearch")}
                     disabled={!code || communeOptions.length === 0}
                   />
                 </div>
                 {deliveryType === "domicile" ? (
                   <div className="grid gap-2">
-                    <Label htmlFor="adresse">Adresse de livraison *</Label>
+                    <Label htmlFor="adresse">{t("form.address")}</Label>
                     <Textarea id="adresse" value={adresse} onChange={(e) => setAdresse(e.target.value)} maxLength={400} rows={3} className="rounded-sm" />
                   </div>
                 ) : (
                   <div className="grid gap-2">
-                    <Label htmlFor="desk">Point Stop Desk *</Label>
+                    <Label htmlFor="desk">{t("form.desk")}</Label>
                     <Combobox
                       id="desk"
                       options={deskOptions}
                       value={deskAddress}
                       onChange={setDeskAddress}
-                      placeholder={commune ? "Choisir le bureau" : "Choisissez d'abord une commune"}
-                      searchPlaceholder="Rechercher un bureau..."
+                      placeholder={commune ? t("form.deskPh") : t("form.communeFirst")}
+                      searchPlaceholder={t("form.deskSearch")}
                       disabled={!commune || deskOptions.length === 0}
                     />
                   </div>
                 )}
               </div>
               <div className="mt-7 space-y-2 border-t border-border pt-5 text-sm">
-                <div className="flex justify-between text-muted-foreground"><span>Sous-total</span><span>{formatDzd(subtotal)}</span></div>
-                <div className="flex justify-between text-muted-foreground"><span>Livraison</span><span>{rate ? formatDzd(shippingFee) : "—"}</span></div>
-                <div className="flex justify-between pt-2 font-display text-2xl"><span>Total</span><span>{formatDzd(total)}</span></div>
+                <div className="flex justify-between text-muted-foreground"><span>{t("form.subtotal")}</span><span>{formatDzd(subtotal)}</span></div>
+                <div className="flex justify-between text-muted-foreground"><span>{t("form.shipping")}</span><span>{rate ? formatDzd(shippingFee) : "—"}</span></div>
+                <div className="flex justify-between pt-2 font-display text-2xl"><span>{t("form.total")}</span><span>{formatDzd(total)}</span></div>
               </div>
               <Button type="submit" disabled={submitting} className="mt-6 h-14 w-full rounded-sm text-sm uppercase tracking-[0.2em]">
-                {submitting ? <Loader2 className="mr-2 size-4 animate-spin" /> : null}
-                Confirmer la Commande — تأكيد الطلب
+                {submitting ? <Loader2 className="me-2 size-4 animate-spin" /> : null}
+                {t("form.submit")}
               </Button>
             </form>
           </div>

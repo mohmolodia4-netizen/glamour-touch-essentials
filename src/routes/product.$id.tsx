@@ -35,6 +35,7 @@ function ProductPage() {
   const { data: product, isLoading } = useQuery(productQuery(id));
   const { data: variants = [] } = useQuery(productVariantsQuery(id));
   const [index, setIndex] = useState(0);
+  const { t } = useI18n();
 
   const orderedVariants = [...variants].sort((a, b) => a.sort_order - b.sort_order);
   const defaultVariant =
@@ -73,12 +74,12 @@ function ProductPage() {
       <SiteHeader />
       <main className="mx-auto max-w-6xl px-5 py-10">
         {isLoading ? (
-          <p className="py-24 text-center text-sm text-muted-foreground">Chargement...</p>
+          <p className="py-24 text-center text-sm text-muted-foreground">{t("common.loading")}</p>
         ) : !product ? (
           <div className="py-24 text-center">
-            <h1 className="font-display text-3xl">Produit introuvable</h1>
+            <h1 className="font-display text-3xl">{t("product.notFound")}</h1>
             <Button asChild variant="outline" className="mt-6 rounded-sm">
-              <Link to="/boutique">Retour à la boutique</Link>
+              <Link to="/boutique">{t("product.back")}</Link>
             </Button>
           </div>
         ) : (
@@ -101,25 +102,25 @@ function ProductPage() {
                   <>
                     <button
                       type="button"
-                      aria-label="Image précédente"
+                      aria-label={t("product.prev")}
                       onClick={() =>
                         setIndex((current) =>
                           current === 0 ? images.length - 1 : current - 1,
                         )
                       }
-                      className="absolute left-3 top-1/2 -translate-y-1/2 rounded-full bg-card/85 p-2 text-foreground"
+                      className="absolute start-3 top-1/2 -translate-y-1/2 rounded-full bg-card/85 p-2 text-foreground"
                     >
-                      <ChevronLeft className="size-4" />
+                      <ChevronLeft className="size-4 rtl:rotate-180" />
                     </button>
                     <button
                       type="button"
-                      aria-label="Image suivante"
+                      aria-label={t("product.next")}
                       onClick={() =>
                         setIndex((current) => (current + 1) % images.length)
                       }
-                      className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-card/85 p-2 text-foreground"
+                      className="absolute end-3 top-1/2 -translate-y-1/2 rounded-full bg-card/85 p-2 text-foreground"
                     >
-                      <ChevronRight className="size-4" />
+                      <ChevronRight className="size-4 rtl:rotate-180" />
                     </button>
                   </>
                 ) : null}
@@ -150,7 +151,7 @@ function ProductPage() {
               {variants.length > 0 ? (
                 <div className="mt-5">
                   <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
-                    Couleurs disponibles
+                    {t("product.colors")}
                   </p>
                   <div className="mt-3 flex flex-wrap items-center gap-3">
                     {variants.map((variant) => {
@@ -162,7 +163,7 @@ function ProductPage() {
                         <button
                           key={variant.id}
                           type="button"
-                          title={`${variant.color_name}${variant.stock_quantity <= 0 ? " — épuisé" : ""}`}
+                          title={`${variant.color_name}${variant.stock_quantity <= 0 ? t("product.soldOutSuffix") : ""}`}
                           aria-label={variant.color_name}
                           onClick={() => {
                             if (position >= 0) setIndex(position);
@@ -201,8 +202,8 @@ function ProductPage() {
               ) : null}
               <p className="mt-4 text-xs uppercase tracking-[0.18em] text-muted-foreground">
                 {product.stock_quantity > 0
-                  ? `En stock — ${product.stock_quantity} pièce(s)`
-                  : "Rupture de stock"}
+                  ? t("product.inStock", { n: product.stock_quantity })
+                  : t("product.outOfStock")}
               </p>
 
               <div className="mt-8">

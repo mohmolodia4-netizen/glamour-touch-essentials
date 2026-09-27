@@ -37,6 +37,7 @@ function Boutique() {
   const { categorie } = Route.useSearch();
   const { data: products = [], isLoading } = useQuery(productsQuery());
   const { data: categories = [] } = useQuery(categoriesQuery());
+  const { t } = useI18n();
 
   const active = categories.find((category) => category.slug === categorie) ?? null;
   const visible = active
@@ -48,9 +49,9 @@ function Boutique() {
       <SiteHeader />
       <main className="mx-auto max-w-6xl px-5 py-14">
         <header className="text-center">
-          <p className="text-[10px] uppercase tracking-luxe text-primary">Collection</p>
+          <p className="text-[10px] uppercase tracking-luxe text-primary">{t("shop.overline")}</p>
           <h1 className="mt-3 font-display text-4xl text-foreground">
-            {active ? active.name : "La Boutique"}
+            {active ? active.name : t("shop.title")}
           </h1>
         </header>
 
@@ -62,7 +63,7 @@ function Boutique() {
               !active ? "bg-primary text-primary-foreground" : "text-muted-foreground",
             )}
           >
-            Tout
+            {t("shop.all")}
           </Link>
           {categories.map((category) => (
             <Link
@@ -83,10 +84,10 @@ function Boutique() {
 
         <div className="mt-12">
           {isLoading ? (
-            <p className="text-center text-sm text-muted-foreground">Chargement...</p>
+            <p className="text-center text-sm text-muted-foreground">{t("common.loading")}</p>
           ) : visible.length === 0 ? (
             <p className="text-center text-sm text-muted-foreground">
-              Aucun produit dans cette catégorie pour le moment.
+              {t("shop.empty")}
             </p>
           ) : (
             <div className="grid grid-cols-2 gap-6 lg:grid-cols-4">
