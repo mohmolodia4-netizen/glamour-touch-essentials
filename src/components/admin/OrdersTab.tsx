@@ -263,7 +263,6 @@ export function OrdersTab() {
                     Livraison {formatDzd(Number(order.shipping_fee))} ·{" "}
                     {new Date(order.created_at).toLocaleString("fr-DZ")}
                   </p>
-                </div>
                   </div>
                 </div>
                 <div className="text-right">
