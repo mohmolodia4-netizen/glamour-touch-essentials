@@ -143,6 +143,20 @@
   }
 }
 
+@layer base {
+  [dir="rtl"] body,
+  [dir="rtl"] h1,
+  [dir="rtl"] h2,
+  [dir="rtl"] h3,
+  [dir="rtl"] .font-display {
+    font-family: "Cairo", ui-sans-serif, system-ui, sans-serif;
+    letter-spacing: 0;
+  }
+  [dir="rtl"] [class*="tracking-"] {
+    letter-spacing: 0;
+  }
+}
+
 @utility tracking-luxe {
   letter-spacing: 0.28em;
 }

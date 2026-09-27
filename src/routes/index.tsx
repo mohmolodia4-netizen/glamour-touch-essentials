@@ -7,6 +7,7 @@ import { SiteFooter } from "@/components/site/SiteFooter";
 import { SiteHeader } from "@/components/site/SiteHeader";
 import { Button } from "@/components/ui/button";
 import { categoriesQuery, productsQuery } from "@/lib/store";
+import { useI18n } from "@/lib/i18n";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -41,6 +42,7 @@ function SectionTitle({ overline, title }: { overline: string; title: string }) 
 function Home() {
   const { data: products = [], isLoading } = useQuery(productsQuery());
   const { data: categories = [] } = useQuery(categoriesQuery());
+  const { t } = useI18n();
 
   const bestSellers = products.filter((product) => product.featured).slice(0, 8);
   const newArrivals = products.slice(0, 8);
@@ -51,29 +53,28 @@ function Home() {
 
       <section className="surface-hero">
         <div className="mx-auto grid max-w-6xl items-center gap-10 px-5 py-16 md:grid-cols-2 md:py-24">
-          <div className="text-center md:text-left">
+          <div className="text-center md:text-start">
             <p className="text-[10px] uppercase tracking-luxe text-primary">
-              Nouvelle collection
+              {t("home.overline")}
             </p>
             <h1 className="mt-5 font-display text-4xl leading-tight text-foreground sm:text-5xl md:text-6xl">
-              L'élégance se porte
+              {t("home.title1")}
               <br />
-              au quotidien
+              {t("home.title2")}
             </h1>
             <p className="mx-auto mt-5 max-w-md text-sm leading-relaxed text-muted-foreground md:mx-0">
-              Sacs à main, portefeuilles, bijoux et montres sélectionnés avec soin.
-              Paiement à la livraison partout en Algérie.
+              {t("home.subtitle")}
             </p>
             <div className="mt-8 flex justify-center gap-3 md:justify-start">
               <Button asChild className="h-12 rounded-sm px-8 text-xs uppercase tracking-[0.2em]">
-                <Link to="/boutique">Découvrir</Link>
+                <Link to="/boutique">{t("home.cta")}</Link>
               </Button>
             </div>
           </div>
           <div className="overflow-hidden rounded-sm shadow-soft">
             <img
               src={heroBag}
-              alt="Sac à main en cuir vert sauge sur soie ivoire"
+              alt={t("home.heroAlt")}
               width={1600}
               height={1200}
               className="size-full object-cover"
@@ -85,7 +86,7 @@ function Home() {
       <main className="mx-auto max-w-6xl px-5 py-20">
         {bestSellers.length > 0 ? (
           <section className="mb-24">
-            <SectionTitle overline="Coups de cœur" title="Best Sellers" />
+            <SectionTitle overline={t("home.bestOverline")} title={t("home.bestTitle")} />
             <div className="grid grid-cols-2 gap-6 lg:grid-cols-4">
               {bestSellers.map((product) => (
                 <ProductCard key={product.id} product={product} />
@@ -96,7 +97,7 @@ function Home() {
 
         {categories.length > 0 ? (
           <section className="mb-24">
-            <SectionTitle overline="Explorer" title="Nos catégories" />
+            <SectionTitle overline={t("home.catOverline")} title={t("home.catTitle")} />
             <div className="grid grid-cols-2 gap-5 lg:grid-cols-4">
               {categories.map((category) => (
                 <Link
@@ -123,12 +124,12 @@ function Home() {
         ) : null}
 
         <section>
-          <SectionTitle overline="Tout juste arrivé" title="Nouveautés" />
+          <SectionTitle overline={t("home.newOverline")} title={t("home.newTitle")} />
           {isLoading ? (
-            <p className="text-center text-sm text-muted-foreground">Chargement...</p>
+            <p className="text-center text-sm text-muted-foreground">{t("common.loading")}</p>
           ) : newArrivals.length === 0 ? (
             <p className="text-center text-sm text-muted-foreground">
-              La collection arrive très bientôt.
+              {t("home.soon")}
             </p>
           ) : (
             <div className="grid grid-cols-2 gap-6 lg:grid-cols-4">

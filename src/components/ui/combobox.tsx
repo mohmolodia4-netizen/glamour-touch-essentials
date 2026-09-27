@@ -1,3 +1,4 @@
+import { useI18n } from "@/lib/i18n";
 import { Check, ChevronsUpDown } from "lucide-react";
 import { useState } from "react";
 
@@ -21,7 +22,7 @@ export function Combobox({
   onChange,
   placeholder,
   searchPlaceholder,
-  emptyText = "Aucun résultat.",
+  emptyText,
   disabled,
   id,
 }: {
@@ -35,6 +36,7 @@ export function Combobox({
   id?: string;
 }) {
   const [open, setOpen] = useState(false);
+  const { t } = useI18n();
   const selected = options.find((option) => option.value === value);
 
   return (
@@ -47,12 +49,12 @@ export function Combobox({
           role="combobox"
           aria-expanded={open}
           disabled={disabled}
-          className="h-12 w-full justify-between rounded-sm border-border bg-card px-4 text-left font-normal"
+          className="h-12 w-full justify-between rounded-sm border-border bg-card px-4 text-start font-normal"
         >
           <span className={cn("truncate", !selected && "text-muted-foreground")}>
             {selected ? selected.label : placeholder}
           </span>
-          <ChevronsUpDown className="ml-2 size-4 shrink-0 opacity-50" />
+          <ChevronsUpDown className="ms-2 size-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent
@@ -66,7 +68,7 @@ export function Combobox({
         >
           <CommandInput placeholder={searchPlaceholder ?? "Rechercher..."} />
           <CommandList className="max-h-64">
-            <CommandEmpty>{emptyText}</CommandEmpty>
+            <CommandEmpty>{emptyText ?? t("form.noResults")}</CommandEmpty>
             <CommandGroup>
               {options.map((option) => (
                 <CommandItem
@@ -79,7 +81,7 @@ export function Combobox({
                 >
                   <Check
                     className={cn(
-                      "mr-2 size-4",
+                      "me-2 size-4",
                       value === option.value ? "opacity-100" : "opacity-0",
                     )}
                   />

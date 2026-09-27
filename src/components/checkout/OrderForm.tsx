@@ -20,6 +20,7 @@ import {
   stopdesksQuery,
   type Product,
 } from "@/lib/store";
+import { useI18n } from "@/lib/i18n";
 
 type DeliveryType = "domicile" | "stopdesk";
 type Line = { color: string; quantity: number };
@@ -37,6 +38,7 @@ export function OrderForm({ product }: { product: Product }) {
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState<string | null>(null);
   const [startedCheckout, setStartedCheckout] = useState(false);
+  const { t } = useI18n();
 
   const code = wilayaCode ? Number(wilayaCode) : null;
   const { data: rates = [] } = useQuery(shippingRatesQuery());
@@ -143,32 +145,32 @@ export function OrderForm({ product }: { product: Product }) {
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
     if (!code) {
-      toast.error("Veuillez choisir une wilaya.");
+      toast.error(t("err.wilaya"));
       return;
     }
     if (fullName.trim().length < 3) {
-      toast.error("Nom complet requis.");
+      toast.error(t("err.name"));
       return;
     }
     if (phone.replace(/\D/g, "").length < 9) {
-      toast.error("Numéro de téléphone invalide.");
+      toast.error(t("err.phone"));
       return;
     }
     if (!commune) {
-      toast.error("Veuillez choisir une commune.");
+      toast.error(t("err.commune"));
       return;
     }
     const address = deliveryType === "domicile" ? adresse : deskAddress;
     if (!address.trim()) {
       toast.error(
         deliveryType === "domicile"
-          ? "Adresse de livraison requise."
-          : "Veuillez choisir un point Stop Desk.",
+          ? t("err.address")
+          : t("err.desk"),
       );
       return;
     }
     if (hasVariants && lines.some((line) => !line.color)) {
-      toast.error("Veuillez choisir une couleur pour chaque ligne.");
+      toast.error(t("err.colorEach"));
       return;
     }
 
@@ -217,10 +219,10 @@ export function OrderForm({ product }: { product: Product }) {
       trackTiktok("CompletePayment", ttPayload);
       trackTiktok("PlaceAnOrder", ttPayload);
       setDone(orderId);
-      toast.success("Commande confirmée ! Nous vous appellerons bientôt.");
+      toast.success(t("ok.order"));
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : "Une erreur est survenue.",
+        error instanceof Error ? error.message : t("err.generic"),
       );
     } finally {
       setSubmitting(false);
@@ -232,11 +234,10 @@ export function OrderForm({ product }: { product: Product }) {
       <div className="rounded-sm border border-primary/30 bg-accent/50 p-8 text-center">
         <ShieldCheck className="mx-auto size-8 text-primary" />
         <h3 className="mt-4 font-display text-2xl text-foreground">
-          Merci, votre commande est confirmée
+          {t("done.title")}
         </h3>
         <p className="mt-2 text-sm text-muted-foreground">
-          Référence : {done.slice(0, 8).toUpperCase()} — notre équipe vous contactera
-          pour confirmer la livraison.
+          {t("done.ref", { ref: done.slice(0, 8).toUpperCase() })}
         </p>
       </div>
     );
@@ -251,18 +252,18 @@ export function OrderForm({ product }: { product: Product }) {
       <div className="flex items-center gap-2 border-b border-border pb-5">
         <Truck className="size-4 text-primary" />
         <h2 className="font-display text-2xl text-foreground">
-          Commander — Paiement à la livraison
+          {t("form.title")}
         </h2>
       </div>
 
       <div className="mt-6 grid min-w-0 gap-5">
         <div className="grid min-w-0 gap-2">
-          <Label htmlFor="fullName">Nom complet *</Label>
+          <Label htmlFor="fullName">{t("form.fullName")}</Label>
           <Input
             id="fullName"
             value={fullName}
             onChange={(event) => setFullName(event.target.value)}
-            placeholder="Votre nom et prénom"
+            placeholder={t("form.fullNamePh")}
             maxLength={120}
             required
             className="h-12 rounded-sm"
@@ -270,7 +271,7 @@ export function OrderForm({ product }: { product: Product }) {
         </div>
 
         <div className="grid min-w-0 gap-2">
-          <Label htmlFor="phone">Numéro de téléphone *</Label>
+          <Label htmlFor="phone">{t("form.phone")}</Label>
           <Input
             id="phone"
             type="tel"
@@ -285,7 +286,7 @@ export function OrderForm({ product }: { product: Product }) {
         </div>
 
         <div className="grid min-w-0 gap-2">
-          <Label htmlFor="wilaya">Wilaya *</Label>
+          <Label htmlFor="wilaya">{t("form.wilaya")}</Label>
           <Combobox
             id="wilaya"
             options={wilayaOptions}
@@ -296,18 +297,18 @@ export function OrderForm({ product }: { product: Product }) {
               setDeskAddress("");
               touchCheckout();
             }}
-            placeholder="Choisir votre wilaya"
-            searchPlaceholder="Rechercher une wilaya..."
+            placeholder={t("form.wilayaPh")}
+            searchPlaceholder={t("form.wilayaSearch")}
           />
         </div>
 
         <div className="grid min-w-0 gap-2">
-          <Label>Mode de livraison *</Label>
+          <Label>{t("form.delivery")}</Label>
           <div className="grid grid-cols-1 gap-2 rounded-sm bg-secondary p-1 sm:grid-cols-2">
             {(
               [
-                { key: "domicile", label: "التوصيل للمنزل (À Domicile)" },
-                { key: "stopdesk", label: "الاستلام من المكتب (Stopdesk / Bureau)" },
+                { key: "domicile", label: "form.domicile" },
+                { key: "stopdesk", label: "form.stopdesk" },
               ] as const
             ).map((option) => (
               <button
@@ -321,14 +322,14 @@ export function OrderForm({ product }: { product: Product }) {
                     : "text-muted-foreground hover:bg-card",
                 )}
               >
-                {option.label}
+                {t(option.label)}
               </button>
             ))}
           </div>
         </div>
 
         <div className="grid min-w-0 gap-2">
-          <Label htmlFor="commune">Commune *</Label>
+          <Label htmlFor="commune">{t("form.commune")}</Label>
           <Combobox
             id="commune"
             options={communeOptions}
@@ -340,23 +341,23 @@ export function OrderForm({ product }: { product: Product }) {
             placeholder={
               code
                 ? deliveryType === "stopdesk" && communeOptions.length === 0
-                  ? "Aucun bureau dans cette wilaya"
-                  : "Choisir votre commune"
-                : "Choisissez d'abord une wilaya"
+                  ? t("form.noDesk")
+                  : t("form.communePh")
+                : t("form.wilayaFirst")
             }
-            searchPlaceholder="Rechercher une commune..."
+            searchPlaceholder={t("form.communeSearch")}
             disabled={!code || communeOptions.length === 0}
           />
         </div>
 
         {deliveryType === "domicile" ? (
           <div className="grid min-w-0 gap-2">
-            <Label htmlFor="adresse">Adresse de livraison *</Label>
+            <Label htmlFor="adresse">{t("form.address")}</Label>
             <Textarea
               id="adresse"
               value={adresse}
               onChange={(event) => setAdresse(event.target.value)}
-              placeholder="Cité, rue, numéro, repère..."
+              placeholder={t("form.addressPh")}
               maxLength={400}
               rows={3}
               className="rounded-sm"
@@ -364,23 +365,23 @@ export function OrderForm({ product }: { product: Product }) {
           </div>
         ) : (
           <div className="grid min-w-0 gap-2">
-            <Label htmlFor="desk">Point Stop Desk *</Label>
+            <Label htmlFor="desk">{t("form.desk")}</Label>
             <Combobox
               id="desk"
               options={deskOptions}
               value={deskAddress}
               onChange={setDeskAddress}
               placeholder={
-                commune ? "Choisir le bureau" : "Choisissez d'abord une commune"
+                commune ? t("form.deskPh") : t("form.communeFirst")
               }
-              searchPlaceholder="Rechercher un bureau..."
+              searchPlaceholder={t("form.deskSearch")}
               disabled={!commune || deskOptions.length === 0}
             />
           </div>
         )}
 
         <div className="grid min-w-0 gap-3">
-          <Label>Quantité{hasVariants ? " & couleurs" : ""}</Label>
+          <Label>{t(hasVariants ? "form.quantityColors" : "form.quantity")}</Label>
           {hasVariants ? (
             <div className="grid gap-3">
               {lines.map((line, position) => {
@@ -398,7 +399,7 @@ export function OrderForm({ product }: { product: Product }) {
                       />
                     ) : null}
                     <select
-                      aria-label="Couleur"
+                      aria-label={t("form.color")}
                       value={line.color}
                       onChange={(event) =>
                         setLines((current) =>
@@ -418,13 +419,13 @@ export function OrderForm({ product }: { product: Product }) {
                           disabled={variant.stock_quantity <= 0}
                         >
                           {variant.color_name}
-                          {variant.stock_quantity <= 0 ? " — épuisé" : ""}
+                          {variant.stock_quantity <= 0 ? t("product.soldOutSuffix") : ""}
                         </option>
                       ))}
                     </select>
                     <Input
                       type="number"
-                      aria-label="Quantité"
+                      aria-label={t("form.quantity")}
                       min={1}
                       max={Math.max(selected?.stock_quantity ?? 1, 1)}
                       value={line.quantity}
@@ -448,7 +449,7 @@ export function OrderForm({ product }: { product: Product }) {
                     {lines.length > 1 ? (
                       <button
                         type="button"
-                        aria-label="Retirer la ligne"
+                        aria-label={t("form.removeLine")}
                         onClick={() =>
                           setLines((current) =>
                             current.filter((_, index) => index !== position),
@@ -474,7 +475,7 @@ export function OrderForm({ product }: { product: Product }) {
                   ])
                 }
               >
-                <Plus className="mr-2 size-4" /> Ajouter une couleur
+                <Plus className="me-2 size-4" /> {t("form.addColor")}
               </Button>
             </div>
           ) : (
@@ -498,15 +499,15 @@ export function OrderForm({ product }: { product: Product }) {
 
       <div className="mt-7 space-y-2 border-t border-border pt-5 text-sm">
         <div className="flex justify-between text-muted-foreground">
-          <span>Sous-total</span>
+          <span>{t("form.subtotal")}</span>
           <span>{formatDzd(subtotal)}</span>
         </div>
         <div className="flex justify-between text-muted-foreground">
-          <span>Livraison</span>
+          <span>{t("form.shipping")}</span>
           <span>{rate ? formatDzd(shippingFee) : "—"}</span>
         </div>
         <div className="flex justify-between pt-2 font-display text-2xl text-foreground">
-          <span>Total</span>
+          <span>{t("form.total")}</span>
           <span>{formatDzd(total)}</span>
         </div>
       </div>
@@ -516,8 +517,8 @@ export function OrderForm({ product }: { product: Product }) {
         disabled={submitting || maxStock <= 0}
         className="mt-6 h-14 w-full rounded-sm text-sm uppercase tracking-[0.2em]"
       >
-        {submitting ? <Loader2 className="mr-2 size-4 animate-spin" /> : null}
-        {maxStock <= 0 ? "Produit épuisé" : "Confirmer la Commande — تأكيد الطلب"}
+        {submitting ? <Loader2 className="me-2 size-4 animate-spin" /> : null}
+        {maxStock <= 0 ? t("form.soldOut") : t("form.submit")}
       </Button>
 
     </form>

@@ -1,3 +1,4 @@
+import { useI18n } from "@/lib/i18n";
 import { Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { Menu } from "lucide-react";
@@ -9,12 +10,13 @@ import { categoriesQuery, publicSettingsQuery } from "@/lib/store";
 import { CartDrawer } from "@/components/cart/CartDrawer";
 
 const navLinks = [
-  { to: "/", label: "Accueil" },
-  { to: "/boutique", label: "Boutique" },
-];
+  { to: "/", label: "nav.home" },
+  { to: "/boutique", label: "nav.shop" },
+] as const;
 
 export function SiteHeader() {
   const [open, setOpen] = useState(false);
+  const { t, lang, setLang } = useI18n();
   const { data: settings } = useQuery(publicSettingsQuery());
   const { data: categories = [] } = useQuery(categoriesQuery());
 
@@ -27,7 +29,7 @@ export function SiteHeader() {
               variant="ghost"
               size="icon"
               className="md:hidden"
-              aria-label="Ouvrir le menu"
+              aria-label={t("nav.openMenu")}
             >
               <Menu className="size-5" />
             </Button>
@@ -41,7 +43,7 @@ export function SiteHeader() {
                   onClick={() => setOpen(false)}
                   className="rounded-sm px-3 py-3 text-sm uppercase tracking-[0.18em] text-foreground hover:bg-secondary"
                 >
-                  {link.label}
+                  {t(link.label)}
                 </Link>
               ))}
               {categories.map((category) => (
@@ -66,7 +68,7 @@ export function SiteHeader() {
               to={link.to}
               className="text-xs uppercase tracking-[0.22em] text-muted-foreground transition-colors hover:text-primary"
             >
-              {link.label}
+              {t(link.label)}
             </Link>
           ))}
         </nav>
@@ -76,7 +78,7 @@ export function SiteHeader() {
             {settings?.site_name ?? "GLAMOUR TOUCH"}
           </span>
           <span className="mt-1 text-[9px] uppercase tracking-[0.3em] text-muted-foreground">
-            Bags &amp; Accessories
+            {t("brand.tagline")}
           </span>
         </Link>
 
@@ -88,9 +90,17 @@ export function SiteHeader() {
               rel="noreferrer"
               className="hidden text-xs uppercase tracking-[0.22em] text-muted-foreground transition-colors hover:text-primary md:inline"
             >
-              Contact
+              {t("nav.contact")}
             </a>
           ) : null}
+          <button
+            type="button"
+            onClick={() => setLang(lang === "fr" ? "ar" : "fr")}
+            aria-label={t("lang.switchLabel")}
+            className="rounded-sm border border-border px-2 py-1 text-xs text-muted-foreground transition-colors hover:text-primary"
+          >
+            {t("lang.switch")}
+          </button>
           <CartDrawer />
         </div>
       </div>
