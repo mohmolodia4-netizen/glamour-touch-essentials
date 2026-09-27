@@ -120,6 +120,50 @@ export function OrdersTab() {
     void queryClient.invalidateQueries({ queryKey: ["admin", "orders"] });
   }
 
+  function toggleSelected(id: string) {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
+  function toggleSelectAll() {
+    const visibleIds = visible.map((o) => o.id);
+    const allSelected = visibleIds.length > 0 && visibleIds.every((id) => selected.has(id));
+    setSelected(allSelected ? new Set() : new Set(visibleIds));
+  }
+
+  async function applyBulkStatus() {
+    if (selected.size === 0) return;
+    setBulkBusy(true);
+    const ids = Array.from(selected);
+    const { error } = await (supabase as any)
+      .from("orders")
+      .update({ status: bulkStatus })
+      .in("id", ids);
+    if (error) {
+      toast.error(error.message);
+      setBulkBusy(false);
+      return;
+    }
+    toast.success(`${ids.length} commande(s) passée(s) en « ${STATUS_LABELS[bulkStatus]} »`);
+
+    // Sync Google Sheet for each updated order (best effort, non-blocking)
+    void Promise.allSettled(
+      ids.map((id) =>
+        (supabase as any).functions.invoke("send-order-notifications", {
+          body: { order_id: id, mode: "sync" },
+        }),
+      ),
+    );
+
+    setSelected(new Set());
+    setBulkBusy(false);
+    void queryClient.invalidateQueries({ queryKey: ["admin", "orders"] });
+  }
+
   async function remove(id: string) {
     const { error } = await (supabase as any).from("orders").delete().eq("id", id);
     if (error) {
