@@ -177,6 +177,52 @@ export function OrdersTab() {
 
   return (
     <div className="space-y-5">
+      {selected.size > 0 && (
+        <div className="sticky top-0 z-30 flex flex-wrap items-center gap-2 rounded-sm border border-border bg-card p-3 shadow-md">
+          <label className="flex items-center gap-2 text-sm text-muted-foreground">
+            <input
+              type="checkbox"
+              className="size-4 accent-primary"
+              checked={visible.length > 0 && visible.every((o) => selected.has(o.id))}
+              onChange={toggleSelectAll}
+            />
+            Tout sélectionner ({visible.length})
+          </label>
+          <span className="text-sm font-medium text-foreground">
+            {selected.size} sélectionnée(s)
+          </span>
+          <Select value={bulkStatus} onValueChange={setBulkStatus}>
+            <SelectTrigger className="h-9 w-44 rounded-sm">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {STATUSES.map((status) => (
+                <SelectItem key={status} value={status}>
+                  {STATUS_LABELS[status]}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Button
+            type="button"
+            size="sm"
+            className="rounded-sm"
+            disabled={bulkBusy}
+            onClick={applyBulkStatus}
+          >
+            {bulkBusy ? "Application..." : "Appliquer"}
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="rounded-sm"
+            onClick={() => setSelected(new Set())}
+          >
+            Tout désélectionner
+          </Button>
+        </div>
+      )}
       <div className="flex flex-col gap-3 sm:flex-row">
         <Input
           value={search}
@@ -205,15 +251,17 @@ export function OrdersTab() {
         <p className="text-sm text-muted-foreground">Aucune commande.</p>
       ) : (
         <div className="space-y-3">
-          <label className="flex items-center gap-2 text-sm text-muted-foreground">
-            <input
-              type="checkbox"
-              className="size-4 accent-primary"
-              checked={visible.length > 0 && visible.every((o) => selected.has(o.id))}
-              onChange={toggleSelectAll}
-            />
-            Tout sélectionner ({visible.length})
-          </label>
+          {selected.size === 0 && (
+            <label className="flex items-center gap-2 text-sm text-muted-foreground">
+              <input
+                type="checkbox"
+                className="size-4 accent-primary"
+                checked={visible.length > 0 && visible.every((o) => selected.has(o.id))}
+                onChange={toggleSelectAll}
+              />
+              Tout sélectionner ({visible.length})
+            </label>
+          )}
           {visible.map((order) => (
             <div
               key={order.id}
