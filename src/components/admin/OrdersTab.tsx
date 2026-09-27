@@ -324,6 +324,44 @@ export function OrdersTab() {
           ))}
         </div>
       )}
+
+      {selected.size > 0 && (
+        <div className="sticky bottom-4 z-20 flex flex-wrap items-center gap-2 rounded-sm border border-border bg-card p-3 shadow-lg">
+          <span className="text-sm font-medium text-foreground">
+            {selected.size} sélectionnée(s)
+          </span>
+          <Select value={bulkStatus} onValueChange={setBulkStatus}>
+            <SelectTrigger className="h-9 w-44 rounded-sm">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {STATUSES.map((status) => (
+                <SelectItem key={status} value={status}>
+                  {STATUS_LABELS[status]}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Button
+            type="button"
+            size="sm"
+            className="rounded-sm"
+            disabled={bulkBusy}
+            onClick={applyBulkStatus}
+          >
+            {bulkBusy ? "Application..." : "Appliquer"}
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="rounded-sm"
+            onClick={() => setSelected(new Set())}
+          >
+            Tout désélectionner
+          </Button>
+        </div>
+      )}
     </div>
   );
 }
