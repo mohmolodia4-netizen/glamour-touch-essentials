@@ -59,6 +59,9 @@ export function OrdersTab() {
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [bulkStatus, setBulkStatus] = useState("confirmed");
+  const [bulkBusy, setBulkBusy] = useState(false);
 
   const { data: orders = [], isLoading } = useQuery({
     queryKey: ["admin", "orders"],
