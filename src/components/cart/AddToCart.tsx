@@ -1,3 +1,4 @@
+import { useI18n } from "@/lib/i18n";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { ShoppingBag } from "lucide-react";

@@ -1,3 +1,4 @@
+import { useI18n } from "@/lib/i18n";
 import { useQuery } from "@tanstack/react-query";
 import { Instagram, Facebook, Phone } from "lucide-react";
 

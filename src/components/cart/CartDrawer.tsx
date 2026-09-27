@@ -1,3 +1,4 @@
+import { useI18n } from "@/lib/i18n";
 import { Link } from "@tanstack/react-router";
 import { ImageIcon, Minus, Plus, ShoppingBag, X } from "lucide-react";
 import { useState } from "react";
