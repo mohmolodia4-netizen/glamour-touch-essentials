@@ -21,7 +21,7 @@ export function Combobox({
   onChange,
   placeholder,
   searchPlaceholder,
-  emptyText = "Aucun résultat.",
+  emptyText,
   disabled,
   id,
 }: {
@@ -66,7 +66,7 @@ export function Combobox({
         >
           <CommandInput placeholder={searchPlaceholder ?? "Rechercher..."} />
           <CommandList className="max-h-64">
-            <CommandEmpty>{emptyText}</CommandEmpty>
+            <CommandEmpty>{emptyText ?? t("form.noResults")}</CommandEmpty>
             <CommandGroup>
               {options.map((option) => (
                 <CommandItem

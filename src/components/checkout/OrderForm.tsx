@@ -234,7 +234,7 @@ export function OrderForm({ product }: { product: Product }) {
       <div className="rounded-sm border border-primary/30 bg-accent/50 p-8 text-center">
         <ShieldCheck className="mx-auto size-8 text-primary" />
         <h3 className="mt-4 font-display text-2xl text-foreground">
-          Merci, votre commande est confirmée
+          {t("done.title")}
         </h3>
         <p className="mt-2 text-sm text-muted-foreground">
           {t("done.ref", { ref: done.slice(0, 8).toUpperCase() })}
