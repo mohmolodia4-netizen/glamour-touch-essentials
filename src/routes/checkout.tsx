@@ -138,6 +138,19 @@ function CheckoutContent() {
         adresse: address,
         deskCode,
       });
+      setDoneSnapshot({
+        lines: items.map((i) => ({
+          name: i.product_name,
+          color: i.color_name,
+          quantity: i.quantity,
+        })),
+        total,
+        fullName,
+        wilaya: rate
+          ? `${String(code).padStart(2, "0")} — ${rate.wilaya_name}`
+          : String(code),
+        commune,
+      });
       clearCart();
       setDone(id);
       toast.success(t("ok.order"));
