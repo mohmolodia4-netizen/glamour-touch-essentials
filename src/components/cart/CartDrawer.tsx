@@ -57,7 +57,7 @@ export function CartLines() {
               <X className="size-4" />
             </button>
             <span className="text-sm text-primary">
-              {formatDzd(item.price * item.quantity)}
+              {formatDzd(unitPrice(item) * item.quantity)}
             </span>
           </div>
         </li>
