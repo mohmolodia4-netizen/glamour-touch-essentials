@@ -38,6 +38,7 @@ function ProductPage() {
   const { data: variants = [] } = useQuery(productVariantsQuery(id));
   const [index, setIndex] = useState(0);
   const { t } = useI18n();
+  const cartOn = useFeature("cart", true);
 
   const orderedVariants = [...variants].sort((a, b) => a.sort_order - b.sort_order);
   const defaultVariant =
