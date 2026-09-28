@@ -40,6 +40,7 @@
   "product.soldOutSuffix": " — épuisé",
   "product.inStock": "En stock — {n} pièce(s)",
   "product.outOfStock": "Rupture de stock",
+  "product.similar": "Vous aimerez aussi",
   "form.title": "Commander — Paiement à la livraison",
   "form.codTitle": "Paiement à la livraison",
   "form.fullName": "Nom complet *",
