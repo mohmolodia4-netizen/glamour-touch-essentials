@@ -40,6 +40,8 @@ type Draft = {
   description: string;
   price: string;
   old_price: string;
+  qty_discount_min: string;
+  qty_discount_percent: string;
   category_id: string;
   stock_quantity: string;
   status: string;
@@ -53,6 +55,8 @@ const emptyDraft: Draft = {
   description: "",
   price: "",
   old_price: "",
+  qty_discount_min: "",
+  qty_discount_percent: "",
   category_id: "",
   stock_quantity: "10",
   status: "published",
@@ -95,6 +99,8 @@ export function ProductsTab() {
       description: product.description ?? "",
       price: String(product.price),
       old_price: product.old_price ? String(product.old_price) : "",
+      qty_discount_min: product.qty_discount_min ? String(product.qty_discount_min) : "",
+      qty_discount_percent: product.qty_discount_percent ? String(product.qty_discount_percent) : "",
       category_id: product.category_id ?? "",
       stock_quantity: String(product.stock_quantity),
       status: product.status,
@@ -219,6 +225,12 @@ export function ProductsTab() {
       description: draft.description.trim() || null,
       price: Number(draft.price),
       old_price: draft.old_price ? Number(draft.old_price) : null,
+      ...(qtyDiscountOn
+        ? {
+            qty_discount_min: draft.qty_discount_min ? Number(draft.qty_discount_min) : null,
+            qty_discount_percent: draft.qty_discount_percent ? Number(draft.qty_discount_percent) : null,
+          }
+        : {}),
       category_id: draft.category_id || null,
       stock_quantity: Number(draft.stock_quantity) || 0,
       status: draft.status,
@@ -329,6 +341,18 @@ export function ProductsTab() {
                 className="rounded-sm"
               />
             </div>
+            {qtyDiscountOn ? (
+              <>
+                <div className="grid gap-2">
+                  <Label>À partir de X pièces (optionnel)</Label>
+                  <Input type="number" min={2} value={draft.qty_discount_min} onChange={(event) => setDraft({ ...draft, qty_discount_min: event.target.value })} className="rounded-sm" />
+                </div>
+                <div className="grid gap-2">
+                  <Label>Remise % (optionnel)</Label>
+                  <Input type="number" min={1} max={99} value={draft.qty_discount_percent} onChange={(event) => setDraft({ ...draft, qty_discount_percent: event.target.value })} className="rounded-sm" />
+                </div>
+              </>
+            ) : null}
             <div className="grid gap-2">
               <Label>Stock</Label>
               <Input

@@ -9,7 +9,7 @@ import { useCart } from "@/lib/cart";
 import { formatDzd } from "@/lib/store";
 
 export function CartLines() {
-  const { items, updateQuantity, removeItem } = useCart();
+  const { items, updateQuantity, removeItem, unitPrice } = useCart();
   const { t } = useI18n();
   return (
     <ul className="divide-y divide-border">
