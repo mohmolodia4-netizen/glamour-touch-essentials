@@ -17,6 +17,7 @@ export type Database = {
       app_settings: {
         Row: {
           facebook_url: string | null
+          features: Json
           google_sheet_webhook_url: string | null
           id: number
           instagram_url: string | null
@@ -32,6 +33,7 @@ export type Database = {
         }
         Insert: {
           facebook_url?: string | null
+          features?: Json
           google_sheet_webhook_url?: string | null
           id?: number
           instagram_url?: string | null
@@ -47,6 +49,7 @@ export type Database = {
         }
         Update: {
           facebook_url?: string | null
+          features?: Json
           google_sheet_webhook_url?: string | null
           id?: number
           instagram_url?: string | null
@@ -426,6 +429,7 @@ export type Database = {
         Args: never
         Returns: {
           facebook_url: string
+          features: Json
           instagram_url: string
           meta_pixel_id: string
           phone: string
