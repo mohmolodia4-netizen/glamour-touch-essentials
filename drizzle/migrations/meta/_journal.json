@@ -22,6 +22,13 @@
       "when": 1790562464432,
       "tag": "0002_app_settings_features",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1790611104649,
+      "tag": "0003_qty_discount",
+      "breakpoints": true
     }
   ]
 }

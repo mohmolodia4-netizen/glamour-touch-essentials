@@ -13,6 +13,8 @@ export type Product = {
   status: string;
   featured: boolean;
   created_at: string;
+  qty_discount_min?: number | null;
+  qty_discount_percent?: number | null;
 };
 
 export type Category = {
@@ -275,6 +277,27 @@ export async function placeCartOrder(input: {
     }
   }
   return orderId;
+}
+
+/** Mirrors public.discounted_unit() in the database. */
+export function discountedUnit(
+  price: number,
+  min: number | null | undefined,
+  pct: number | null | undefined,
+  qty: number,
+  enabled: boolean,
+) {
+  const p = Number(price) || 0;
+  const m = Number(min) || 0;
+  const d = Number(pct) || 0;
+  if (!enabled || m <= 0 || d <= 0 || d >= 100 || qty < m) return p;
+  return Math.round(p * (1 - d / 100));
+}
+
+export function hasQtyDiscount(p: { qty_discount_min?: number | null; qty_discount_percent?: number | null }) {
+  const m = Number(p.qty_discount_min) || 0;
+  const d = Number(p.qty_discount_percent) || 0;
+  return m > 0 && d > 0 && d < 100;
 }
 
 export function formatDzd(value: number) {

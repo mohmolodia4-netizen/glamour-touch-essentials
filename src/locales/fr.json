@@ -109,5 +109,6 @@
   "cart.add": "Ajouter au panier",
   "cart.added": "Ajouté au panier",
   "cart.see": "Voir",
-  "cart.seeMine": "Voir mon panier"
+  "cart.seeMine": "Voir mon panier",
+  "product.qtyDiscount": "Achetez {n}, économisez {p}%"
 }

@@ -22,6 +22,8 @@ import {
   type Product,
 } from "@/lib/store";
 import { useI18n } from "@/lib/i18n";
+import { useFeature } from "@/lib/features";
+import { discountedUnit } from "@/lib/store";
 
 type DeliveryType = "domicile" | "stopdesk";
 type Line = { color: string; quantity: number };
@@ -78,7 +80,9 @@ export function OrderForm({ product }: { product: Product }) {
       : rate.stopdesk_fee
     : 0;
   const quantity = lines.reduce((sum, line) => sum + Math.max(1, line.quantity), 0);
-  const subtotal = Number(product.price) * quantity;
+  const discountOn = useFeature("qty_discount", false);
+  const unit = discountedUnit(Number(product.price), product.qty_discount_min, product.qty_discount_percent, quantity, discountOn);
+  const subtotal = unit * quantity;
   const total = subtotal + shippingFee;
 
   const maxStock = hasVariants

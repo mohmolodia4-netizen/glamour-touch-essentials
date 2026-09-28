@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { OrderForm } from "@/components/checkout/OrderForm";
 import { AddToCart } from "@/components/cart/AddToCart";
 import { useFeature } from "@/lib/features";
+import { hasQtyDiscount } from "@/lib/store";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { SiteHeader } from "@/components/site/SiteHeader";
 import { ProductCard } from "@/components/site/ProductCard";
@@ -46,6 +47,7 @@ function ProductPage() {
   const { t } = useI18n();
   const cartOn = useFeature("cart", true);
   const similarOn = useFeature("similar_products", false);
+  const qtyDiscountOn = useFeature("qty_discount", false);
   const categoryId = product?.category_id ?? null;
   const { data: categoryProducts = [] } = useQuery({
     ...productsQuery(),
@@ -218,6 +220,11 @@ function ProductPage() {
                   </span>
                 ) : null}
               </div>
+              {qtyDiscountOn && hasQtyDiscount(product) ? (
+                <p className="mt-3 inline-block rounded-sm bg-accent px-3 py-1.5 text-sm text-primary">
+                  {t("product.qtyDiscount", { n: Number(product.qty_discount_min), p: Number(product.qty_discount_percent) })}
+                </p>
+              ) : null}
               {product.description ? (
                 <p className="mt-5 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
                   {product.description}

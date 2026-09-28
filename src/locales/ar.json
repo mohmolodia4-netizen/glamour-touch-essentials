@@ -109,5 +109,6 @@
   "cart.add": "أضيفي إلى السلة",
   "cart.added": "تمت الإضافة إلى السلة",
   "cart.see": "عرض",
-  "cart.seeMine": "عرض سلتي"
+  "cart.seeMine": "عرض سلتي",
+  "product.qtyDiscount": "اشتري {n}، ووفّري {p}%"
 }
