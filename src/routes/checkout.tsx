@@ -22,6 +22,9 @@ import {
   stopdesksQuery,
 } from "@/lib/store";
 import { useI18n } from "@/lib/i18n";
+import { publicSettingsQuery } from "@/lib/store";
+import { resolveFeature } from "@/lib/features";
+import { useNavigate } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({
@@ -38,6 +41,17 @@ export const Route = createFileRoute("/checkout")({
 type DeliveryType = "domicile" | "stopdesk";
 
 function CheckoutPage() {
+  const { data: settings, isSuccess } = useQuery(publicSettingsQuery());
+  const cartOn = resolveFeature(settings?.features, "cart", true);
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (isSuccess && !cartOn) void navigate({ to: "/", replace: true });
+  }, [isSuccess, cartOn, navigate]);
+  if (isSuccess && !cartOn) return null;
+  return <CheckoutContent />;
+}
+
+function CheckoutContent() {
   const { items, subtotal, clearCart } = useCart();
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");

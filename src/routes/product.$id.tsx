@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 
 import { OrderForm } from "@/components/checkout/OrderForm";
 import { AddToCart } from "@/components/cart/AddToCart";
+import { useFeature } from "@/lib/features";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { SiteHeader } from "@/components/site/SiteHeader";
 import { Button } from "@/components/ui/button";
@@ -37,6 +38,7 @@ function ProductPage() {
   const { data: variants = [] } = useQuery(productVariantsQuery(id));
   const [index, setIndex] = useState(0);
   const { t } = useI18n();
+  const cartOn = useFeature("cart", true);
 
   const orderedVariants = [...variants].sort((a, b) => a.sort_order - b.sort_order);
   const defaultVariant =
@@ -210,9 +212,11 @@ function ProductPage() {
               <div className="mt-8">
                 <OrderForm product={product} />
               </div>
-              <div className="mt-6">
-                <AddToCart product={product} cover={images[0] ?? null} />
-              </div>
+              {cartOn ? (
+                <div className="mt-6">
+                  <AddToCart product={product} cover={images[0] ?? null} />
+                </div>
+              ) : null}
             </div>
           </div>
         )}

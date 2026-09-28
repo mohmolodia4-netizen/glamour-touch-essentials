@@ -6,6 +6,8 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { FEATURES, resolveFeature } from "@/lib/features";
 import { supabase } from "@/integrations/supabase/client";
 
 type Settings = {
@@ -67,6 +69,7 @@ export function SettingsTab() {
   const queryClient = useQueryClient();
   const [form, setForm] = useState<Settings>(empty);
   const [saving, setSaving] = useState(false);
+  const [features, setFeatures] = useState<Record<string, boolean>>({});
 
   const { data, isLoading } = useQuery({
     queryKey: ["admin", "settings"],
@@ -77,7 +80,7 @@ export function SettingsTab() {
         .eq("id", 1)
         .maybeSingle();
       if (error) throw new Error(error.message);
-      return row as Partial<Settings> | null;
+      return row as (Partial<Settings> & { features?: Record<string, unknown> }) | null;
     },
   });
 
@@ -88,6 +91,11 @@ export function SettingsTab() {
       for (const field of FIELDS) next[field.key] = data[field.key] ?? "";
       return next;
     });
+    setFeatures(
+      Object.fromEntries(
+        FEATURES.map((f) => [f.key, resolveFeature(data.features, f.key, f.default)]),
+      ),
+    );
   }, [data]);
 
   async function save() {
@@ -97,7 +105,7 @@ export function SettingsTab() {
     );
     const { error } = await (supabase as any)
       .from("app_settings")
-      .update(payload)
+      .update({ ...payload, features: { ...(data?.features ?? {}), ...features } })
       .eq("id", 1);
     setSaving(false);
     if (error) {
@@ -130,6 +138,20 @@ export function SettingsTab() {
             ) : null}
           </div>
         ))}
+      </div>
+      <div className="rounded-sm border border-border p-5">
+        <h3 className="font-display text-xl">Fonctionnalités</h3>
+        <div className="mt-4 divide-y divide-border">
+          {FEATURES.map((f) => (
+            <label key={f.key} className="flex items-center justify-between gap-4 py-3">
+              <span className="text-sm">{f.label}</span>
+              <Switch
+                checked={features[f.key] ?? f.default}
+                onCheckedChange={(v) => setFeatures({ ...features, [f.key]: v })}
+              />
+            </label>
+          ))}
+        </div>
       </div>
       <Button onClick={save} disabled={saving} className="rounded-sm">
         {saving ? <Loader2 className="mr-2 size-4 animate-spin" /> : null}
