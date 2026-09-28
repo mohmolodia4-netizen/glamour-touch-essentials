@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { Loader2, ShieldCheck, Truck } from "lucide-react";
 
 import { CartLines } from "@/components/cart/CartDrawer";
+import { WhatsAppConfirm } from "@/components/checkout/WhatsAppConfirm";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { SiteHeader } from "@/components/site/SiteHeader";
 import { Button } from "@/components/ui/button";
@@ -62,6 +63,13 @@ function CheckoutContent() {
   const [deskAddress, setDeskAddress] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState<string | null>(null);
+  const [doneSnapshot, setDoneSnapshot] = useState<{
+    lines: { name: string; color: string | null; quantity: number }[];
+    total: number;
+    fullName: string;
+    wilaya: string;
+    commune: string;
+  } | null>(null);
   const { t } = useI18n();
 
   const code = wilayaCode ? Number(wilayaCode) : null;
@@ -130,6 +138,19 @@ function CheckoutContent() {
         adresse: address,
         deskCode,
       });
+      setDoneSnapshot({
+        lines: items.map((i) => ({
+          name: i.product_name,
+          color: i.color_name,
+          quantity: i.quantity,
+        })),
+        total,
+        fullName,
+        wilaya: rate
+          ? `${String(code).padStart(2, "0")} — ${rate.wilaya_name}`
+          : String(code),
+        commune,
+      });
       clearCart();
       setDone(id);
       toast.success(t("ok.order"));
@@ -151,7 +172,17 @@ function CheckoutContent() {
             <p className="mt-2 text-sm text-muted-foreground">
               {t("done.ref", { ref: done.slice(0, 8).toUpperCase() })}
             </p>
-            <Button asChild variant="outline" className="mt-6 rounded-sm">
+            {doneSnapshot ? (
+              <WhatsAppConfirm
+                orderId={done}
+                fullName={doneSnapshot.fullName}
+                lines={doneSnapshot.lines}
+                total={doneSnapshot.total}
+                wilaya={doneSnapshot.wilaya}
+                commune={doneSnapshot.commune}
+              />
+            ) : null}
+            <Button asChild variant="outline" className="mt-3 rounded-sm">
               <Link to="/boutique">{t("done.continue")}</Link>
             </Button>
           </div>
