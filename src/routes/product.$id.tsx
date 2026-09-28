@@ -9,9 +9,15 @@ import { AddToCart } from "@/components/cart/AddToCart";
 import { useFeature } from "@/lib/features";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { SiteHeader } from "@/components/site/SiteHeader";
+import { ProductCard } from "@/components/site/ProductCard";
 import { Button } from "@/components/ui/button";
 import { trackPixel } from "@/lib/pixel";
-import { formatDzd, productQuery, productVariantsQuery } from "@/lib/store";
+import {
+  formatDzd,
+  productQuery,
+  productVariantsQuery,
+  productsQuery,
+} from "@/lib/store";
 
 export const Route = createFileRoute("/product/$id")({
   head: () => ({
@@ -39,6 +45,20 @@ function ProductPage() {
   const [index, setIndex] = useState(0);
   const { t } = useI18n();
   const cartOn = useFeature("cart", true);
+  const similarOn = useFeature("similar_products", false);
+  const categoryId = product?.category_id ?? null;
+  const { data: categoryProducts = [] } = useQuery({
+    ...productsQuery(),
+    enabled: similarOn && categoryId !== null,
+  });
+
+  const relatedProducts =
+    similarOn && categoryId !== null && product
+      ? categoryProducts
+          .filter((item) => item.category_id === categoryId && item.id !== product.id)
+          .slice(0, 4)
+      : [];
+  const showSimilar = relatedProducts.length >= 2;
 
   const orderedVariants = [...variants].sort((a, b) => a.sort_order - b.sort_order);
   const defaultVariant =
@@ -220,6 +240,18 @@ function ProductPage() {
             </div>
           </div>
         )}
+        {showSimilar ? (
+          <section className="mt-16">
+            <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+              {t("product.similar")}
+            </p>
+            <div className="mt-6 grid grid-cols-2 gap-x-6 gap-y-10 lg:grid-cols-4">
+              {relatedProducts.map((item) => (
+                <ProductCard key={item.id} product={item} />
+              ))}
+            </div>
+          </section>
+        ) : null}
       </main>
       <SiteFooter />
     </div>
