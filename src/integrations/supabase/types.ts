@@ -303,6 +303,8 @@ export type Database = {
           name: string
           old_price: number | null
           price: number
+          qty_discount_min: number | null
+          qty_discount_percent: number | null
           status: string
           stock_quantity: number
           updated_at: string
@@ -318,6 +320,8 @@ export type Database = {
           name: string
           old_price?: number | null
           price: number
+          qty_discount_min?: number | null
+          qty_discount_percent?: number | null
           status?: string
           stock_quantity?: number
           updated_at?: string
@@ -333,6 +337,8 @@ export type Database = {
           name?: string
           old_price?: number | null
           price?: number
+          qty_discount_min?: number | null
+          qty_discount_percent?: number | null
           status?: string
           stock_quantity?: number
           updated_at?: string
@@ -425,6 +431,10 @@ export type Database = {
     }
     Functions: {
       claim_first_admin: { Args: never; Returns: boolean }
+      discounted_unit: {
+        Args: { _min: number; _pct: number; _price: number; _qty: number }
+        Returns: number
+      }
       get_public_settings: {
         Args: never
         Returns: {
@@ -501,6 +511,7 @@ export type Database = {
         }
         Returns: string
       }
+      qty_discount_on: { Args: never; Returns: boolean }
     }
     Enums: {
       app_role: "admin" | "user"
