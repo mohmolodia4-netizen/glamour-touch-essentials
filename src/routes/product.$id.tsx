@@ -45,6 +45,20 @@ function ProductPage() {
   const [index, setIndex] = useState(0);
   const { t } = useI18n();
   const cartOn = useFeature("cart", true);
+  const similarOn = useFeature("similar_products", false);
+  const categoryId = product?.category_id ?? null;
+  const { data: categoryProducts = [] } = useQuery({
+    ...productsQuery(),
+    enabled: similarOn && categoryId !== null,
+  });
+
+  const relatedProducts =
+    similarOn && categoryId !== null && product
+      ? categoryProducts
+          .filter((item) => item.category_id === categoryId && item.id !== product.id)
+          .slice(0, 4)
+      : [];
+  const showSimilar = relatedProducts.length >= 2;
 
   const orderedVariants = [...variants].sort((a, b) => a.sort_order - b.sort_order);
   const defaultVariant =
