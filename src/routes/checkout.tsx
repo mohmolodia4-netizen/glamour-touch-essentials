@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { Loader2, ShieldCheck, Truck } from "lucide-react";
 
 import { CartLines } from "@/components/cart/CartDrawer";
+import { WhatsAppConfirm } from "@/components/checkout/WhatsAppConfirm";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { SiteHeader } from "@/components/site/SiteHeader";
 import { Button } from "@/components/ui/button";
