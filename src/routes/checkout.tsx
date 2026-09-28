@@ -151,7 +151,23 @@ function CheckoutContent() {
             <p className="mt-2 text-sm text-muted-foreground">
               {t("done.ref", { ref: done.slice(0, 8).toUpperCase() })}
             </p>
-            <Button asChild variant="outline" className="mt-6 rounded-sm">
+            <WhatsAppConfirm
+              orderId={done}
+              fullName={fullName}
+              lines={items.map((i) => ({
+                name: i.product_name,
+                color: i.color_name,
+                quantity: i.quantity,
+              }))}
+              total={total}
+              wilaya={
+                rate
+                  ? `${String(code).padStart(2, "0")} — ${rate.wilaya_name}`
+                  : wilayaCode
+              }
+              commune={commune}
+            />
+            <Button asChild variant="outline" className="mt-3 rounded-sm">
               <Link to="/boutique">{t("done.continue")}</Link>
             </Button>
           </div>
