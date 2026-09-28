@@ -24,6 +24,7 @@ import {
   type Product,
 } from "@/lib/store";
 import { uploadImage } from "@/lib/upload";
+import { useFeature } from "@/lib/features";
 
 type VariantDraft = {
   id?: string;
@@ -69,6 +70,7 @@ const emptyDraft: Draft = {
 export function ProductsTab() {
   const queryClient = useQueryClient();
   const [draft, setDraft] = useState<Draft | null>(null);
+  const qtyDiscountOn = useFeature("qty_discount", false);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const fileInput = useRef<HTMLInputElement>(null);
