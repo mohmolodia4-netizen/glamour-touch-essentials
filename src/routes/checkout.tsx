@@ -63,6 +63,13 @@ function CheckoutContent() {
   const [deskAddress, setDeskAddress] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState<string | null>(null);
+  const [doneSnapshot, setDoneSnapshot] = useState<{
+    lines: { name: string; color: string | null; quantity: number }[];
+    total: number;
+    fullName: string;
+    wilaya: string;
+    commune: string;
+  } | null>(null);
   const { t } = useI18n();
 
   const code = wilayaCode ? Number(wilayaCode) : null;
