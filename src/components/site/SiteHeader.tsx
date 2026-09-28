@@ -8,6 +8,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { categoriesQuery, publicSettingsQuery } from "@/lib/store";
 import { CartDrawer } from "@/components/cart/CartDrawer";
+import { useFeature } from "@/lib/features";
 
 const navLinks = [
   { to: "/", label: "nav.home" },
@@ -19,6 +20,7 @@ export function SiteHeader() {
   const { t, lang, setLang } = useI18n();
   const { data: settings } = useQuery(publicSettingsQuery());
   const { data: categories = [] } = useQuery(categoriesQuery());
+  const cartOn = useFeature("cart", true);
 
   return (
     <header className="sticky top-0 z-40 border-b border-border/70 bg-background/85 backdrop-blur-md">
@@ -101,7 +103,7 @@ export function SiteHeader() {
           >
             {t("lang.switch")}
           </button>
-          <CartDrawer />
+          {cartOn ? <CartDrawer /> : null}
         </div>
       </div>
     </header>
