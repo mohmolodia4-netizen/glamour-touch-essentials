@@ -9,9 +9,15 @@ import { AddToCart } from "@/components/cart/AddToCart";
 import { useFeature } from "@/lib/features";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { SiteHeader } from "@/components/site/SiteHeader";
+import { ProductCard } from "@/components/site/ProductCard";
 import { Button } from "@/components/ui/button";
 import { trackPixel } from "@/lib/pixel";
-import { formatDzd, productQuery, productVariantsQuery } from "@/lib/store";
+import {
+  formatDzd,
+  productQuery,
+  productVariantsQuery,
+  productsQuery,
+} from "@/lib/store";
 
 export const Route = createFileRoute("/product/$id")({
   head: () => ({
