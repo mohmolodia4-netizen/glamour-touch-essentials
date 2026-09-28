@@ -240,6 +240,18 @@ function ProductPage() {
             </div>
           </div>
         )}
+        {showSimilar ? (
+          <section className="mt-16">
+            <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+              {t("product.similar")}
+            </p>
+            <div className="mt-6 grid grid-cols-2 gap-x-6 gap-y-10 lg:grid-cols-4">
+              {relatedProducts.map((item) => (
+                <ProductCard key={item.id} product={item} />
+              ))}
+            </div>
+          </section>
+        ) : null}
       </main>
       <SiteFooter />
     </div>
