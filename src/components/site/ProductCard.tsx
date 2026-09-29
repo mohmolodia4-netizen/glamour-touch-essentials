@@ -70,7 +70,7 @@ export function ProductCard({ product }: { product: Product }) {
         </div>
       </Link>
       {product.stock_quantity > 0 ? (
-        <div className="absolute inset-x-2 top-[calc((100%-4.5rem)-3rem)] sm:top-auto sm:bottom-[4.75rem]">
+        <div className="mt-3">
           <QuickAddToCart product={product} cover={cover} hasVariants={hasVariants} />
         </div>
       ) : null}
