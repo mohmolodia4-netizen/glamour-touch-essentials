@@ -21,9 +21,12 @@ export type Database = {
           google_sheet_webhook_url: string | null
           id: number
           instagram_url: string | null
+          logo_url: string | null
           meta_pixel_id: string | null
           phone: string | null
+          primary_color: string | null
           site_name: string
+          site_tagline: string | null
           telegram_bot_token: string | null
           telegram_chat_id: string | null
           tiktok_pixel_id: string | null
@@ -37,9 +40,12 @@ export type Database = {
           google_sheet_webhook_url?: string | null
           id?: number
           instagram_url?: string | null
+          logo_url?: string | null
           meta_pixel_id?: string | null
           phone?: string | null
+          primary_color?: string | null
           site_name?: string
+          site_tagline?: string | null
           telegram_bot_token?: string | null
           telegram_chat_id?: string | null
           tiktok_pixel_id?: string | null
@@ -53,9 +59,12 @@ export type Database = {
           google_sheet_webhook_url?: string | null
           id?: number
           instagram_url?: string | null
+          logo_url?: string | null
           meta_pixel_id?: string | null
           phone?: string | null
+          primary_color?: string | null
           site_name?: string
+          site_tagline?: string | null
           telegram_bot_token?: string | null
           telegram_chat_id?: string | null
           tiktok_pixel_id?: string | null
@@ -441,9 +450,12 @@ export type Database = {
           facebook_url: string
           features: Json
           instagram_url: string
+          logo_url: string
           meta_pixel_id: string
           phone: string
+          primary_color: string
           site_name: string
+          site_tagline: string
           tiktok_pixel_id: string
           tiktok_url: string
           whatsapp: string

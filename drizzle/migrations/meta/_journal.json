@@ -29,6 +29,13 @@
       "when": 1790611104649,
       "tag": "0003_qty_discount",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1790727948187,
+      "tag": "0004_site_branding_settings",
+      "breakpoints": true
     }
   ]
 }
