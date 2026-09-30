@@ -16,6 +16,10 @@ type Settings = {
   site_tagline: string;
   primary_color: string;
   logo_url: string;
+  hero_title: string;
+  hero_subtitle: string;
+  hero_image_url: string;
+  hero_button_text: string;
   phone: string;
   whatsapp: string;
   instagram_url: string;
@@ -59,6 +63,10 @@ const empty: Settings = {
   site_tagline: "Bags & Accessories",
   primary_color: "#556959",
   logo_url: "",
+  hero_title: "",
+  hero_subtitle: "",
+  hero_image_url: "",
+  hero_button_text: "",
   phone: "",
   whatsapp: "",
   instagram_url: "",
@@ -75,7 +83,7 @@ export function SettingsTab() {
   const queryClient = useQueryClient();
   const [form, setForm] = useState<Settings>(empty);
   const [saving, setSaving] = useState(false);
-  const [uploading, setUploading] = useState(false);
+  const [uploading, setUploading] = useState<"logo" | "hero" | null>(null);
   const [features, setFeatures] = useState<Record<string, boolean>>({});
 
   const { data, isLoading } = useQuery({
@@ -100,6 +108,10 @@ export function SettingsTab() {
       next.site_tagline = data.site_tagline || empty.site_tagline;
       next.primary_color = data.primary_color || empty.primary_color;
       next.logo_url = data.logo_url || "";
+      next.hero_title = data.hero_title || "";
+      next.hero_subtitle = data.hero_subtitle || "";
+      next.hero_image_url = data.hero_image_url || "";
+      next.hero_button_text = data.hero_button_text || "";
       return next;
     });
     setFeatures(
@@ -120,7 +132,7 @@ export function SettingsTab() {
     );
     const { error } = await (supabase as any)
       .from("app_settings")
-      .update({ ...payload, site_name: form.site_name.trim() || empty.site_name, site_tagline: form.site_tagline.trim() || empty.site_tagline, primary_color: form.primary_color.trim(), logo_url: form.logo_url || null, features: { ...(data?.features ?? {}), ...features } })
+      .update({ ...payload, site_name: form.site_name.trim() || empty.site_name, site_tagline: form.site_tagline.trim() || empty.site_tagline, primary_color: form.primary_color.trim(), logo_url: form.logo_url || null, hero_title: form.hero_title.trim() || null, hero_subtitle: form.hero_subtitle.trim() || null, hero_image_url: form.hero_image_url || null, hero_button_text: form.hero_button_text.trim() || null, features: { ...(data?.features ?? {}), ...features } })
       .eq("id", 1);
     setSaving(false);
     if (error) {
@@ -132,20 +144,20 @@ export function SettingsTab() {
     void queryClient.invalidateQueries({ queryKey: ["public_settings"] });
   }
 
-  async function handleLogo(file: File | undefined) {
+  async function handleImage(file: File | undefined, field: "logo_url" | "hero_image_url") {
     if (!file) return;
     if (!file.type.startsWith("image/")) {
       toast.error("Choisissez une image valide.");
       return;
     }
-    setUploading(true);
+    setUploading(field === "logo_url" ? "logo" : "hero");
     try {
-      const logo_url = await uploadImage(file);
-      setForm((current) => ({ ...current, logo_url }));
+      const url = await uploadImage(file);
+      setForm((current) => ({ ...current, [field]: url }));
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Échec de l'envoi");
     } finally {
-      setUploading(false);
+      setUploading(null);
     }
   }
 
@@ -176,12 +188,42 @@ export function SettingsTab() {
             <div className="flex min-h-10 items-center gap-3">
               {form.logo_url ? <img src={form.logo_url} alt="Logo actuel" className="max-h-12 max-w-28 object-contain" /> : <ImageIcon className="size-5 text-muted-foreground" />}
               <label className="inline-flex cursor-pointer items-center gap-2 text-sm text-primary">
-                {uploading ? <Loader2 className="size-4 animate-spin" /> : <Upload className="size-4" />}
-                {uploading ? "Envoi..." : "Importer"}
-                <input type="file" accept="image/*" className="sr-only" disabled={uploading} onChange={(event) => { void handleLogo(event.target.files?.[0]); event.target.value = ""; }} />
+                 {uploading === "logo" ? <Loader2 className="size-4 animate-spin" /> : <Upload className="size-4" />}
+                 {uploading === "logo" ? "Envoi..." : "Importer"}
+                 <input type="file" accept="image/*" className="sr-only" disabled={!!uploading} onChange={(event) => { void handleImage(event.target.files?.[0], "logo_url"); event.target.value = ""; }} />
               </label>
               {form.logo_url ? <Button variant="ghost" size="icon" type="button" aria-label="Supprimer le logo" onClick={() => setForm({ ...form, logo_url: "" })}><X className="size-4" /></Button> : null}
             </div>
+          </div>
+        </div>
+      </div>
+      <div className="rounded-sm border border-border p-5">
+        <h3 className="font-display text-xl">Page d'accueil</h3>
+        <div className="mt-4 grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-2">
+            <Label htmlFor="hero-title">Titre de la bannière</Label>
+            <Input id="hero-title" value={form.hero_title} onChange={(event) => setForm({ ...form, hero_title: event.target.value })} placeholder={form.site_name || "Glamour Touch"} className="rounded-sm" />
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="hero-button-text">Texte du bouton</Label>
+            <Input id="hero-button-text" value={form.hero_button_text} onChange={(event) => setForm({ ...form, hero_button_text: event.target.value })} placeholder="Découvrir" className="rounded-sm" />
+          </div>
+          <div className="grid gap-2 sm:col-span-2">
+            <Label htmlFor="hero-subtitle">Sous-titre de la bannière</Label>
+            <Input id="hero-subtitle" value={form.hero_subtitle} onChange={(event) => setForm({ ...form, hero_subtitle: event.target.value })} placeholder={form.site_tagline || "Bags & Accessories"} className="rounded-sm" />
+          </div>
+          <div className="grid gap-2 sm:col-span-2">
+            <Label htmlFor="hero-image">Image de la bannière</Label>
+            <div className="flex flex-wrap items-center gap-3">
+              {form.hero_image_url ? <img src={form.hero_image_url} alt="Image actuelle de la bannière" className="h-20 w-28 rounded-sm object-cover" /> : <ImageIcon className="size-5 text-muted-foreground" />}
+              <label className="inline-flex cursor-pointer items-center gap-2 text-sm text-primary">
+                {uploading === "hero" ? <Loader2 className="size-4 animate-spin" /> : <Upload className="size-4" />}
+                {uploading === "hero" ? "Envoi..." : "Importer"}
+                <input id="hero-image" type="file" accept="image/*" className="sr-only" disabled={!!uploading} onChange={(event) => { void handleImage(event.target.files?.[0], "hero_image_url"); event.target.value = ""; }} />
+              </label>
+              {form.hero_image_url ? <Button variant="ghost" size="icon" type="button" aria-label="Retirer l'image de la bannière" onClick={() => setForm({ ...form, hero_image_url: "" })}><X className="size-4" /></Button> : null}
+            </div>
+            <p className="text-xs text-muted-foreground">Sans image importée, l'image actuelle reste affichée.</p>
           </div>
         </div>
       </div>

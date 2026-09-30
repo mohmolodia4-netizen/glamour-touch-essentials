@@ -10,3 +10,4 @@
 <!-- LOVABLE:END -->
 
 - Storefront branding is served by `get_public_settings()` and mapped into `--brand-primary` at the root; this keeps all semantic primary controls in sync with admin settings without duplicating colors in individual pages.
+- Homepage hero overrides are served by `get_public_settings()` with null fallbacks to the existing brand copy and bundled image, so unset editor fields preserve the storefront.

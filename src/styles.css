@@ -187,3 +187,29 @@
   transform: translateY(-6px);
   box-shadow: var(--shadow-lift);
 }
+
+@keyframes hero-rise {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes hero-zoom {
+  from { transform: scale(1); }
+  to { transform: scale(1.05); }
+}
+
+.hero-copy-enter {
+  animation: hero-rise 600ms ease-out 120ms both;
+}
+
+.hero-image-enter {
+  animation: hero-rise 600ms ease-out both;
+}
+
+.hero-image-zoom {
+  animation: hero-zoom 9s ease-in-out infinite alternate;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-copy-enter, .hero-image-enter, .hero-image-zoom { animation: none; }
+}
