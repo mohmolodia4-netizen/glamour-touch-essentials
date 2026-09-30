@@ -76,6 +76,10 @@ export type PublicSettings = {
   site_tagline: string | null;
   primary_color: string | null;
   logo_url: string | null;
+  hero_title: string | null;
+  hero_subtitle: string | null;
+  hero_image_url: string | null;
+  hero_button_text: string | null;
   phone: string | null;
   whatsapp: string | null;
   instagram_url: string | null;

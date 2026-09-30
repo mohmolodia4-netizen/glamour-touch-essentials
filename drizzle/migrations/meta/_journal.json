@@ -43,6 +43,13 @@
       "when": 1790728016368,
       "tag": "0005_match_existing_sage_brand_default",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1790781097127,
+      "tag": "0006_homepage_hero_settings",
+      "breakpoints": true
     }
   ]
 }

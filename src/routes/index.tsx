@@ -56,29 +56,29 @@ function Home() {
 
       <section className="surface-hero">
         <div className="mx-auto grid max-w-6xl items-center gap-10 px-5 py-16 md:grid-cols-2 md:py-24">
-          <div className="text-center md:text-start">
+          <div className="hero-copy-enter text-center md:text-start">
             <p className="text-[10px] uppercase tracking-luxe text-primary">
               {t("home.overline")}
             </p>
             <h1 className="mt-5 font-display text-4xl leading-tight text-foreground sm:text-5xl md:text-6xl">
-              {settings?.site_name || "Glamour Touch"}
+              {settings?.hero_title || settings?.site_name || "Glamour Touch"}
             </h1>
             <p className="mx-auto mt-5 max-w-md text-sm leading-relaxed text-muted-foreground md:mx-0">
-              {settings?.site_tagline || t("brand.tagline")}
+              {settings?.hero_subtitle || settings?.site_tagline || t("brand.tagline")}
             </p>
             <div className="mt-8 flex justify-center gap-3 md:justify-start">
               <Button asChild className="h-12 rounded-sm px-8 text-xs uppercase tracking-[0.2em]">
-                <Link to="/boutique">{t("home.cta")}</Link>
+                <Link to="/boutique">{settings?.hero_button_text || t("home.cta")}</Link>
               </Button>
             </div>
           </div>
-          <div className="overflow-hidden rounded-sm shadow-soft">
+          <div className="hero-image-enter overflow-hidden rounded-sm shadow-soft">
             <img
-              src={heroBag}
+              src={settings?.hero_image_url || heroBag}
               alt={t("home.heroAlt")}
               width={1600}
               height={1200}
-              className="size-full object-cover"
+              className="hero-image-zoom size-full object-cover"
             />
           </div>
         </div>

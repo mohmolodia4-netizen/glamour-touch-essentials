@@ -19,6 +19,10 @@ export type Database = {
           facebook_url: string | null
           features: Json
           google_sheet_webhook_url: string | null
+          hero_button_text: string | null
+          hero_image_url: string | null
+          hero_subtitle: string | null
+          hero_title: string | null
           id: number
           instagram_url: string | null
           logo_url: string | null
@@ -38,6 +42,10 @@ export type Database = {
           facebook_url?: string | null
           features?: Json
           google_sheet_webhook_url?: string | null
+          hero_button_text?: string | null
+          hero_image_url?: string | null
+          hero_subtitle?: string | null
+          hero_title?: string | null
           id?: number
           instagram_url?: string | null
           logo_url?: string | null
@@ -57,6 +65,10 @@ export type Database = {
           facebook_url?: string | null
           features?: Json
           google_sheet_webhook_url?: string | null
+          hero_button_text?: string | null
+          hero_image_url?: string | null
+          hero_subtitle?: string | null
+          hero_title?: string | null
           id?: number
           instagram_url?: string | null
           logo_url?: string | null
@@ -449,6 +461,10 @@ export type Database = {
         Returns: {
           facebook_url: string
           features: Json
+          hero_button_text: string
+          hero_image_url: string
+          hero_subtitle: string
+          hero_title: string
           instagram_url: string
           logo_url: string
           meta_pixel_id: string
