@@ -25,6 +25,8 @@ export const Route = createFileRoute("/boutique")({
           "Toute la collection Glamour Touch : sacs à main, portefeuilles, bijoux, montres et accessoires pour femme.",
       },
       { property: "og:title", content: "Boutique — Glamour Touch" },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       {
         property: "og:description",
         content: "Sacs à main et accessoires de luxe, paiement à la livraison.",

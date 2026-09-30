@@ -57,7 +57,7 @@ const FIELDS: { key: keyof Settings; label: string; hint?: string }[] = [
 const empty: Settings = {
   site_name: "Glamour Touch",
   site_tagline: "Bags & Accessories",
-  primary_color: "#687C6C",
+  primary_color: "#556959",
   logo_url: "",
   phone: "",
   whatsapp: "",
@@ -168,7 +168,7 @@ export function SettingsTab() {
             <Label htmlFor="primary-color">Couleur principale</Label>
             <div className="flex items-center gap-2">
               <Input aria-label="Choisir la couleur" type="color" value={form.primary_color} onChange={(event) => setForm({ ...form, primary_color: event.target.value })} className="h-10 w-14 cursor-pointer rounded-sm p-1" />
-              <Input id="primary-color" value={form.primary_color} onChange={(event) => setForm({ ...form, primary_color: event.target.value })} placeholder="#687C6C" className="rounded-sm" />
+              <Input id="primary-color" value={form.primary_color} onChange={(event) => setForm({ ...form, primary_color: event.target.value })} placeholder="#556959" className="rounded-sm" />
             </div>
           </div>
           <div className="grid gap-2">

@@ -33,6 +33,8 @@ export const Route = createFileRoute("/checkout")({
       { title: "Mon panier — Glamour Touch" },
       { name: "description", content: "Finalisez votre commande Glamour Touch, paiement à la livraison." },
       { property: "og:title", content: "Mon panier — Glamour Touch" },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { property: "og:description", content: "Paiement à la livraison dans les 58 wilayas." },
     ],
   }),
