@@ -259,7 +259,7 @@ export function SettingsTab() {
           ))}
         </div>
       </div>
-      <Button onClick={save} disabled={saving || uploading} className="rounded-sm">
+      <Button onClick={save} disabled={saving || !!uploading} className="rounded-sm">
         {saving ? <Loader2 className="mr-2 size-4 animate-spin" /> : null}
         Enregistrer
       </Button>
