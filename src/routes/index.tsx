@@ -6,7 +6,7 @@ import { ProductCard } from "@/components/site/ProductCard";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { SiteHeader } from "@/components/site/SiteHeader";
 import { Button } from "@/components/ui/button";
-import { categoriesQuery, productsQuery } from "@/lib/store";
+import { categoriesQuery, productsQuery, publicSettingsQuery } from "@/lib/store";
 import { useI18n } from "@/lib/i18n";
 
 export const Route = createFileRoute("/")({
@@ -19,6 +19,8 @@ export const Route = createFileRoute("/")({
           "Découvrez la collection Glamour Touch : sacs à main, portefeuilles, bijoux et montres. Paiement à la livraison dans les 58 wilayas.",
       },
       { property: "og:title", content: "Glamour Touch — Sacs & Accessoires de luxe" },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       {
         property: "og:description",
         content:
@@ -42,6 +44,7 @@ function SectionTitle({ overline, title }: { overline: string; title: string }) 
 function Home() {
   const { data: products = [], isLoading } = useQuery(productsQuery());
   const { data: categories = [] } = useQuery(categoriesQuery());
+  const { data: settings } = useQuery(publicSettingsQuery());
   const { t } = useI18n();
 
   const bestSellers = products.filter((product) => product.featured).slice(0, 8);
@@ -58,12 +61,10 @@ function Home() {
               {t("home.overline")}
             </p>
             <h1 className="mt-5 font-display text-4xl leading-tight text-foreground sm:text-5xl md:text-6xl">
-              {t("home.title1")}
-              <br />
-              {t("home.title2")}
+              {settings?.site_name || "Glamour Touch"}
             </h1>
             <p className="mx-auto mt-5 max-w-md text-sm leading-relaxed text-muted-foreground md:mx-0">
-              {t("home.subtitle")}
+              {settings?.site_tagline || t("brand.tagline")}
             </p>
             <div className="mt-8 flex justify-center gap-3 md:justify-start">
               <Button asChild className="h-12 rounded-sm px-8 text-xs uppercase tracking-[0.2em]">

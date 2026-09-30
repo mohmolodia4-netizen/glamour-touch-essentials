@@ -12,9 +12,12 @@ export function SiteFooter() {
     <footer className="mt-24 border-t border-border bg-secondary/60">
       <div className="mx-auto grid max-w-6xl gap-10 px-5 py-14 md:grid-cols-3">
         <div>
-          <p className="font-display text-xl tracking-[0.24em] text-primary">
-            {settings?.site_name ?? "GLAMOUR TOUCH"}
-          </p>
+          {settings?.logo_url ? (
+            <img src={settings.logo_url} alt={settings.site_name || "Glamour Touch"} className="max-h-14 max-w-44 object-contain" />
+          ) : (
+            <p className="font-display text-xl text-primary">{settings?.site_name || "Glamour Touch"}</p>
+          )}
+          <p className="mt-1 text-xs text-muted-foreground">{settings?.site_tagline || t("brand.tagline")}</p>
           <p className="mt-3 max-w-xs text-sm leading-relaxed text-muted-foreground">
             {t("footer.about")}
           </p>
@@ -66,7 +69,7 @@ export function SiteFooter() {
         </div>
       </div>
       <div className="border-t border-border py-6 text-center text-xs tracking-[0.18em] text-muted-foreground">
-        © {new Date().getFullYear()} GLAMOUR TOUCH
+        © {new Date().getFullYear()} {settings?.site_name || "Glamour Touch"}
       </div>
     </footer>
   );
