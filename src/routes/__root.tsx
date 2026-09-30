@@ -1,4 +1,4 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
 import {
   Outlet,
   Link,
@@ -15,6 +15,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { PixelLoader } from "@/components/site/PixelLoader";
 import { CartProvider } from "@/lib/cart";
 import { I18nProvider } from "@/lib/i18n";
+import { publicSettingsQuery } from "@/lib/store";
 
 
 function NotFoundComponent() {
@@ -131,6 +132,7 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <BrandColor />
       <PixelLoader />
       <Toaster position="top-center" richColors />
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
@@ -142,4 +144,20 @@ function RootComponent() {
     </QueryClientProvider>
 
   );
+}
+
+function BrandColor() {
+  const { data: settings } = useQuery(publicSettingsQuery());
+  useEffect(() => {
+    const color = settings?.primary_color;
+    if (color && /^#[0-9a-fA-F]{6}$/.test(color)) {
+      document.documentElement.style.setProperty("--brand-primary", color);
+    } else {
+      document.documentElement.style.removeProperty("--brand-primary");
+    }
+    return () => {
+      document.documentElement.style.removeProperty("--brand-primary");
+    };
+  }, [settings?.primary_color]);
+  return null;
 }

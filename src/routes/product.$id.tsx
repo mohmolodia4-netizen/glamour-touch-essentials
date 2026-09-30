@@ -18,6 +18,7 @@ import {
   productQuery,
   productVariantsQuery,
   productsQuery,
+  publicSettingsQuery,
 } from "@/lib/store";
 
 export const Route = createFileRoute("/product/$id")({
@@ -30,6 +31,8 @@ export const Route = createFileRoute("/product/$id")({
           "Commandez ce modèle Glamour Touch avec paiement à la livraison, livraison à domicile ou retrait en bureau.",
       },
       { property: "og:title", content: "Produit — Glamour Touch" },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       {
         property: "og:description",
         content: "Paiement à la livraison, livraison dans les 58 wilayas.",
@@ -42,6 +45,7 @@ export const Route = createFileRoute("/product/$id")({
 function ProductPage() {
   const { id } = Route.useParams();
   const { data: product, isLoading } = useQuery(productQuery(id));
+  const { data: settings } = useQuery(publicSettingsQuery());
   const { data: variants = [] } = useQuery(productVariantsQuery(id));
   const [index, setIndex] = useState(0);
   const { t } = useI18n();
@@ -120,7 +124,7 @@ function ProductPage() {
                 ) : (
                   <div className="flex size-full flex-col items-center justify-center gap-2 text-xs uppercase tracking-[0.2em] text-muted-foreground">
                     <ImageIcon className="size-8 opacity-50" aria-hidden="true" />
-                    Glamour Touch
+                    {settings?.site_name || "Glamour Touch"}
                   </div>
                 )}
                 {images.length > 1 ? (

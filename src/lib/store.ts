@@ -73,6 +73,9 @@ export type Stopdesk = {
 
 export type PublicSettings = {
   site_name: string | null;
+  site_tagline: string | null;
+  primary_color: string | null;
+  logo_url: string | null;
   phone: string | null;
   whatsapp: string | null;
   instagram_url: string | null;

@@ -75,12 +75,16 @@ export function SiteHeader() {
           ))}
         </nav>
 
-        <Link to="/" className="flex flex-col items-center">
-          <span className="font-display text-2xl leading-none tracking-[0.24em] text-primary">
-            {settings?.site_name ?? "GLAMOUR TOUCH"}
-          </span>
-          <span className="mt-1 text-[9px] uppercase tracking-[0.3em] text-muted-foreground">
-            {t("brand.tagline")}
+        <Link to="/" className="flex min-w-0 flex-col items-center text-center" aria-label={settings?.site_name || "Glamour Touch"}>
+          {settings?.logo_url ? (
+            <img src={settings.logo_url} alt={settings.site_name || "Glamour Touch"} className="max-h-10 max-w-36 object-contain" />
+          ) : (
+            <span className="font-display text-xl leading-none text-primary sm:text-2xl">
+              {settings?.site_name || "Glamour Touch"}
+            </span>
+          )}
+          <span className="mt-1 max-w-36 truncate text-[9px] uppercase text-muted-foreground sm:max-w-56">
+            {settings?.site_tagline || t("brand.tagline")}
           </span>
         </Link>
 
