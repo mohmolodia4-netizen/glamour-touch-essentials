@@ -155,7 +155,9 @@ function BrandColor() {
     } else {
       document.documentElement.style.removeProperty("--brand-primary");
     }
-    return () => document.documentElement.style.removeProperty("--brand-primary");
+    return () => {
+      document.documentElement.style.removeProperty("--brand-primary");
+    };
   }, [settings?.primary_color]);
   return null;
 }

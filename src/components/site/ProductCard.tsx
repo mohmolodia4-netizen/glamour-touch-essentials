@@ -7,6 +7,7 @@ import { QuickAddToCart } from "@/components/cart/QuickAddToCart";
 import {
   formatDzd,
   pickVariantCover,
+  publicSettingsQuery,
   variantCoversQuery,
   type Product,
 } from "@/lib/store";
@@ -14,6 +15,7 @@ import {
 export function ProductCard({ product }: { product: Product }) {
   const discounted = product.old_price && product.old_price > product.price;
   const { data: covers = [] } = useQuery(variantCoversQuery());
+  const { data: settings } = useQuery(publicSettingsQuery());
   const { t } = useI18n();
 
   const cover =
@@ -43,7 +45,7 @@ export function ProductCard({ product }: { product: Product }) {
           ) : (
             <div className="flex size-full flex-col items-center justify-center gap-2 text-xs uppercase tracking-[0.2em] text-muted-foreground">
               <ImageIcon className="size-6 opacity-50" aria-hidden="true" />
-              Glamour Touch
+              {settings?.site_name || "Glamour Touch"}
             </div>
           )}
           {discounted ? (
