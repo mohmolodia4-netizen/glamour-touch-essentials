@@ -3,31 +3,30 @@ import { useQuery } from "@tanstack/react-query";
 import { ProductCard } from "@/components/site/ProductCard";
 import { useFeature } from "@/lib/features";
 import { useI18n } from "@/lib/i18n";
-import { productsQuery } from "@/lib/store";
+import { crossSellQuery, productsQuery } from "@/lib/store";
 
 /**
  * "Complétez votre look" — shown under the order success screens.
- * Gated by features.post_order_upsell (default OFF) and hidden when the
- * cart feature is off. Renders nothing when fewer than 2 products qualify.
+ * Shows admin-picked products (cross_sell_products, by sort_order), minus
+ * the current order's items. Gated by features.post_order_upsell and cart.
  */
 export function PostOrderUpsell({ excludeIds }: { excludeIds: string[] }) {
   const upsellOn = useFeature("post_order_upsell", false);
   const cartOn = useFeature("cart", true);
   const { t } = useI18n();
-  const { data: products = [] } = useQuery({
-    ...productsQuery(),
-    enabled: upsellOn && cartOn,
-  });
+  const enabled = upsellOn && cartOn;
+  const { data: products = [] } = useQuery({ ...productsQuery(), enabled });
+  const { data: picks = [] } = useQuery({ ...crossSellQuery(), enabled });
 
-  if (!upsellOn || !cartOn) return null;
+  if (!enabled) return null;
 
   const excluded = new Set(excludeIds);
-  // Prefer best sellers (the `featured` flag), then newest — productsQuery already orders by created_at desc.
-  const suggestions = products
-    .filter((p) => !excluded.has(p.id))
-    .sort((a, b) => Number(b.featured) - Number(a.featured))
-    .slice(0, 3);
-  if (suggestions.length < 2) return null;
+  const byId = new Map(products.map((p) => [p.id, p]));
+  const suggestions = picks
+    .filter((r) => !excluded.has(r.product_id))
+    .map((r) => byId.get(r.product_id))
+    .filter((p): p is NonNullable<typeof p> => !!p);
+  if (suggestions.length < 1) return null;
 
   return (
     <section aria-label={t("upsell.title")}>

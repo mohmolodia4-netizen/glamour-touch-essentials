@@ -10,6 +10,7 @@ import { Switch } from "@/components/ui/switch";
 import { FEATURES, resolveFeature } from "@/lib/features";
 import { supabase } from "@/integrations/supabase/client";
 import { uploadImage } from "@/lib/upload";
+import { CrossSellPicker } from "@/components/admin/CrossSellPicker";
 
 type Settings = {
   site_name: string;
@@ -259,6 +260,7 @@ export function SettingsTab() {
           ))}
         </div>
       </div>
+      <CrossSellPicker />
       <Button onClick={save} disabled={saving || !!uploading} className="rounded-sm">
         {saving ? <Loader2 className="mr-2 size-4 animate-spin" /> : null}
         Enregistrer
