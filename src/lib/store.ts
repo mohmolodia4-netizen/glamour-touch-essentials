@@ -110,6 +110,17 @@ export const productsQuery = () => ({
     ),
 });
 
+export type CrossSellRow = { id: string; product_id: string; sort_order: number };
+export const crossSellQuery = () => ({
+  queryKey: ["cross_sell"],
+  queryFn: async () =>
+    unwrap<CrossSellRow[]>(
+      await table("cross_sell_products")
+        .select("id, product_id, sort_order")
+        .order("sort_order", { ascending: true }),
+    ),
+});
+
 export const productQuery = (id: string) => ({
   queryKey: ["product", id],
   queryFn: async () => {
