@@ -110,5 +110,6 @@
   "cart.added": "Ajouté au panier",
   "cart.see": "Voir",
   "cart.seeMine": "Voir mon panier",
-  "product.qtyDiscount": "Achetez {n}, économisez {p}%"
+  "product.qtyDiscount": "Achetez {n}, économisez {p}%",
+  "upsell.title": "Complétez votre look"
 }
