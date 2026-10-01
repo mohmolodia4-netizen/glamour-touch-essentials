@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { WhatsAppConfirm } from "@/components/checkout/WhatsAppConfirm";
+import { PostOrderUpsell } from "@/components/checkout/PostOrderUpsell";
 import { trackPixel } from "@/lib/pixel";
 import { trackTiktok } from "@/lib/tiktok-pixel";
 import {
@@ -239,26 +240,29 @@ export function OrderForm({ product }: { product: Product }) {
       ? `${String(code).padStart(2, "0")} — ${rate.wilaya_name}`
       : wilayaCode;
     return (
-      <div className="rounded-sm border border-primary/30 bg-accent/50 p-8 text-center">
-        <ShieldCheck className="mx-auto size-8 text-primary" />
-        <h3 className="mt-4 font-display text-2xl text-foreground">
-          {t("done.title")}
-        </h3>
-        <p className="mt-2 text-sm text-muted-foreground">
-          {t("done.ref", { ref: done.slice(0, 8).toUpperCase() })}
-        </p>
-        <WhatsAppConfirm
-          orderId={done}
-          fullName={fullName}
-          lines={lines.map((line) => ({
-            name: product.name,
-            color: hasVariants ? line.color : null,
-            quantity: Math.max(1, line.quantity),
-          }))}
-          total={total}
-          wilaya={wilayaName}
-          commune={commune}
-        />
+      <div className="grid gap-12">
+        <div className="rounded-sm border border-primary/30 bg-accent/50 p-8 text-center">
+          <ShieldCheck className="mx-auto size-8 text-primary" />
+          <h3 className="mt-4 font-display text-2xl text-foreground">
+            {t("done.title")}
+          </h3>
+          <p className="mt-2 text-sm text-muted-foreground">
+            {t("done.ref", { ref: done.slice(0, 8).toUpperCase() })}
+          </p>
+          <WhatsAppConfirm
+            orderId={done}
+            fullName={fullName}
+            lines={lines.map((line) => ({
+              name: product.name,
+              color: hasVariants ? line.color : null,
+              quantity: Math.max(1, line.quantity),
+            }))}
+            total={total}
+            wilaya={wilayaName}
+            commune={commune}
+          />
+        </div>
+        <PostOrderUpsell excludeIds={[product.id]} />
       </div>
     );
   }

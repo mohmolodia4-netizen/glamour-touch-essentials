@@ -6,6 +6,7 @@ import { Loader2, ShieldCheck, Truck } from "lucide-react";
 
 import { CartLines } from "@/components/cart/CartDrawer";
 import { WhatsAppConfirm } from "@/components/checkout/WhatsAppConfirm";
+import { PostOrderUpsell } from "@/components/checkout/PostOrderUpsell";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { SiteHeader } from "@/components/site/SiteHeader";
 import { Button } from "@/components/ui/button";
@@ -67,6 +68,7 @@ function CheckoutContent() {
   const [done, setDone] = useState<string | null>(null);
   const [doneSnapshot, setDoneSnapshot] = useState<{
     lines: { name: string; color: string | null; quantity: number }[];
+    productIds: string[];
     total: number;
     fullName: string;
     wilaya: string;
@@ -146,6 +148,7 @@ function CheckoutContent() {
           color: i.color_name,
           quantity: i.quantity,
         })),
+        productIds: items.map((i) => i.product_id),
         total,
         fullName,
         wilaya: rate
@@ -168,25 +171,30 @@ function CheckoutContent() {
       <SiteHeader />
       <main className="mx-auto max-w-5xl px-5 py-10">
         {done ? (
-          <div className="mx-auto max-w-lg rounded-sm border border-primary/30 bg-accent/50 p-8 text-center">
-            <ShieldCheck className="mx-auto size-8 text-primary" />
-            <h1 className="mt-4 font-display text-2xl">{t("done.title")}</h1>
-            <p className="mt-2 text-sm text-muted-foreground">
-              {t("done.ref", { ref: done.slice(0, 8).toUpperCase() })}
-            </p>
+          <div className="grid gap-12">
+            <div className="mx-auto w-full max-w-lg rounded-sm border border-primary/30 bg-accent/50 p-8 text-center">
+              <ShieldCheck className="mx-auto size-8 text-primary" />
+              <h1 className="mt-4 font-display text-2xl">{t("done.title")}</h1>
+              <p className="mt-2 text-sm text-muted-foreground">
+                {t("done.ref", { ref: done.slice(0, 8).toUpperCase() })}
+              </p>
+              {doneSnapshot ? (
+                <WhatsAppConfirm
+                  orderId={done}
+                  fullName={doneSnapshot.fullName}
+                  lines={doneSnapshot.lines}
+                  total={doneSnapshot.total}
+                  wilaya={doneSnapshot.wilaya}
+                  commune={doneSnapshot.commune}
+                />
+              ) : null}
+              <Button asChild variant="outline" className="mt-3 rounded-sm">
+                <Link to="/boutique">{t("done.continue")}</Link>
+              </Button>
+            </div>
             {doneSnapshot ? (
-              <WhatsAppConfirm
-                orderId={done}
-                fullName={doneSnapshot.fullName}
-                lines={doneSnapshot.lines}
-                total={doneSnapshot.total}
-                wilaya={doneSnapshot.wilaya}
-                commune={doneSnapshot.commune}
-              />
+              <PostOrderUpsell excludeIds={doneSnapshot.productIds} />
             ) : null}
-            <Button asChild variant="outline" className="mt-3 rounded-sm">
-              <Link to="/boutique">{t("done.continue")}</Link>
-            </Button>
           </div>
         ) : items.length === 0 ? (
           <div className="py-24 text-center">
