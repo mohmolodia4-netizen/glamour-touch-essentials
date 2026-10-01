@@ -44,7 +44,9 @@ export function CrossSellPicker() {
     const j = i + dir;
     if (j < 0 || j >= rows.length) return;
     const order = [...rows];
-    [order[i], order[j]] = [order[j], order[i]];
+    const tmp = order[i]!;
+    order[i] = order[j]!;
+    order[j] = tmp;
     return run(() =>
       Promise.all(
         order.map((r, idx) =>
