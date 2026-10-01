@@ -50,6 +50,13 @@
       "when": 1790781097127,
       "tag": "0006_homepage_hero_settings",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1790880164177,
+      "tag": "0007_cross_sell_products",
+      "breakpoints": true
     }
   ]
 }
