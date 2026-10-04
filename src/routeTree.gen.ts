@@ -14,6 +14,7 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as BoutiqueRouteImport } from './routes/boutique'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as ProductIdRouteImport } from './routes/product.$id'
+import { Route as ApiPublicMigrateHelperRouteImport } from './routes/api/public/migrate-helper'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -40,6 +41,11 @@ const ProductIdRoute = ProductIdRouteImport.update({
   path: '/product/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicMigrateHelperRoute = ApiPublicMigrateHelperRouteImport.update({
+  id: '/api/public/migrate-helper',
+  path: '/api/public/migrate-helper',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -47,6 +53,7 @@ export interface FileRoutesByFullPath {
   '/boutique': typeof BoutiqueRoute
   '/checkout': typeof CheckoutRoute
   '/product/$id': typeof ProductIdRoute
+  '/api/public/migrate-helper': typeof ApiPublicMigrateHelperRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -54,6 +61,7 @@ export interface FileRoutesByTo {
   '/boutique': typeof BoutiqueRoute
   '/checkout': typeof CheckoutRoute
   '/product/$id': typeof ProductIdRoute
+  '/api/public/migrate-helper': typeof ApiPublicMigrateHelperRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -62,13 +70,33 @@ export interface FileRoutesById {
   '/boutique': typeof BoutiqueRoute
   '/checkout': typeof CheckoutRoute
   '/product/$id': typeof ProductIdRoute
+  '/api/public/migrate-helper': typeof ApiPublicMigrateHelperRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/admin' | '/boutique' | '/checkout' | '/product/$id'
+  fullPaths:
+    | '/'
+    | '/admin'
+    | '/boutique'
+    | '/checkout'
+    | '/product/$id'
+    | '/api/public/migrate-helper'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/admin' | '/boutique' | '/checkout' | '/product/$id'
-  id: '__root__' | '/' | '/admin' | '/boutique' | '/checkout' | '/product/$id'
+  to:
+    | '/'
+    | '/admin'
+    | '/boutique'
+    | '/checkout'
+    | '/product/$id'
+    | '/api/public/migrate-helper'
+  id:
+    | '__root__'
+    | '/'
+    | '/admin'
+    | '/boutique'
+    | '/checkout'
+    | '/product/$id'
+    | '/api/public/migrate-helper'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -77,6 +105,7 @@ export interface RootRouteChildren {
   BoutiqueRoute: typeof BoutiqueRoute
   CheckoutRoute: typeof CheckoutRoute
   ProductIdRoute: typeof ProductIdRoute
+  ApiPublicMigrateHelperRoute: typeof ApiPublicMigrateHelperRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -116,6 +145,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProductIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/migrate-helper': {
+      id: '/api/public/migrate-helper'
+      path: '/api/public/migrate-helper'
+      fullPath: '/api/public/migrate-helper'
+      preLoaderRoute: typeof ApiPublicMigrateHelperRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -125,6 +161,7 @@ const rootRouteChildren: RootRouteChildren = {
   BoutiqueRoute: BoutiqueRoute,
   CheckoutRoute: CheckoutRoute,
   ProductIdRoute: ProductIdRoute,
+  ApiPublicMigrateHelperRoute: ApiPublicMigrateHelperRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
