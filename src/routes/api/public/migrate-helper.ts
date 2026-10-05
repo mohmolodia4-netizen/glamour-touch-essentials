@@ -64,7 +64,7 @@ const handle = async (req: Request): Promise<Response> => {
   }
 
   const body = await readJsonBody(req);
-  if (body?.action === "ping") {
+  if (body?.["action"] === "ping") {
     return jsonResponse({
       ok: true,
       build_id: BUILD_ID,
