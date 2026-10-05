@@ -1,116 +1,275 @@
-# Glamour Touch Essentials
+# Glamour Touch
 
-👜Glamour Touch— Luxury Handbags & Accessories Store (Build Prompt)
+Glamour Touch is a bilingual, mobile-first e-commerce storefront for women’s handbags and accessories in Algeria. It supports guest cash-on-delivery orders, color variants, a persistent multi-product cart, home and Stopdesk delivery, an authenticated French-language administration dashboard, and automated order notifications.
 
-Build an elegant e-commerce store for women's luxury handbags, fashion accessories, wallets, jewelry, and watches called "Glamour Touch", using Lovable Cloud (managed Supabase) as backend and TanStack Start as framework.
+The application uses TanStack Start for the web app and Supabase/Lovable Cloud for authentication, PostgreSQL data, Row Level Security, image storage, database RPCs, and the order-notification Edge Function.
 
-🎨 Brand & Visual Identity
+## Features
 
-Palette: Sage Green, Ivory White, Light Beige, Dark Gray — luxury, elegant, feminine, premium feel, mobile-first.
+### Storefront
 
-🛍️ Storefront (Guest-Only, No Login for Customers)
+- Home page with an editable hero, featured best sellers, category grid, and new arrivals.
+- Product catalog at `/boutique`, including category filtering.
+- Shareable product pages at `/product/:id` with:
+  - image gallery and thumbnail navigation;
+  - color swatches backed by product variants;
+  - variant-specific images and stock;
+  - a configurable default variant image;
+  - price, optional old price, description, and stock status;
+  - direct cash-on-delivery checkout;
+  - optional quantity-discount messaging;
+  - optional related products from the same category.
+- Safe image fallbacks when a product or category has no uploaded image.
+- Responsive layouts with mobile overflow protection.
 
-Homepage: Hero banner, Best Sellers, category grid, New Arrivals. Product pages at /product/$id (shareable links for ads). Simple product image carousel.
+### French and Arabic
 
-🛒 Checkout (Cash on Delivery, on product page — NO cart)
+- French is the default storefront language.
+- The header includes a `FR / عربي` language switcher.
+- The selected language is persisted in `localStorage`.
+- Arabic uses right-to-left layout and the Cairo font.
+- Storefront navigation, footer, catalog, product pages, forms, cart, checkout, success messages, and reusable controls are translated.
+- Product names, category names, wilayas, communes, and DA prices remain exactly as entered.
+- The admin dashboard always stays in French and left-to-right.
 
-FIELDS & EXACT BEHAVIOR (must match precisely):
+### Product images and variants
 
-Full Name (Input, Required)
+- Product images are optional and support multiple uploads.
+- Products can have color variants with a name, color value, image, stock quantity, display order, and default-image flag.
+- If no default is selected, the first variant by display order becomes the fallback.
+- Storefront cover selection follows: default variant image, first variant image, product image, additional product image, then a clean branded placeholder.
+- Direct orders can contain multiple lines for the same product with different colors and quantities.
 
-Phone Number (Input, Required)
+### Shopping cart
 
-Wilaya (Searchable Dropdown, Required) — from the 58-wilaya shipping matrix below.
+- Guest cart stored in `localStorage`; no customer account is required.
+- Supports multiple different products and color variants in one order.
+- Cart drawer in the header with item count, quantity controls, removal, and subtotal.
+- Quick add-to-cart controls on product cards:
+  - products without variants add immediately;
+  - products with variants open an inline color picker first.
+- Dedicated `/checkout` route for multi-product cash-on-delivery orders.
+- Cart contents are cleared after a successful cart order.
 
-Delivery Method Selector (Radio Buttons / Toggle Bar):
+### Checkout and delivery
 
-Option A: "التوصيل للمنزل (À Domicile)"
+Both direct product checkout and cart checkout collect:
 
-Option B: "الاستلام من المكتب (Stopdesk / Bureau)"
+- full name;
+- phone number;
+- wilaya;
+- delivery method;
+- commune;
+- home address or Stopdesk location;
+- quantity and color selections where applicable.
 
-Dynamic behavior:
+Delivery behavior:
 
-"À Domicile": Commune dropdown = all home-delivery communes for selected wilaya. Address = free-text input (Required). Stopdesk field hidden.
+- **À domicile:** communes come from the commune directory and a free-text address is required.
+- **Stopdesk:** only communes with available Stopdesk points are shown, followed by a specific office selector.
+- Shipping is calculated from the selected wilaya and delivery method.
+- Totals update before submission and remain denominated in Algerian dinars (`DA`).
+- Orders are validated and priced again in PostgreSQL RPCs; client totals are not trusted.
+- Product and variant stock is validated and decremented atomically.
 
-"Stopdesk": Commune dropdown = ONLY communes with an active Stop Desk point for selected wilaya. Address becomes a Dropdown Select with the available Stop Desk addresses for that commune.
+### Quantity discounts
 
-Real-time total = Product Price + Delivery Fee (based on Wilaya + delivery method).
+- Products may define an optional minimum quantity and percentage discount.
+- The discount is calculated per product across all of that product’s color lines.
+- The discounted unit price is rounded to whole DA.
+- Display calculations are mirrored in the direct order form, cart drawer, and cart checkout.
+- Final pricing is enforced server-side by both active checkout RPCs.
+- The entire behavior is controlled by the `qty_discount` feature flag.
 
-Submit button: "Confirmer la Commande" (تأكيد الطلب).
+### Order success features
 
-Fires Meta Pixel events: ViewContent, InitiateCheckout, Purchase.
+- Both checkout flows show an order reference after success.
+- Optional **Confirmer sur WhatsApp** button opens a prefilled WhatsApp message containing the order reference, customer, product lines, total, wilaya, and commune.
+- Optional **Complétez votre look** section displays admin-selected published products in a configured order, excluding products in the completed order.
+- Post-order suggestions remain hidden when either `post_order_upsell` or the cart feature is disabled.
 
-📍 SHIPPING DATA
+### Runtime branding and content
 
-I will attach two files directly in the Lovable chat after this prompt:
+Administrators can update without code changes:
 
-Communes dataset (wilaya code, wilaya name, commune name, postal code) — for the "À Domicile" dropdown.
+- site name and tagline;
+- primary brand color;
+- logo;
+- hero title, subtitle, image, and button text;
+- phone and WhatsApp number;
+- Instagram, Facebook, and TikTok links;
+- Meta Pixel and TikTok Pixel IDs.
 
-Stopdesk dataset (wilaya code, wilaya name, point name/code, address) — for the "Stopdesk" dropdown.
+The primary color is exposed as the runtime CSS variable `--brand-primary` and feeds the semantic accent, button, badge, focus-ring, and sidebar colors. The hero uses subtle staggered entrance motion and a slow image zoom, with reduced-motion support.
 
-Import both into the database as seed data (communes table + stopdesks table, linked by wilaya code), same as the Kidzyy project. Read them from the attached files — do not ask me to paste rows here.
+## Feature flags
 
-Use this 58-wilaya pricing matrix for shipping_rates (domicile + stopdesk fees in DZD):
+The singleton `app_settings.features` JSON object is editable from the **Fonctionnalités** card in the admin dashboard.
 
-[ {"code": 1, "name": "Adrar", "domicile": 1100, "stopdesk": 750}, {"code": 2, "name": "Chlef", "domicile": 680, "stopdesk": 400}, {"code": 3, "name": "Laghouat", "domicile": 800, "stopdesk": 500}, {"code": 4, "name": "Oum El Bouaghi", "domicile": 680, "stopdesk": 400}, {"code": 5, "name": "Batna", "domicile": 700, "stopdesk": 400}, {"code": 6, "name": "Béjaïa", "domicile": 700, "stopdesk": 400}, {"code": 7, "name": "Biskra", "domicile": 800, "stopdesk": 500}, {"code": 8, "name": "Béchar", "domicile": 1000, "stopdesk": 700}, {"code": 9, "name": "Blida", "domicile": 500, "stopdesk": 350}, {"code": 10, "name": "Bouira", "domicile": 600, "stopdesk": 400}, {"code": 11, "name": "Tamanrasset", "domicile": 1500, "stopdesk": 1050}, {"code": 12, "name": "Tébessa", "domicile": 720, "stopdesk": 450}, {"code": 13, "name": "Tlemcen", "domicile": 700, "stopdesk": 400}, {"code": 14, "name": "Tiaret", "domicile": 700, "stopdesk": 400}, {"code": 15, "name": "Tizi Ouzou", "domicile": 600, "stopdesk": 400}, {"code": 16, "name": "Alger", "domicile": 400, "stopdesk": 300}, {"code": 17, "name": "Djelfa", "domicile": 800, "stopdesk": 500}, {"code": 18, "name": "Jijel", "domicile": 700, "stopdesk": 400}, {"code": 19, "name": "Sétif", "domicile": 680, "stopdesk": 400}, {"code": 20, "name": "Saïda", "domicile": 730, "stopdesk": 450}, {"code": 21, "name": "Skikda", "domicile": 700, "stopdesk": 400}, {"code": 22, "name": "Sidi Bel Abbès", "domicile": 700, "stopdesk": 400}, {"code": 23, "name": "Annaba", "domicile": 700, "stopdesk": 450}, {"code": 24, "name": "Guelma", "domicile": 700, "stopdesk": 400}, {"code": 25, "name": "Constantine", "domicile": 680, "stopdesk": 400}, {"code": 26, "name": "Médéa", "domicile": 600, "stopdesk": 400}, {"code": 27, "name": "Mostaganem", "domicile": 700, "stopdesk": 400}, {"code": 28, "name": "M'Sila", "domicile": 700, "stopdesk": 400}, {"code": 29, "name": "Mascara", "domicile": 700, "stopdesk": 400}, {"code": 30, "name": "Ouargla", "domicile": 900, "stopdesk": 550}, {"code": 31, "name": "Oran", "domicile": 580, "stopdesk": 400}, {"code": 32, "name": "El Bayadh", "domicile": 970, "stopdesk": 700}, {"code": 33, "name": "Illizi", "domicile": 1500, "stopdesk": 1050}, {"code": 34, "name": "Bordj Bou Arreridj", "domicile": 680, "stopdesk": 400}, {"code": 35, "name": "Boumerdès", "domicile": 530, "stopdesk": 350}, {"code": 36, "name": "El Tarf", "domicile": 730, "stopdesk": 450}, {"code": 37, "name": "Tindouf", "domicile": 1100, "stopdesk": 750}, {"code": 38, "name": "Tissemsilt", "domicile": 700, "stopdesk": 400}, {"code": 39, "name": "El Oued", "domicile": 900, "stopdesk": 550}, {"code": 40, "name": "Khenchela", "domicile": 700, "stopdesk": 400}, {"code": 41, "name": "Souk Ahras", "domicile": 730, "stopdesk": 450}, {"code": 42, "name": "Tipaza", "domicile": 530, "stopdesk": 350}, {"code": 43, "name": "Mila", "domicile": 700, "stopdesk": 400}, {"code": 44, "name": "Aïn Defla", "domicile": 700, "stopdesk": 400}, {"code": 45, "name": "Naâma", "domicile": 930, "stopdesk": 550}, {"code": 46, "name": "Aïn Témouchent", "domicile": 700, "stopdesk": 400}, {"code": 47, "name": "Ghardaïa", "domicile": 850, "stopdesk": 500}, {"code": 48, "name": "Relizane", "domicile": 700, "stopdesk": 400}, {"code": 49, "name": "Timimoun", "domicile": 1100, "stopdesk": 750}, {"code": 51, "name": "Ouled Djellal", "domicile": 800, "stopdesk": 500}, {"code": 52, "name": "Beni Abbes", "domicile": 1000, "stopdesk": 750}, {"code": 53, "name": "In Salah", "domicile": 1400, "stopdesk": 950}, {"code": 55, "name": "Touggourt", "domicile": 930, "stopdesk": 550}, {"code": 56, "name": "Djanet", "domicile": 2100, "stopdesk": 1500}, {"code": 57, "name": "El M'Ghair", "domicile": 930, "stopdesk": 550}, {"code": 58, "name": "El Meniaa", "domicile": 850, "stopdesk": 500} ]
+Implemented gates:
 
-🗄️ Backend Architecture (CRITICAL — read carefully)
+| Key | Default | Current behavior |
+| --- | --- | --- |
+| `cart` | On | Cart icon, product add-to-cart controls, cart checkout, and post-order upsells |
+| `similar_products` | Off | Related-product section on product pages |
+| `qty_discount` | Off | Quantity discount fields, hints, display pricing, and server-side discounting |
+| `post_order_upsell` | Off | Admin-selected products on order success screens |
+| `whatsapp_confirm` | Off | WhatsApp confirmation button on order success screens |
 
-⚠️ This store must deploy to any host (Vercel, Netlify, Lovable hosting) with zero manual secret setup on that host. Therefore:
+The settings UI also stores `whatsapp_order`, `wishlist`, `bundles`, and `order_alerts`. These keys are reserved in the current codebase and do not yet control a separate storefront or admin feature.
 
-Do NOT use TanStack Start server functions (createServerFn) or any server.ts file importing a service-role Supabase client for writes (orders) or reads of sensitive settings (Telegram tokens). That pattern requires SUPABASE_SERVICE_ROLE_KEY set manually on every host and breaks deployments.
+## Analytics
 
-INSTEAD:
+Pixel scripts are loaded only when their IDs are configured in site settings.
 
-Order creation: a Postgres RPC function place_order(...) (SECURITY DEFINER), called from the client via supabase.rpc('place_order', {...}) using only the public anon key. Validates input, checks stock, computes shipping, inserts order, decrements stock, returns order id.
+### Meta Pixel
 
-Telegram notifications: a Supabase Edge Function (e.g. send-order-notifications) using the service role key stored as a Supabase project secret (not a host env var). Client calls the edge function with order_id only; edge function re-fetches order and sends the Telegram message.
+- `PageView` when the pixel initializes.
+- `ViewContent` on product pages.
+- `InitiateCheckout` when the direct product order form is first engaged.
+- `Purchase` after a successful direct product order.
 
-Any other privileged operation goes through RLS policies or additional SECURITY DEFINER RPC / Edge Functions — never a service-role client in deployed frontend server code.
+### TikTok Pixel
 
-Tables (RLS on all):
+- Page tracking when the pixel initializes.
+- `CompletePayment` after a successful direct product order.
+- `PlaceAnOrder` after a successful direct product order.
 
-categories: name, slug, image_url, status | public read published; admin ALL
+The current cart checkout does not emit the direct-order Meta or TikTok conversion events.
 
-products: name, description, price, old_price, image_url, image_urls[], category_id, stock_quantity, status, featured | public read published; admin ALL
+## Admin dashboard
 
-orders: product_id/name/price, quantity, full_name, phone, commune, wilaya_id/name, delivery_type, shipping_fee, total, status, adresse | anon INSERT via place_order RPC only; admin SELECT/UPDATE/DELETE
+The `/admin` route uses email/password authentication and role checks from `user_roles`. If no administrator exists, the first authenticated account can claim the initial admin role through `claim_first_admin()`.
 
-shipping_rates: 58 wilayas, domicile + stopdesk fees | public read; admin manage
+The dashboard is always French/LTR and contains four tabs:
 
-app_settings: site name, phone/WhatsApp, Instagram/Facebook/TikTok URLs, Meta Pixel ID, Telegram bot token + chat id | admin only
+### Commandes
 
-Security-definer functions: has_role(_user_id, _role); place_order(...) as above.
+- List orders and their item/color breakdowns.
+- Search by customer, phone, product, wilaya, or commune.
+- Filter by order status.
+- Update an individual order to En attente, Confirmée, Expédiée, Livrée, or Annulée.
+- Select individual orders or all currently filtered orders.
+- Apply a bulk status change from a sticky action bar.
+- Copy phone numbers, open WhatsApp, or delete an order.
+- Trigger Google Sheets synchronization after status updates.
 
-🔐 Admin Dashboard (Supabase Auth email/password, /admin)
+### Produits
 
-Tabs: Commandes, Produits, Catégories, Réglages.
+- Create, edit, and delete products.
+- Manage name, description, current and old price, category, stock, published/draft status, and featured status.
+- Upload and remove optional product images.
+- Create, edit, and remove color variants with per-variant stock and images.
+- Select one default variant image.
+- Configure optional quantity discounts when that feature is enabled.
 
-Commandes: view/search/filter by status, copy phone, WhatsApp link.
+### Catégories
 
-Produits: CRUD, multi-image upload to Supabase Storage, live previews, stock/price/status/featured.
+- Create, edit, and delete categories.
+- Manage name, slug, display order, and image.
 
-Catégories: CRUD + image upload.
+### Paramètres
 
-Réglages — two cards:
+- **Design & Contenu:** site name, tagline, primary color, and logo.
+- **Page d’accueil:** hero title, subtitle, image, and button label.
+- Contact and social links.
+- Meta Pixel and TikTok Pixel IDs.
+- Telegram bot configuration, including comma-separated chat IDs.
+- Google Sheets webhook URL.
+- Feature switches.
+- Searchable, reorderable post-order cross-sell product selection with immediate saving.
 
-"Site & Marketing": store name, WhatsApp, Instagram/Facebook/TikTok URLs, Meta Pixel ID — one "Enregistrer" button.
+## Database
 
-"Notifications Telegram": Bot Token, Chat ID, "Enregistrer" button, "Tester la connexion" button (calls the Edge Function). Values stored in app_settings, admin-only access.
+All application tables use Row Level Security. Public access is limited to published catalog data and shipping lookup data. Orders are created through security-definer RPCs; authenticated administrators manage protected data through role-based policies.
 
-⚠️ Critical Rules
+### Tables
 
-Guest checkout only — never show login to visitors.
+| Table | Purpose |
+| --- | --- |
+| `app_settings` | Singleton branding, hero content, contact links, pixel IDs, feature flags, and notification configuration |
+| `categories` | Storefront categories, slugs, images, publication status, and ordering |
+| `products` | Product content, pricing, images, stock, publication/featured state, and quantity-discount rules |
+| `product_variants` | Color-specific images, stock, ordering, and default-image selection |
+| `orders` | Customer, delivery, totals, status, Stopdesk code, and Google Sheets synchronization state |
+| `order_items` | Product/color/quantity/unit-price lines for direct and cart orders |
+| `shipping_rates` | Home and Stopdesk fees by wilaya |
+| `communes` | Wilaya/commune/postal-code directory used by home delivery |
+| `stopdesks` | Wilaya/commune office names, codes, and addresses |
+| `cross_sell_products` | Admin-selected and ordered post-purchase product suggestions |
+| `user_roles` | Separate `admin` and `user` role assignments |
 
-RLS on every table; anon can only INSERT orders via place_order RPC.
+The `product-images` storage bucket holds product, category, logo, hero, and variant uploads. The application stores long-lived signed URLs for uploaded images.
 
-Telegram + any privileged operation runs only inside a Supabase Edge Function — never in a TanStack server function or host-dependent env var.
+### Database functions and RPCs
 
-No hardcoded admin credentials; roles in user_roles.
+| Function | Purpose |
+| --- | --- |
+| `has_role(_user_id, _role)` | Checks role membership for RLS and admin access |
+| `claim_first_admin()` | Allows the first authenticated user to claim the initial admin role |
+| `get_public_settings()` | Exposes the non-sensitive storefront settings needed by public pages |
+| `discounted_unit(...)` | Calculates a rounded quantity-discounted unit price |
+| `qty_discount_on()` | Reads the server-side quantity-discount feature flag |
+| `place_order_items(...)` | Creates a direct product order with one or more color/quantity lines and atomic stock updates |
+| `place_cart_order(...)` | Creates a multi-product cart order, validates each line, calculates shipping and discounts, and updates stock atomically |
+| `place_order(...)` | Legacy single-line order overloads retained in the database |
+| `set_updated_at()` | Maintains `updated_at` timestamps through table triggers |
 
-Verify no client.server.ts or server-only file imports SUPABASE_SERVICE_ROLE_KEY anywhere — checkout and notifications must work identically on Lovable, Vercel, or Netlify with only the public Supabase URL and anon key.
+The repository also includes `supabase/schema/full_schema_baseline.sql`, an idempotent, non-destructive schema baseline for recreating the core database structure without copying application data.
 
-This project was built with [Lovable](https://lovable.dev).
+## Notifications and external integrations
+
+### `send-order-notifications` Edge Function
+
+The deployed Edge Function receives an order ID and reloads the order and its lines from the database.
+
+- Sends a formatted new-order message to one or more comma-separated Telegram chat IDs.
+- Includes cart lines or direct-order color lines in the Telegram message.
+- Sends order and status payloads to the configured Google Sheets webhook.
+- Maps internal statuses to the French labels En attente, Confirmée, Expédiée, Livrée, and Annulée.
+- Uses `addOrder`, `updateStatus`, `archiveOrder`, or `cancelOrder` according to the current status.
+- Stores `sheet_sent_at` to avoid appending the same order more than once.
+- Treats notification failures separately from order creation so a customer order can still succeed.
+- Sends the Stopdesk code to the Sheets integration for Stopdesk orders.
+
+### `/api/public/migrate-helper`
+
+This TanStack server route exposes protected migration diagnostics over `GET` and `POST`. Every request requires the configured access header. Its `ping` action reports whether the required server environment is available. It is not used by the storefront checkout flow.
+
+## Tech stack
+
+- React 19
+- TanStack Start and TanStack Router
+- TanStack Query
+- TypeScript
+- Vite
+- Tailwind CSS 4
+- shadcn-style UI components built on Radix UI
+- Supabase/Lovable Cloud: PostgreSQL, Auth, Storage, RLS, RPCs, and Edge Functions
+- Sonner notifications
+- React Hook Form and Zod dependencies
+- Lucide icons
+
+## Project routes
+
+| Route | Description |
+| --- | --- |
+| `/` | Storefront home page |
+| `/boutique` | Product catalog and category filtering |
+| `/product/:id` | Product details and direct checkout |
+| `/checkout` | Multi-product cart checkout |
+| `/admin` | Authenticated administration dashboard |
+| `/api/public/migrate-helper` | Access-key-protected migration diagnostics endpoint |
+
+## Deployment notes
+
+- The current project is connected to Lovable Cloud, which provides its Supabase-compatible backend.
+- Public browser access requires `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY`. The generated client can also use the corresponding server-side public values during rendering.
+- The `send-order-notifications` Edge Function requires its platform-provided database URL and service-role credential. Telegram and Google Sheets values are read from the protected `app_settings` row, not exposed through `get_public_settings()`.
+- `/api/public/migrate-helper` requires `MIGRATE_HELPER_ACCESS_KEY`, `SUPABASE_DB_URL`, and `SUPABASE_SERVICE_ROLE_KEY` in the server runtime.
+- Never expose service-role credentials, Telegram tokens, database URLs, migration access keys, or other private values in client code or committed files.
+- Database changes live under `supabase/migrations`. The consolidated schema reference is `supabase/schema/full_schema_baseline.sql`.
+- The storefront itself performs public reads and checkout RPC calls with the publishable client; administrator writes remain protected by authentication and RLS.
 
 ## Build with Lovable
 
