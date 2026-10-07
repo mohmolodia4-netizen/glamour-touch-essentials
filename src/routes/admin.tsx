@@ -29,9 +29,23 @@ const PAGE_COPY: Record<AdminTab, { title: string; subtitle: string }> = {
 
 export const Route = createFileRoute("/admin")({
   ssr: false,
-  validateSearch: (search: Record<string, unknown>): { tab: AdminTab } => ({
-    tab: ADMIN_TABS.includes(search["tab"] as AdminTab) ? (search["tab"] as AdminTab) : "orders",
-  }),
+  validateSearch: (
+    search: Record<string, unknown>,
+  ): {
+    tab: AdminTab;
+    range?: string | undefined;
+    from?: string | undefined;
+    to?: string | undefined;
+  } => {
+    const str = (value: unknown) =>
+      typeof value === "string" && value.length > 0 ? value : undefined;
+    return {
+      tab: ADMIN_TABS.includes(search["tab"] as AdminTab) ? (search["tab"] as AdminTab) : "orders",
+      range: str(search["range"]),
+      from: str(search["from"]),
+      to: str(search["to"]),
+    };
+  },
   head: () => ({
     meta: [
       { title: "Administration — Glamour Touch" },

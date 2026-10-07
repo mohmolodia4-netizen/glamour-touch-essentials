@@ -1,6 +1,13 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { getRouteApi } from "@tanstack/react-router";
 import { Copy, MessageCircle, Trash2 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+
+import {
+  OrderDateFilter,
+  resolveDateBounds,
+  type DateFilterValue,
+} from "@/components/admin/OrderDateFilter";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -58,6 +65,8 @@ function itemsLabel(order: Order) {
   return items.map((item) => `${item.quantity}x ${item.color_name}`).join(", ");
 }
 
+const adminRoute = getRouteApi("/admin");
+
 export function OrdersTab() {
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
@@ -66,13 +75,33 @@ export function OrdersTab() {
   const [bulkStatus, setBulkStatus] = useState("confirmed");
   const [bulkBusy, setBulkBusy] = useState(false);
 
+  const { range, from, to } = adminRoute.useSearch();
+  const navigate = adminRoute.useNavigate();
+  const bounds = resolveDateBounds({ range, from, to });
+  const startIso = bounds?.start.toISOString() ?? null;
+  const endIso = bounds?.end.toISOString() ?? null;
+
+  useEffect(() => {
+    setSelected(new Set());
+  }, [startIso, endIso]);
+
+  function changeDateFilter(next: DateFilterValue) {
+    void navigate({
+      search: (prev) => ({ ...prev, range: next.range, from: next.from, to: next.to }),
+      replace: true,
+    });
+  }
+
   const { data: orders = [], isLoading } = useQuery({
-    queryKey: ["admin", "orders"],
+    queryKey: ["admin", "orders", startIso, endIso],
     queryFn: async () => {
-      const { data, error } = await (supabase as any)
+      let query = (supabase as any)
         .from("orders")
-        .select("*, order_items(color_name, quantity, product_name, unit_price)")
-        .order("created_at", { ascending: false });
+        .select("*, order_items(color_name, quantity, product_name, unit_price)");
+      if (startIso && endIso) {
+        query = query.gte("created_at", startIso).lt("created_at", endIso);
+      }
+      const { data, error } = await query.order("created_at", { ascending: false });
       if (error) throw new Error(error.message);
       return (data ?? []) as Order[];
     },
@@ -249,19 +278,22 @@ export function OrdersTab() {
           </TabsList>
         </div>
       </Tabs>
-      <div className="flex flex-col gap-3 sm:flex-row">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
         <Input
           value={search}
           onChange={(event) => setSearch(event.target.value)}
           placeholder="Rechercher (nom, téléphone, produit...)"
           className="h-11 rounded-sm sm:max-w-sm"
         />
+        <OrderDateFilter value={{ range, from, to }} onChange={changeDateFilter} />
       </div>
 
       {isLoading ? (
         <p className="text-sm text-muted-foreground">Chargement...</p>
       ) : visible.length === 0 ? (
-        <p className="text-sm text-muted-foreground">Aucune commande.</p>
+        <p className="text-sm text-muted-foreground">
+          {bounds ? "Aucune commande sur cette période." : "Aucune commande."}
+        </p>
       ) : (
         <div className="space-y-3">
           {selected.size === 0 && (
