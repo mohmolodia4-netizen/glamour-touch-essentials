@@ -1,4 +1,4 @@
-import { addDays, format, isValid, parseISO, startOfDay, startOfMonth } from "date-fns";
+import { addDays, addMonths, format, isValid, parseISO, startOfDay, startOfMonth } from "date-fns";
 import { fr } from "date-fns/locale";
 import { CalendarIcon, X } from "lucide-react";
 import { useState } from "react";
@@ -178,7 +178,8 @@ export function OrderDateFilter({
                 locale={fr}
                 selected={selected}
                 onSelect={pickRange}
-                {...(selected?.from ? { defaultMonth: selected.from } : {})}
+                defaultMonth={addMonths(selected?.to ?? new Date(), isMobile ? 0 : -1)}
+                endMonth={new Date()}
                 numberOfMonths={isMobile ? 1 : 2}
                 disabled={{ after: new Date() }}
                 className="pointer-events-auto p-3"
