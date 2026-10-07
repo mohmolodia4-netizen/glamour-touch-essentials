@@ -278,19 +278,22 @@ export function OrdersTab() {
           </TabsList>
         </div>
       </Tabs>
-      <div className="flex flex-col gap-3 sm:flex-row">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
         <Input
           value={search}
           onChange={(event) => setSearch(event.target.value)}
           placeholder="Rechercher (nom, téléphone, produit...)"
           className="h-11 rounded-sm sm:max-w-sm"
         />
+        <OrderDateFilter value={{ range, from, to }} onChange={changeDateFilter} />
       </div>
 
       {isLoading ? (
         <p className="text-sm text-muted-foreground">Chargement...</p>
       ) : visible.length === 0 ? (
-        <p className="text-sm text-muted-foreground">Aucune commande.</p>
+        <p className="text-sm text-muted-foreground">
+          {bounds ? "Aucune commande sur cette période." : "Aucune commande."}
+        </p>
       ) : (
         <div className="space-y-3">
           {selected.size === 0 && (
