@@ -3,7 +3,7 @@ import { getRouteApi } from "@tanstack/react-router";
 import { format, parseISO } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Loader2 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Bar, CartesianGrid, ComposedChart, Line, XAxis, YAxis } from "recharts";
 import { toast } from "sonner";
 
@@ -74,6 +74,12 @@ function pct(part: number, whole: number) {
 }
 
 export function DashboardTab() {
+  const { tab } = adminRoute.useSearch();
+  const navigate = adminRoute.useNavigate();
+  // Pin the tab in the URL so switching the feature off keeps this page open.
+  useEffect(() => {
+    if (!tab) void navigate({ search: (prev) => ({ ...prev, tab: "dashboard" }), replace: true });
+  }, [tab, navigate]);
   const enabled = useFeature(FEATURE_KEY, false);
   const config = useFeatureConfig<DashboardConfig>(FEATURE_KEY);
   const visibleKpis = (
