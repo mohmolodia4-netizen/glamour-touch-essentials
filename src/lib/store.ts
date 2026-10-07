@@ -61,6 +61,7 @@ export type ShippingRate = {
   wilaya_name: string;
   domicile_fee: number;
   stopdesk_fee: number;
+  active?: boolean;
 };
 
 export type Commune = { commune_name: string; postal_code: string | null };
@@ -171,7 +172,7 @@ export const shippingRatesQuery = () => ({
   queryKey: ["shipping_rates"],
   queryFn: async () =>
     unwrap<ShippingRate[]>(
-      await table("shipping_rates").select("*").order("wilaya_code"),
+      await table("shipping_rates").select("*").eq("active", true).order("wilaya_code"),
     ),
 });
 
@@ -195,6 +196,7 @@ export const stopdesksQuery = (wilayaCode: number | null) => ({
       await table("stopdesks")
         .select("commune_name, desk_name, desk_code, address")
         .eq("wilaya_code", wilayaCode)
+        .eq("active", true)
         .order("commune_name"),
     ),
 });

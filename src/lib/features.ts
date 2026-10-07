@@ -13,6 +13,7 @@ export const FEATURES: { key: string; label: string; default: boolean }[] = [
   { key: "whatsapp_confirm", label: "Confirmation WhatsApp après commande", default: false },
   { key: "order_alerts", label: "Alerte son nouvelle commande (admin)", default: false },
   { key: "dashboard", label: "Tableau de bord (admin)", default: false },
+  { key: "free_shipping", label: "Livraison gratuite", default: false },
 ];
 
 export function resolveFeature(
@@ -34,4 +35,12 @@ export function useFeatureConfig<T = Record<string, unknown>>(key: string): T | 
   const value = data?.feature_config?.[key];
   if (!value || typeof value !== "object" || Array.isArray(value)) return null;
   return value as T;
+}
+
+/** Free-shipping threshold in DA when the feature is on and configured, else null. */
+export function useFreeShippingThreshold(): number | null {
+  const on = useFeature("free_shipping", false);
+  const config = useFeatureConfig<{ threshold?: unknown }>("free_shipping");
+  const amount = Number(config?.threshold);
+  return on && Number.isFinite(amount) && amount > 0 ? amount : null;
 }

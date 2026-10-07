@@ -111,5 +111,7 @@
   "cart.see": "Voir",
   "cart.seeMine": "Voir mon panier",
   "product.qtyDiscount": "Achetez {n}, économisez {p}%",
-  "upsell.title": "Complétez votre look"
+  "upsell.title": "Complétez votre look",
+  "form.shippingFree": "Gratuite",
+  "form.freeShippingFrom": "Livraison gratuite dès {amount}"
 }
