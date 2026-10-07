@@ -78,6 +78,13 @@
       "when": 1791388648172,
       "tag": "0010_admin_dashboard_group_products_by_id",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1791389151045,
+      "tag": "0011_delivery_active_and_free_shipping",
+      "breakpoints": true
     }
   ]
 }

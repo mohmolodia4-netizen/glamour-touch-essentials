@@ -25,7 +25,7 @@ import {
 } from "@/lib/store";
 import { useI18n } from "@/lib/i18n";
 import { publicSettingsQuery } from "@/lib/store";
-import { resolveFeature } from "@/lib/features";
+import { resolveFeature, useFreeShippingThreshold } from "@/lib/features";
 import { useNavigate } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/checkout")({
@@ -89,7 +89,10 @@ function CheckoutContent() {
   );
 
   const rate = rates.find((r) => r.wilaya_code === code) ?? null;
-  const shippingFee = rate ? (deliveryType === "domicile" ? rate.domicile_fee : rate.stopdesk_fee) : 0;
+  const freeShippingFrom = useFreeShippingThreshold();
+  const freeShipping = freeShippingFrom !== null && subtotal >= freeShippingFrom;
+  const shippingFee =
+    rate && !freeShipping ? (deliveryType === "domicile" ? rate.domicile_fee : rate.stopdesk_fee) : 0;
   const total = subtotal + shippingFee;
 
   const wilayaOptions = useMemo(
@@ -285,7 +288,12 @@ function CheckoutContent() {
               </div>
               <div className="mt-7 space-y-2 border-t border-border pt-5 text-sm">
                 <div className="flex justify-between text-muted-foreground"><span>{t("form.subtotal")}</span><span>{formatDzd(subtotal)}</span></div>
-                <div className="flex justify-between text-muted-foreground"><span>{t("form.shipping")}</span><span>{rate ? formatDzd(shippingFee) : "—"}</span></div>
+                <div className="flex justify-between text-muted-foreground"><span>{t("form.shipping")}</span><span>{rate ? (freeShipping ? t("form.shippingFree") : formatDzd(shippingFee)) : "—"}</span></div>
+                {freeShippingFrom !== null ? (
+                  <p className="text-xs text-primary">
+                    {t("form.freeShippingFrom", { amount: formatDzd(freeShippingFrom) })}
+                  </p>
+                ) : null}
                 <div className="flex justify-between pt-2 font-display text-2xl"><span>{t("form.total")}</span><span>{formatDzd(total)}</span></div>
               </div>
               <Button type="submit" disabled={submitting} className="mt-6 h-14 w-full rounded-sm text-sm uppercase tracking-[0.2em]">

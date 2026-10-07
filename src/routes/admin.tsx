@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { AdminSidebar, type AdminTab } from "@/components/admin/AdminSidebar";
 import { CategoriesTab } from "@/components/admin/CategoriesTab";
 import { DashboardTab } from "@/components/admin/DashboardTab";
+import { DeliveryTab } from "@/components/admin/DeliveryTab";
 import { OrdersTab } from "@/components/admin/OrdersTab";
 import { ProductsTab } from "@/components/admin/ProductsTab";
 import { SettingsTab } from "@/components/admin/SettingsTab";
@@ -20,13 +21,14 @@ import { resolveFeature } from "@/lib/features";
 import { publicSettingsQuery } from "@/lib/store";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
-const ADMIN_TABS: AdminTab[] = ["dashboard", "orders", "products", "categories", "settings"];
+const ADMIN_TABS: AdminTab[] = ["dashboard", "orders", "products", "categories", "delivery", "settings"];
 
 const PAGE_COPY: Record<AdminTab, { title: string; subtitle: string }> = {
   dashboard: { title: "Tableau de bord", subtitle: "Ventes, commandes et performances de la boutique." },
   orders: { title: "Commandes", subtitle: "Suivez, filtrez et traitez les commandes clients." },
   products: { title: "Produits", subtitle: "Gérez le catalogue, les couleurs, les stocks et les prix." },
   categories: { title: "Catégories", subtitle: "Organisez les collections présentées dans la boutique." },
+  delivery: { title: "Livraison", subtitle: "Tarifs par wilaya, bureaux Stopdesk et livraison gratuite." },
   settings: { title: "Paramètres", subtitle: "Personnalisez la boutique et ses intégrations." },
 };
 
@@ -198,6 +200,7 @@ function AdminPage() {
     orders: <OrdersTab />,
     products: <ProductsTab />,
     categories: <CategoriesTab />,
+    delivery: <DeliveryTab />,
     settings: <SettingsTab />,
   };
 

@@ -23,7 +23,7 @@ import {
   type Product,
 } from "@/lib/store";
 import { useI18n } from "@/lib/i18n";
-import { useFeature } from "@/lib/features";
+import { useFeature, useFreeShippingThreshold } from "@/lib/features";
 import { discountedUnit } from "@/lib/store";
 
 type DeliveryType = "domicile" | "stopdesk";
@@ -75,7 +75,7 @@ export function OrderForm({ product }: { product: Product }) {
   }, [stopdesks, commune, deskAddress]);
 
   const rate = rates.find((item) => item.wilaya_code === code) ?? null;
-  const shippingFee = rate
+  const baseShippingFee = rate
     ? deliveryType === "domicile"
       ? rate.domicile_fee
       : rate.stopdesk_fee
@@ -84,6 +84,9 @@ export function OrderForm({ product }: { product: Product }) {
   const discountOn = useFeature("qty_discount", false);
   const unit = discountedUnit(Number(product.price), product.qty_discount_min, product.qty_discount_percent, quantity, discountOn);
   const subtotal = unit * quantity;
+  const freeShippingFrom = useFreeShippingThreshold();
+  const freeShipping = freeShippingFrom !== null && subtotal >= freeShippingFrom;
+  const shippingFee = freeShipping ? 0 : baseShippingFee;
   const total = subtotal + shippingFee;
 
   const maxStock = hasVariants
@@ -528,8 +531,15 @@ export function OrderForm({ product }: { product: Product }) {
         </div>
         <div className="flex justify-between text-muted-foreground">
           <span>{t("form.shipping")}</span>
-          <span>{rate ? formatDzd(shippingFee) : "—"}</span>
+          <span>
+            {rate ? (freeShipping ? t("form.shippingFree") : formatDzd(shippingFee)) : "—"}
+          </span>
         </div>
+        {freeShippingFrom !== null ? (
+          <p className="text-xs text-primary">
+            {t("form.freeShippingFrom", { amount: formatDzd(freeShippingFrom) })}
+          </p>
+        ) : null}
         <div className="flex justify-between pt-2 font-display text-2xl text-foreground">
           <span>{t("form.total")}</span>
           <span>{formatDzd(total)}</span>
