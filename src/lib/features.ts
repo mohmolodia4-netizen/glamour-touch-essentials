@@ -12,6 +12,7 @@ export const FEATURES: { key: string; label: string; default: boolean }[] = [
   { key: "post_order_upsell", label: "Suggestions après commande", default: false },
   { key: "whatsapp_confirm", label: "Confirmation WhatsApp après commande", default: false },
   { key: "order_alerts", label: "Alerte son nouvelle commande (admin)", default: false },
+  { key: "dashboard", label: "Tableau de bord (admin)", default: false },
 ];
 
 export function resolveFeature(

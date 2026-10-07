@@ -483,6 +483,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_dashboard_stats: {
+        Args: { _end: string; _start: string; _tz?: string }
+        Returns: Json
+      }
       claim_first_admin: { Args: never; Returns: boolean }
       discounted_unit: {
         Args: { _min: number; _pct: number; _price: number; _qty: number }

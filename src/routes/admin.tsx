@@ -6,6 +6,7 @@ import { toast } from "sonner";
 
 import { AdminSidebar, type AdminTab } from "@/components/admin/AdminSidebar";
 import { CategoriesTab } from "@/components/admin/CategoriesTab";
+import { DashboardTab } from "@/components/admin/DashboardTab";
 import { OrdersTab } from "@/components/admin/OrdersTab";
 import { ProductsTab } from "@/components/admin/ProductsTab";
 import { SettingsTab } from "@/components/admin/SettingsTab";
@@ -15,12 +16,14 @@ import { Label } from "@/components/ui/label";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { resolveFeature } from "@/lib/features";
 import { publicSettingsQuery } from "@/lib/store";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
-const ADMIN_TABS: AdminTab[] = ["orders", "products", "categories", "settings"];
+const ADMIN_TABS: AdminTab[] = ["dashboard", "orders", "products", "categories", "settings"];
 
 const PAGE_COPY: Record<AdminTab, { title: string; subtitle: string }> = {
+  dashboard: { title: "Tableau de bord", subtitle: "Ventes, commandes et performances de la boutique." },
   orders: { title: "Commandes", subtitle: "Suivez, filtrez et traitez les commandes clients." },
   products: { title: "Produits", subtitle: "Gérez le catalogue, les couleurs, les stocks et les prix." },
   categories: { title: "Catégories", subtitle: "Organisez les collections présentées dans la boutique." },
@@ -32,7 +35,7 @@ export const Route = createFileRoute("/admin")({
   validateSearch: (
     search: Record<string, unknown>,
   ): {
-    tab: AdminTab;
+    tab?: AdminTab | undefined;
     range?: string | undefined;
     from?: string | undefined;
     to?: string | undefined;
@@ -40,7 +43,7 @@ export const Route = createFileRoute("/admin")({
     const str = (value: unknown) =>
       typeof value === "string" && value.length > 0 ? value : undefined;
     return {
-      tab: ADMIN_TABS.includes(search["tab"] as AdminTab) ? (search["tab"] as AdminTab) : "orders",
+      tab: ADMIN_TABS.includes(search["tab"] as AdminTab) ? (search["tab"] as AdminTab) : undefined,
       range: str(search["range"]),
       from: str(search["from"]),
       to: str(search["to"]),
@@ -135,11 +138,13 @@ function LoginCard() {
 function AdminPage() {
   useForceFrench();
   const { session, isAdmin, loading } = useAdminAuth();
-  const { tab } = Route.useSearch();
+  const { tab: requestedTab } = Route.useSearch();
   const queryClient = useQueryClient();
-  const { data: settings } = useQuery(publicSettingsQuery());
+  const { data: settings, isLoading: settingsLoading } = useQuery(publicSettingsQuery());
+  const dashboardOn = resolveFeature(settings?.features, "dashboard", false);
+  const tab: AdminTab = requestedTab ?? (dashboardOn ? "dashboard" : "orders");
 
-  if (loading) {
+  if (loading || (!requestedTab && settingsLoading)) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <Loader2 className="size-6 animate-spin text-muted-foreground" />
@@ -189,6 +194,7 @@ function AdminPage() {
 
   const page = PAGE_COPY[tab];
   const content: Record<AdminTab, ReactNode> = {
+    dashboard: <DashboardTab />,
     orders: <OrdersTab />,
     products: <ProductsTab />,
     categories: <CategoriesTab />,
@@ -208,6 +214,7 @@ function AdminPage() {
           activeTab={tab}
           logoUrl={settings?.logo_url}
           storeName={settings?.site_name}
+          mutedTabs={dashboardOn ? [] : ["dashboard"]}
           onLogout={() => void logout()}
         />
         <SidebarInset className="min-w-0">

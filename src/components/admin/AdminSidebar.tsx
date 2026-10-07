@@ -1,5 +1,7 @@
 import { Link } from "@tanstack/react-router";
-import { Boxes, LogOut, Package, Settings, ShoppingBag, Tags } from "lucide-react";
+import { Boxes, LayoutDashboard, LogOut, Package, Settings, ShoppingBag, Tags } from "lucide-react";
+
+import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -17,9 +19,10 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 
-export type AdminTab = "orders" | "products" | "categories" | "settings";
+export type AdminTab = "dashboard" | "orders" | "products" | "categories" | "settings";
 
 const items = [
+  { tab: "dashboard" as const, label: "Tableau de bord", icon: LayoutDashboard },
   { tab: "orders" as const, label: "Commandes", icon: ShoppingBag },
   { tab: "products" as const, label: "Produits", icon: Package },
   { tab: "categories" as const, label: "Catégories", icon: Tags },
@@ -30,10 +33,12 @@ type AdminSidebarProps = {
   activeTab: AdminTab;
   logoUrl?: string | null | undefined;
   storeName?: string | null | undefined;
+  /** Feature pages whose feature is switched off: kept visible but muted. */
+  mutedTabs?: AdminTab[] | undefined;
   onLogout: () => void;
 };
 
-export function AdminSidebar({ activeTab, logoUrl, storeName, onLogout }: AdminSidebarProps) {
+export function AdminSidebar({ activeTab, logoUrl, storeName, mutedTabs = [], onLogout }: AdminSidebarProps) {
   const { setOpenMobile } = useSidebar();
 
   return (
@@ -69,7 +74,7 @@ export function AdminSidebar({ activeTab, logoUrl, storeName, onLogout }: AdminS
                     asChild
                     isActive={activeTab === item.tab}
                     tooltip={item.label}
-                    className="h-10"
+                    className={cn("h-10", mutedTabs.includes(item.tab) && "opacity-55")}
                   >
                     <Link
                       to="/admin"

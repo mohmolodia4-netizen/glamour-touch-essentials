@@ -64,6 +64,20 @@
       "when": 1791386014932,
       "tag": "0008_add_feature_config",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1791388392682,
+      "tag": "0009_admin_dashboard_stats",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1791388648172,
+      "tag": "0010_admin_dashboard_group_products_by_id",
+      "breakpoints": true
     }
   ]
 }
