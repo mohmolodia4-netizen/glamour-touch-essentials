@@ -57,6 +57,13 @@
       "when": 1790880164177,
       "tag": "0007_cross_sell_products",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1791386014932,
+      "tag": "0008_add_feature_config",
+      "breakpoints": true
     }
   ]
 }
