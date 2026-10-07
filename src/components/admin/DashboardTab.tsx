@@ -208,7 +208,7 @@ function DashboardContent({ visibleKpis }: { visibleKpis: KpiKey[] }) {
       ) : null}
 
       {visibleKpis.length > 0 ? (
-        <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-3 2xl:grid-cols-6">
           {KPI_DEFS.filter((kpi) => visibleKpis.includes(kpi.key)).map((kpi) => (
             <Card key={kpi.key} className="rounded-sm">
               <CardContent className="space-y-1 p-4">
