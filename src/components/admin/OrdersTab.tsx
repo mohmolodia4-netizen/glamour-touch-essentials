@@ -93,7 +93,7 @@ export function OrdersTab() {
 
   const statusCounts = orders.reduce<Record<string, number>>(
     (counts, order) => {
-      counts.all += 1;
+      counts["all"] = (counts["all"] ?? 0) + 1;
       counts[order.status] = (counts[order.status] ?? 0) + 1;
       return counts;
     },

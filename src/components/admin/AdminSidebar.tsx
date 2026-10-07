@@ -28,8 +28,8 @@ const items = [
 
 type AdminSidebarProps = {
   activeTab: AdminTab;
-  logoUrl?: string | null;
-  storeName?: string | null;
+  logoUrl?: string | null | undefined;
+  storeName?: string | null | undefined;
   onLogout: () => void;
 };
 

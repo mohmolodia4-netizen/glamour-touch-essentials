@@ -30,7 +30,7 @@ const PAGE_COPY: Record<AdminTab, { title: string; subtitle: string }> = {
 export const Route = createFileRoute("/admin")({
   ssr: false,
   validateSearch: (search: Record<string, unknown>): { tab: AdminTab } => ({
-    tab: ADMIN_TABS.includes(search.tab as AdminTab) ? (search.tab as AdminTab) : "orders",
+    tab: ADMIN_TABS.includes(search["tab"] as AdminTab) ? (search["tab"] as AdminTab) : "orders",
   }),
   head: () => ({
     meta: [
