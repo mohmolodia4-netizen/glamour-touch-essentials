@@ -83,9 +83,13 @@ function triggerLabel(value: DateFilterValue) {
 export function OrderDateFilter({
   value,
   onChange,
+  presets = DATE_PRESETS,
+  allowAll = true,
 }: {
   value: DateFilterValue;
   onChange: (next: DateFilterValue) => void;
+  presets?: readonly DatePreset[];
+  allowAll?: boolean;
 }) {
   const isMobile = useIsMobile();
   const [open, setOpen] = useState(false);
@@ -146,6 +150,7 @@ export function OrderDateFilter({
         <PopoverContent className="w-auto max-w-[calc(100vw-2rem)] p-0" align="start">
           <div className="flex flex-col sm:flex-row">
             <div className="flex flex-wrap gap-1 border-b border-border p-2 sm:w-40 sm:flex-col sm:flex-nowrap sm:border-b-0 sm:border-r">
+              {allowAll ? (
               <Button
                 type="button"
                 variant={!active ? "secondary" : "ghost"}
@@ -159,7 +164,8 @@ export function OrderDateFilter({
               >
                 Toutes les dates
               </Button>
-              {DATE_PRESETS.map((preset) => (
+              ) : null}
+              {presets.map((preset) => (
                 <Button
                   key={preset}
                   type="button"
@@ -188,7 +194,7 @@ export function OrderDateFilter({
           </div>
         </PopoverContent>
       </Popover>
-      {active ? (
+      {active && allowAll ? (
         <Button
           type="button"
           variant="ghost"
