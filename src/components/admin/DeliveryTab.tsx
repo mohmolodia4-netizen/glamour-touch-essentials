@@ -449,13 +449,13 @@ function StopdesksSection() {
   async function saveDesk() {
     if (!form) return;
     const rate = rates.find((r) => r.wilaya_code === Number(form.wilaya_code));
-    if (!rate) return toast.error("Choisissez une wilaya");
-    if (!form.commune_name.trim()) return toast.error("Commune requise");
-    if (!form.desk_name.trim()) return toast.error("Nom du bureau requis");
-    if (!form.address.trim()) return toast.error("Adresse requise");
+    if (!rate) return void toast.error("Choisissez une wilaya");
+    if (!form.commune_name.trim()) return void toast.error("Commune requise");
+    if (!form.desk_name.trim()) return void toast.error("Nom du bureau requis");
+    if (!form.address.trim()) return void toast.error("Adresse requise");
     const code = form.desk_code.trim();
     if (code && desks.some((d) => d.desk_code === code && d.id !== form.id)) {
-      return toast.error("Ce code est déjà utilisé par un autre bureau");
+      return void toast.error("Ce code est déjà utilisé par un autre bureau");
     }
     const payload = {
       wilaya_code: rate.wilaya_code,
@@ -470,7 +470,7 @@ function StopdesksSection() {
       ? await db.from("stopdesks").update(payload).eq("id", form.id)
       : await db.from("stopdesks").insert(payload);
     setSaving(false);
-    if (error) return toast.error(error.message);
+    if (error) return void toast.error(error.message);
     toast.success(form.id ? "Bureau modifié" : "Bureau ajouté");
     setForm(null);
     refresh();
