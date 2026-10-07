@@ -22,7 +22,11 @@ const PRESET_LABELS: Record<DatePreset, string> = {
   custom: "Personnalisé",
 };
 
-export type DateFilterValue = { range?: string; from?: string; to?: string };
+export type DateFilterValue = {
+  range?: string | undefined;
+  from?: string | undefined;
+  to?: string | undefined;
+};
 
 const DAY_RE = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -174,7 +178,7 @@ export function OrderDateFilter({
                 locale={fr}
                 selected={selected}
                 onSelect={pickRange}
-                defaultMonth={selected?.from}
+                {...(selected?.from ? { defaultMonth: selected.from } : {})}
                 numberOfMonths={isMobile ? 1 : 2}
                 disabled={{ after: new Date() }}
                 className="pointer-events-auto p-3"
