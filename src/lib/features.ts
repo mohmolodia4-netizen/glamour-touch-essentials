@@ -27,3 +27,10 @@ export function useFeature(key: string, defaultValue = false) {
   const { data } = useQuery(publicSettingsQuery());
   return resolveFeature(data?.features, key, defaultValue);
 }
+
+export function useFeatureConfig<T = Record<string, unknown>>(key: string): T | null {
+  const { data } = useQuery(publicSettingsQuery());
+  const value = data?.feature_config?.[key];
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+  return value as T;
+}

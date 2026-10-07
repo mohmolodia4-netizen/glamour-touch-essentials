@@ -5,6 +5,7 @@ import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Select,
   SelectContent,
@@ -49,6 +50,8 @@ const STATUS_LABELS: Record<string, string> = {
   cancelled: "Annulée",
 };
 
+const FILTER_TABS = ["all", ...STATUSES] as const;
+
 function itemsLabel(order: Order) {
   const items = (order.order_items ?? []).filter((item) => item.color_name);
   if (items.length === 0) return null;
@@ -87,6 +90,15 @@ export function OrdersTab() {
         .includes(term);
     return matchesStatus && matchesSearch;
   });
+
+  const statusCounts = orders.reduce<Record<string, number>>(
+    (counts, order) => {
+      counts.all += 1;
+      counts[order.status] = (counts[order.status] ?? 0) + 1;
+      return counts;
+    },
+    { all: 0 },
+  );
 
   async function updateStatus(id: string, status: string) {
     const { error } = await (supabase as any)
@@ -223,6 +235,20 @@ export function OrdersTab() {
           </Button>
         </div>
       )}
+      <Tabs value={statusFilter} onValueChange={setStatusFilter} className="w-full">
+        <div className="overflow-x-auto pb-1">
+          <TabsList className="h-auto min-w-max justify-start rounded-md bg-muted p-1">
+            {FILTER_TABS.map((status) => (
+              <TabsTrigger key={status} value={status} className="gap-2 rounded-sm px-3 py-2">
+                <span>{status === "all" ? "Tous" : STATUS_LABELS[status]}</span>
+                <span className="rounded-sm bg-background/80 px-1.5 py-0.5 text-xs tabular-nums text-muted-foreground">
+                  {statusCounts[status] ?? 0}
+                </span>
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </div>
+      </Tabs>
       <div className="flex flex-col gap-3 sm:flex-row">
         <Input
           value={search}
@@ -230,19 +256,6 @@ export function OrdersTab() {
           placeholder="Rechercher (nom, téléphone, produit...)"
           className="h-11 rounded-sm sm:max-w-sm"
         />
-        <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="h-11 rounded-sm sm:w-52">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Tous les statuts</SelectItem>
-            {STATUSES.map((status) => (
-              <SelectItem key={status} value={status}>
-                {STATUS_LABELS[status]}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
       </div>
 
       {isLoading ? (

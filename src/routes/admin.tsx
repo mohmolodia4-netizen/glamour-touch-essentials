@@ -1,9 +1,10 @@
 import { useForceFrench } from "@/lib/i18n";
 import { createFileRoute } from "@tanstack/react-router";
 import { Loader2 } from "lucide-react";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { toast } from "sonner";
 
+import { AdminSidebar, type AdminTab } from "@/components/admin/AdminSidebar";
 import { CategoriesTab } from "@/components/admin/CategoriesTab";
 import { OrdersTab } from "@/components/admin/OrdersTab";
 import { ProductsTab } from "@/components/admin/ProductsTab";
@@ -11,12 +12,26 @@ import { SettingsTab } from "@/components/admin/SettingsTab";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { publicSettingsQuery } from "@/lib/store";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+
+const ADMIN_TABS: AdminTab[] = ["orders", "products", "categories", "settings"];
+
+const PAGE_COPY: Record<AdminTab, { title: string; subtitle: string }> = {
+  orders: { title: "Commandes", subtitle: "Suivez, filtrez et traitez les commandes clients." },
+  products: { title: "Produits", subtitle: "Gérez le catalogue, les couleurs, les stocks et les prix." },
+  categories: { title: "Catégories", subtitle: "Organisez les collections présentées dans la boutique." },
+  settings: { title: "Paramètres", subtitle: "Personnalisez la boutique et ses intégrations." },
+};
 
 export const Route = createFileRoute("/admin")({
   ssr: false,
+  validateSearch: (search: Record<string, unknown>): { tab: AdminTab } => ({
+    tab: ADMIN_TABS.includes(search.tab as AdminTab) ? (search.tab as AdminTab) : "orders",
+  }),
   head: () => ({
     meta: [
       { title: "Administration — Glamour Touch" },
@@ -106,6 +121,9 @@ function LoginCard() {
 function AdminPage() {
   useForceFrench();
   const { session, isAdmin, loading } = useAdminAuth();
+  const { tab } = Route.useSearch();
+  const queryClient = useQueryClient();
+  const { data: settings } = useQuery(publicSettingsQuery());
 
   if (loading) {
     return (
@@ -155,47 +173,48 @@ function AdminPage() {
     );
   }
 
-  return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b border-border">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-5">
-          <div>
-            <h1 className="font-display text-2xl">Glamour Touch — Admin</h1>
-            <p className="text-xs text-muted-foreground">{session.user.email}</p>
-          </div>
-          <Button
-            variant="outline"
-            size="sm"
-            className="rounded-sm"
-            onClick={() => supabase.auth.signOut()}
-          >
-            Déconnexion
-          </Button>
-        </div>
-      </header>
+  const page = PAGE_COPY[tab];
+  const content: Record<AdminTab, ReactNode> = {
+    orders: <OrdersTab />,
+    products: <ProductsTab />,
+    categories: <CategoriesTab />,
+    settings: <SettingsTab />,
+  };
 
-      <main className="mx-auto max-w-6xl px-4 py-8">
-        <Tabs defaultValue="orders">
-          <TabsList className="rounded-sm">
-            <TabsTrigger value="orders">Commandes</TabsTrigger>
-            <TabsTrigger value="products">Produits</TabsTrigger>
-            <TabsTrigger value="categories">Catégories</TabsTrigger>
-            <TabsTrigger value="settings">Paramètres</TabsTrigger>
-          </TabsList>
-          <TabsContent value="orders" className="mt-6">
-            <OrdersTab />
-          </TabsContent>
-          <TabsContent value="products" className="mt-6">
-            <ProductsTab />
-          </TabsContent>
-          <TabsContent value="categories" className="mt-6">
-            <CategoriesTab />
-          </TabsContent>
-          <TabsContent value="settings" className="mt-6">
-            <SettingsTab />
-          </TabsContent>
-        </Tabs>
-      </main>
-    </div>
+  async function logout() {
+    await queryClient.cancelQueries();
+    queryClient.clear();
+    await supabase.auth.signOut();
+  }
+
+  return (
+    <SidebarProvider>
+      <div className="flex min-h-svh w-full bg-muted/30" dir="ltr">
+        <AdminSidebar
+          activeTab={tab}
+          logoUrl={settings?.logo_url}
+          storeName={settings?.site_name}
+          onLogout={() => void logout()}
+        />
+        <SidebarInset className="min-w-0">
+          <header className="sticky top-0 z-40 flex h-16 items-center gap-3 border-b border-border bg-background/95 px-4 backdrop-blur md:px-6">
+            <SidebarTrigger className="size-9" />
+            <div className="min-w-0">
+              <h1 className="truncate font-display text-2xl leading-tight">{page.title}</h1>
+              <p className="hidden truncate text-xs text-muted-foreground sm:block">{page.subtitle}</p>
+            </div>
+            <p className="ml-auto hidden max-w-56 truncate text-xs text-muted-foreground lg:block">
+              {session.user.email}
+            </p>
+          </header>
+          <main className="w-full min-w-0 px-4 py-6 md:px-6 lg:px-8">
+            <div className="mb-6 sm:hidden">
+              <p className="text-sm text-muted-foreground">{page.subtitle}</p>
+            </div>
+            {content[tab]}
+          </main>
+        </SidebarInset>
+      </div>
+    </SidebarProvider>
   );
 }
