@@ -408,18 +408,21 @@ export type Database = {
       }
       shipping_rates: {
         Row: {
+          active: boolean
           domicile_fee: number
           stopdesk_fee: number
           wilaya_code: number
           wilaya_name: string
         }
         Insert: {
+          active?: boolean
           domicile_fee: number
           stopdesk_fee: number
           wilaya_code: number
           wilaya_name: string
         }
         Update: {
+          active?: boolean
           domicile_fee?: number
           stopdesk_fee?: number
           wilaya_code?: number
@@ -429,6 +432,7 @@ export type Database = {
       }
       stopdesks: {
         Row: {
+          active: boolean
           address: string
           commune_name: string
           desk_code: string | null
@@ -438,6 +442,7 @@ export type Database = {
           wilaya_name: string
         }
         Insert: {
+          active?: boolean
           address: string
           commune_name: string
           desk_code?: string | null
@@ -447,6 +452,7 @@ export type Database = {
           wilaya_name: string
         }
         Update: {
+          active?: boolean
           address?: string
           commune_name?: string
           desk_code?: string | null
@@ -492,6 +498,7 @@ export type Database = {
         Args: { _min: number; _pct: number; _price: number; _qty: number }
         Returns: number
       }
+      free_shipping_threshold: { Args: never; Returns: number }
       get_public_settings: {
         Args: never
         Returns: {
