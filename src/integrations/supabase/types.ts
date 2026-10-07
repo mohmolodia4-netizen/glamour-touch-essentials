@@ -17,6 +17,7 @@ export type Database = {
       app_settings: {
         Row: {
           facebook_url: string | null
+          feature_config: Json
           features: Json
           google_sheet_webhook_url: string | null
           hero_button_text: string | null
@@ -40,6 +41,7 @@ export type Database = {
         }
         Insert: {
           facebook_url?: string | null
+          feature_config?: Json
           features?: Json
           google_sheet_webhook_url?: string | null
           hero_button_text?: string | null
@@ -63,6 +65,7 @@ export type Database = {
         }
         Update: {
           facebook_url?: string | null
+          feature_config?: Json
           features?: Json
           google_sheet_webhook_url?: string | null
           hero_button_text?: string | null
@@ -489,6 +492,7 @@ export type Database = {
         Args: never
         Returns: {
           facebook_url: string
+          feature_config: Json
           features: Json
           hero_button_text: string
           hero_image_url: string
