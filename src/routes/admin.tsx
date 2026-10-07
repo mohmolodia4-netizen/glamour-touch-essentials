@@ -31,7 +31,12 @@ export const Route = createFileRoute("/admin")({
   ssr: false,
   validateSearch: (
     search: Record<string, unknown>,
-  ): { tab: AdminTab; range?: string; from?: string; to?: string } => {
+  ): {
+    tab: AdminTab;
+    range?: string | undefined;
+    from?: string | undefined;
+    to?: string | undefined;
+  } => {
     const str = (value: unknown) =>
       typeof value === "string" && value.length > 0 ? value : undefined;
     return {
