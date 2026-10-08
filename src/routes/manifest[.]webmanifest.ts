@@ -19,8 +19,8 @@ export const Route = createFileRoute("/manifest.webmanifest")({
         let settings: PublicSettings | null = null;
         try {
           const sb = createClient(
-            process.env["VITE_SUPABASE_URL"] ?? import.meta.env.VITE_SUPABASE_URL,
-            process.env["VITE_SUPABASE_PUBLISHABLE_KEY"] ?? import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+            process.env["VITE_SUPABASE_URL"] ?? import.meta.env["VITE_SUPABASE_URL"],
+            process.env["VITE_SUPABASE_PUBLISHABLE_KEY"] ?? import.meta.env["VITE_SUPABASE_PUBLISHABLE_KEY"],
             { auth: { persistSession: false, autoRefreshToken: false } },
           );
           const { data } = await sb.rpc("get_public_settings");

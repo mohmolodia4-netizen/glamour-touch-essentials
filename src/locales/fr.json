@@ -122,12 +122,10 @@
   "form.discount": "Remise",
   "coupon.appliedOn": "Réduction appliquée sur : {products}",
   "coupon.notEligible": "Ce code ne s'applique pas aux produits de votre panier",
-  "pwa": {
-    "title": "Installer l'application",
-    "desc": "Accédez à la boutique en un geste depuis votre écran d'accueil.",
-    "install": "Installer",
-    "later": "Plus tard",
-    "iosTitle": "Installer sur iPhone",
-    "iosSteps": "Touchez Partager puis « Sur l'écran d'accueil »."
-  }
+  "pwa.title": "Installer l'application",
+  "pwa.desc": "Accédez à la boutique en un geste depuis votre écran d'accueil.",
+  "pwa.install": "Installer",
+  "pwa.later": "Plus tard",
+  "pwa.iosTitle": "Installer sur iPhone",
+  "pwa.iosSteps": "Touchez Partager puis « Sur l'écran d'accueil »."
 }

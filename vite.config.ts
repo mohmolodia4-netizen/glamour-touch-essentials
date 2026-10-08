@@ -23,6 +23,7 @@ export default defineConfig({
         devOptions: { enabled: false },
         strategies: "generateSW",
         filename: "sw.js",
+        outDir: "dist/client",
         workbox: {
           // Static hashed assets only: no HTML, no navigation fallback, no runtime caching
           // (backend/API calls always go to the network).
