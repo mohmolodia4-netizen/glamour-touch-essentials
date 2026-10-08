@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { createClient } from "@supabase/supabase-js";
+import type { PublicSettings } from "@/lib/store";
 
 type PwaConfig = {
   app_name?: string;
@@ -15,7 +16,7 @@ export const Route = createFileRoute("/manifest.webmanifest")({
   server: {
     handlers: {
       GET: async () => {
-        let settings: Record<string, any> | null = null;
+        let settings: PublicSettings | null = null;
         try {
           const sb = createClient(
             process.env["VITE_SUPABASE_URL"] ?? import.meta.env.VITE_SUPABASE_URL,
@@ -23,14 +24,14 @@ export const Route = createFileRoute("/manifest.webmanifest")({
             { auth: { persistSession: false, autoRefreshToken: false } },
           );
           const { data } = await sb.rpc("get_public_settings");
-          settings = (Array.isArray(data) ? data[0] : data) ?? null;
+          settings = ((Array.isArray(data) ? data[0] : data) ?? null) as PublicSettings | null;
         } catch {
           settings = null;
         }
-        const enabled = settings?.features?.pwa === true;
+        const enabled = settings?.features?.["pwa"] === true;
         if (!enabled) return new Response("Not found", { status: 404 });
 
-        const cfg: PwaConfig = settings?.feature_config?.pwa ?? {};
+        const cfg = (settings?.feature_config?.["pwa"] ?? {}) as PwaConfig;
         const name = cfg.app_name || settings?.site_name || "Glamour Touch";
         const theme = cfg.theme_color && HEX.test(cfg.theme_color)
           ? cfg.theme_color
