@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as BoutiqueRouteImport } from './routes/boutique'
 import { Route as CheckoutRouteImport } from './routes/checkout'
+import { Route as ManifestDotwebmanifestRouteImport } from './routes/manifest[.]webmanifest'
 import { Route as ProductIdRouteImport } from './routes/product.$id'
 import { Route as ApiPublicMigrateHelperRouteImport } from './routes/api/public/migrate-helper'
 
@@ -36,6 +37,11 @@ const CheckoutRoute = CheckoutRouteImport.update({
   path: '/checkout',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ManifestDotwebmanifestRoute = ManifestDotwebmanifestRouteImport.update({
+  id: '/manifest.webmanifest',
+  path: '/manifest.webmanifest',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProductIdRoute = ProductIdRouteImport.update({
   id: '/product/$id',
   path: '/product/$id',
@@ -52,6 +58,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRoute
   '/boutique': typeof BoutiqueRoute
   '/checkout': typeof CheckoutRoute
+  '/manifest.webmanifest': typeof ManifestDotwebmanifestRoute
   '/product/$id': typeof ProductIdRoute
   '/api/public/migrate-helper': typeof ApiPublicMigrateHelperRoute
 }
@@ -60,6 +67,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminRoute
   '/boutique': typeof BoutiqueRoute
   '/checkout': typeof CheckoutRoute
+  '/manifest.webmanifest': typeof ManifestDotwebmanifestRoute
   '/product/$id': typeof ProductIdRoute
   '/api/public/migrate-helper': typeof ApiPublicMigrateHelperRoute
 }
@@ -69,6 +77,7 @@ export interface FileRoutesById {
   '/admin': typeof AdminRoute
   '/boutique': typeof BoutiqueRoute
   '/checkout': typeof CheckoutRoute
+  '/manifest.webmanifest': typeof ManifestDotwebmanifestRoute
   '/product/$id': typeof ProductIdRoute
   '/api/public/migrate-helper': typeof ApiPublicMigrateHelperRoute
 }
@@ -79,6 +88,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/boutique'
     | '/checkout'
+    | '/manifest.webmanifest'
     | '/product/$id'
     | '/api/public/migrate-helper'
   fileRoutesByTo: FileRoutesByTo
@@ -87,6 +97,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/boutique'
     | '/checkout'
+    | '/manifest.webmanifest'
     | '/product/$id'
     | '/api/public/migrate-helper'
   id:
@@ -95,6 +106,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/boutique'
     | '/checkout'
+    | '/manifest.webmanifest'
     | '/product/$id'
     | '/api/public/migrate-helper'
   fileRoutesById: FileRoutesById
@@ -104,6 +116,7 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRoute
   BoutiqueRoute: typeof BoutiqueRoute
   CheckoutRoute: typeof CheckoutRoute
+  ManifestDotwebmanifestRoute: typeof ManifestDotwebmanifestRoute
   ProductIdRoute: typeof ProductIdRoute
   ApiPublicMigrateHelperRoute: typeof ApiPublicMigrateHelperRoute
 }
@@ -138,6 +151,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CheckoutRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/manifest.webmanifest': {
+      id: '/manifest.webmanifest'
+      path: '/manifest.webmanifest'
+      fullPath: '/manifest.webmanifest'
+      preLoaderRoute: typeof ManifestDotwebmanifestRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/product/$id': {
       id: '/product/$id'
       path: '/product/$id'
@@ -160,6 +180,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRoute,
   BoutiqueRoute: BoutiqueRoute,
   CheckoutRoute: CheckoutRoute,
+  ManifestDotwebmanifestRoute: ManifestDotwebmanifestRoute,
   ProductIdRoute: ProductIdRoute,
   ApiPublicMigrateHelperRoute: ApiPublicMigrateHelperRoute,
 }
