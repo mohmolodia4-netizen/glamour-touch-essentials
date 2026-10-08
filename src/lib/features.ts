@@ -14,6 +14,7 @@ export const FEATURES: { key: string; label: string; default: boolean }[] = [
   { key: "order_alerts", label: "Alerte son nouvelle commande (admin)", default: false },
   { key: "dashboard", label: "Tableau de bord (admin)", default: false },
   { key: "free_shipping", label: "Livraison gratuite", default: false },
+  { key: "coupons", label: "Codes promo", default: false },
 ];
 
 export function resolveFeature(

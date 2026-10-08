@@ -24,6 +24,7 @@ import {
 } from "@/lib/store";
 import { useI18n } from "@/lib/i18n";
 import { useFeature, useFreeShippingThreshold } from "@/lib/features";
+import { CouponInput, type AppliedCoupon } from "@/components/checkout/CouponInput";
 import { discountedUnit } from "@/lib/store";
 
 type DeliveryType = "domicile" | "stopdesk";
@@ -87,7 +88,9 @@ export function OrderForm({ product }: { product: Product }) {
   const freeShippingFrom = useFreeShippingThreshold();
   const freeShipping = freeShippingFrom !== null && subtotal >= freeShippingFrom;
   const shippingFee = freeShipping ? 0 : baseShippingFee;
-  const total = subtotal + shippingFee;
+  const [coupon, setCoupon] = useState<AppliedCoupon>(null);
+  const discount = coupon ? Math.min(coupon.discount, subtotal) : 0;
+  const total = subtotal - discount + shippingFee;
 
   const maxStock = hasVariants
     ? variants.reduce((sum, variant) => sum + variant.stock_quantity, 0)
@@ -200,6 +203,7 @@ export function OrderForm({ product }: { product: Product }) {
         deliveryType,
         adresse: address,
         deskCode,
+        couponCode: coupon?.code ?? null,
       });
       trackPixel("Purchase", {
         content_ids: [product.id],
@@ -535,6 +539,13 @@ export function OrderForm({ product }: { product: Product }) {
             {rate ? (freeShipping ? t("form.shippingFree") : formatDzd(shippingFee)) : "—"}
           </span>
         </div>
+        <CouponInput subtotal={subtotal} value={coupon} onChange={setCoupon} />
+        {discount > 0 ? (
+          <div className="flex justify-between text-primary">
+            <span>{t("form.discount")} ({coupon?.code})</span>
+            <span>−{formatDzd(discount)}</span>
+          </div>
+        ) : null}
         {freeShippingFrom !== null ? (
           <p className="text-xs text-primary">
             {t("form.freeShippingFrom", { amount: formatDzd(freeShippingFrom) })}
