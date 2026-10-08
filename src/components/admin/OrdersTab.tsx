@@ -220,6 +220,39 @@ export function OrdersTab() {
     void queryClient.invalidateQueries({ queryKey: ["admin", "orders"] });
   }
 
+  async function bulkDelete() {
+    const ids = Array.from(selected);
+    if (ids.length === 0) return;
+    setDeleteBusy(true);
+    const failed = new Set<string>();
+    let deleted = 0;
+    for (let i = 0; i < ids.length; i += 50) {
+      const chunk = ids.slice(i, i + 50);
+      const { error } = await (supabase as any)
+        .from("orders")
+        .delete()
+        .in("id", chunk);
+      if (error) {
+        chunk.forEach((id) => failed.add(id));
+      } else {
+        deleted += chunk.length;
+      }
+    }
+    setDeleteBusy(false);
+    if (failed.size > 0) {
+      toast.error(`${failed.size} commande(s) n'ont pas pu être supprimées`);
+      setSelected(failed);
+    } else {
+      setSelected(new Set());
+    }
+    if (deleted > 0) {
+      toast.success(`${deleted} commande(s) supprimée(s)`);
+    }
+    setDeleteOpen(false);
+    setDeleteConfirmText("");
+    void queryClient.invalidateQueries({ queryKey: ["admin", "orders"] });
+  }
+
   async function remove(id: string) {
     const { error } = await (supabase as any).from("orders").delete().eq("id", id);
     if (error) {
