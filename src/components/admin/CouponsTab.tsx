@@ -63,8 +63,8 @@ export function CouponsTab() {
   async function save() {
     if (!draft) return;
     const value = Number(draft.value);
-    if (!draft.code.trim()) return toast.error("Code requis");
-    if (!(value > 0) || (draft.type === "percent" && value > 100)) return toast.error("Valeur invalide");
+    if (!draft.code.trim()) { toast.error("Code requis"); return; }
+    if (!(value > 0) || (draft.type === "percent" && value > 100)) { toast.error("Valeur invalide"); return; }
     const payload = {
       code: draft.code.trim().toUpperCase(),
       type: draft.type,
@@ -78,7 +78,7 @@ export function CouponsTab() {
     setSaving(true);
     const { error } = draft.id ? await db().update(payload).eq("id", draft.id) : await db().insert(payload);
     setSaving(false);
-    if (error) return toast.error(error.code === "23505" ? "Ce code existe déjà" : error.message);
+    if (error) { toast.error(error.code === "23505" ? "Ce code existe déjà" : error.message); return; }
     toast.success("Code promo enregistré");
     setDraft(null);
     refresh();
