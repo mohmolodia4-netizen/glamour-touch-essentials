@@ -222,8 +222,10 @@ export async function placeOrder(input: {
   deliveryType: "domicile" | "stopdesk";
   adresse: string;
   deskCode?: string;
+  couponCode?: string | null;
 }) {
   const { data, error } = await rpc("place_order_items", {
+    ...(input.couponCode ? { _coupon_code: input.couponCode } : {}),
     _product_id: input.productId,
     _items: input.items,
     _full_name: input.fullName,
@@ -274,8 +276,10 @@ export async function placeCartOrder(input: {
   deliveryType: "domicile" | "stopdesk";
   adresse: string;
   deskCode?: string;
+  couponCode?: string | null;
 }) {
   const { data, error } = await rpc("place_cart_order", {
+    ...(input.couponCode ? { _coupon_code: input.couponCode } : {}),
     _items: input.items,
     _full_name: input.fullName,
     _phone: input.phone,
@@ -323,4 +327,11 @@ export function hasQtyDiscount(p: { qty_discount_min?: number | null; qty_discou
 
 export function formatDzd(value: number) {
   return `${new Intl.NumberFormat("fr-DZ").format(Math.round(value))} DA`;
+}
+
+export type CouponResult = { valid: boolean; code?: string; discount?: number; message?: string };
+export async function validateCoupon(code: string, subtotal: number): Promise<CouponResult> {
+  const { data, error } = await rpc("validate_coupon", { _code: code, _subtotal: subtotal });
+  if (error) throw new Error(error.message);
+  return data as CouponResult;
 }
