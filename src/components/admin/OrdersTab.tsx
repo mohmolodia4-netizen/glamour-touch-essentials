@@ -10,6 +10,16 @@ import {
 } from "@/components/admin/OrderDateFilter";
 import { toast } from "sonner";
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -76,6 +86,9 @@ export function OrdersTab() {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [bulkStatus, setBulkStatus] = useState("confirmed");
   const [bulkBusy, setBulkBusy] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleteBusy, setDeleteBusy] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState("");
 
   const { range, from, to } = adminRoute.useSearch();
   const navigate = adminRoute.useNavigate();
@@ -207,6 +220,39 @@ export function OrdersTab() {
     void queryClient.invalidateQueries({ queryKey: ["admin", "orders"] });
   }
 
+  async function bulkDelete() {
+    const ids = Array.from(selected);
+    if (ids.length === 0) return;
+    setDeleteBusy(true);
+    const failed = new Set<string>();
+    let deleted = 0;
+    for (let i = 0; i < ids.length; i += 50) {
+      const chunk = ids.slice(i, i + 50);
+      const { error } = await (supabase as any)
+        .from("orders")
+        .delete()
+        .in("id", chunk);
+      if (error) {
+        chunk.forEach((id) => failed.add(id));
+      } else {
+        deleted += chunk.length;
+      }
+    }
+    setDeleteBusy(false);
+    if (failed.size > 0) {
+      toast.error(`${failed.size} commande(s) n'ont pas pu être supprimées`);
+      setSelected(failed);
+    } else {
+      setSelected(new Set());
+    }
+    if (deleted > 0) {
+      toast.success(`${deleted} commande(s) supprimée(s)`);
+    }
+    setDeleteOpen(false);
+    setDeleteConfirmText("");
+    void queryClient.invalidateQueries({ queryKey: ["admin", "orders"] });
+  }
+
   async function remove(id: string) {
     const { error } = await (supabase as any).from("orders").delete().eq("id", id);
     if (error) {
@@ -254,6 +300,19 @@ export function OrdersTab() {
             onClick={applyBulkStatus}
           >
             {bulkBusy ? "Application..." : "Appliquer"}
+          </Button>
+          <Button
+            type="button"
+            variant="destructive"
+            size="sm"
+            className="rounded-sm"
+            disabled={deleteBusy}
+            onClick={() => {
+              setDeleteConfirmText("");
+              setDeleteOpen(true);
+            }}
+          >
+            <Trash2 className="mr-1 size-3.5" /> Supprimer
           </Button>
           <Button
             type="button"
@@ -422,6 +481,47 @@ export function OrdersTab() {
         </div>
       )}
 
+      <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              Supprimer {selected.size} commande(s) définitivement ?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Cette action est irréversible.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          {selected.size >= 10 && (
+            <div className="space-y-2">
+              <p className="text-sm text-muted-foreground">
+                Tapez <span className="font-semibold text-foreground">SUPPRIMER</span> pour confirmer.
+              </p>
+              <Input
+                value={deleteConfirmText}
+                onChange={(event) => setDeleteConfirmText(event.target.value)}
+                placeholder="SUPPRIMER"
+                className="rounded-sm"
+              />
+            </div>
+          )}
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteBusy}>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={
+                deleteBusy ||
+                (selected.size >= 10 && deleteConfirmText !== "SUPPRIMER")
+              }
+              onClick={(event) => {
+                event.preventDefault();
+                void bulkDelete();
+              }}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleteBusy ? "Suppression..." : "Supprimer"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
