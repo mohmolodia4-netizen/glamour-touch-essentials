@@ -481,6 +481,47 @@ export function OrdersTab() {
         </div>
       )}
 
+      <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              Supprimer {selected.size} commande(s) définitivement ?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Cette action est irréversible.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          {selected.size >= 10 && (
+            <div className="space-y-2">
+              <p className="text-sm text-muted-foreground">
+                Tapez <span className="font-semibold text-foreground">SUPPRIMER</span> pour confirmer.
+              </p>
+              <Input
+                value={deleteConfirmText}
+                onChange={(event) => setDeleteConfirmText(event.target.value)}
+                placeholder="SUPPRIMER"
+                className="rounded-sm"
+              />
+            </div>
+          )}
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteBusy}>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={
+                deleteBusy ||
+                (selected.size >= 10 && deleteConfirmText !== "SUPPRIMER")
+              }
+              onClick={(event) => {
+                event.preventDefault();
+                void bulkDelete();
+              }}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleteBusy ? "Suppression..." : "Supprimer"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
