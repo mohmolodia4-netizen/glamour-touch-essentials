@@ -329,9 +329,14 @@ export function formatDzd(value: number) {
   return `${new Intl.NumberFormat("fr-DZ").format(Math.round(value))} DA`;
 }
 
-export type CouponResult = { valid: boolean; code?: string; discount?: number; message?: string };
-export async function validateCoupon(code: string, subtotal: number): Promise<CouponResult> {
-  const { data, error } = await rpc("validate_coupon", { _code: code, _subtotal: subtotal });
+export type CouponResult = { valid: boolean; code?: string; discount?: number; message?: string; products?: string[] | null };
+export type CouponItem = { product_id: string; quantity: number; unit_price: number };
+export async function validateCoupon(code: string, subtotal: number, items?: CouponItem[]): Promise<CouponResult> {
+  const { data, error } = await rpc("validate_coupon", {
+    _code: code,
+    _subtotal: subtotal,
+    ...(items ? { _items: items } : {}),
+  });
   if (error) throw new Error(error.message);
   return data as CouponResult;
 }

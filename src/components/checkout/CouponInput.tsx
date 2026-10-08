@@ -5,17 +5,19 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useFeature } from "@/lib/features";
 import { useI18n } from "@/lib/i18n";
-import { formatDzd, validateCoupon } from "@/lib/store";
+import { formatDzd, validateCoupon, type CouponItem } from "@/lib/store";
 
-export type AppliedCoupon = { code: string; discount: number } | null;
+export type AppliedCoupon = { code: string; discount: number; products?: string[] | null } | null;
 
 /** "Code promo" box. Re-validates when the subtotal changes. Renders nothing when coupons are off. */
 export function CouponInput({
   subtotal,
+  items,
   value,
   onChange,
 }: {
   subtotal: number;
+  items?: CouponItem[];
   value: AppliedCoupon;
   onChange: (next: AppliedCoupon) => void;
 }) {
@@ -31,8 +33,8 @@ export function CouponInput({
     setBusy(true);
     setError(null);
     try {
-      const res = await validateCoupon(c, subtotal);
-      if (res.valid && res.code) onChange({ code: res.code, discount: Number(res.discount) || 0 });
+      const res = await validateCoupon(c, subtotal, items);
+      if (res.valid && res.code) onChange({ code: res.code, discount: Number(res.discount) || 0, products: res.products ?? null });
       else {
         onChange(null);
         setError(res.message ?? t("coupon.invalid"));
@@ -48,7 +50,7 @@ export function CouponInput({
   useEffect(() => {
     if (value) void apply(value.code);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [subtotal]);
+  }, [subtotal, JSON.stringify(items ?? null)]);
 
   useEffect(() => {
     if (!enabled && value) onChange(null);
@@ -61,6 +63,11 @@ export function CouponInput({
       <div className="flex items-center justify-between rounded-sm border border-primary/30 bg-accent/40 px-3 py-2 text-sm">
         <span>
           {t("coupon.applied", { code: value.code })} · −{formatDzd(value.discount)}
+          {value.products && value.products.length > 0 ? (
+            <span className="block text-xs text-muted-foreground">
+              {t("coupon.appliedOn", { products: value.products.join(", ") })}
+            </span>
+          ) : null}
         </span>
         <button
           type="button"

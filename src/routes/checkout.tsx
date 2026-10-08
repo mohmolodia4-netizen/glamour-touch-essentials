@@ -57,7 +57,7 @@ function CheckoutPage() {
 }
 
 function CheckoutContent() {
-  const { items, subtotal, clearCart } = useCart();
+  const { items, subtotal, clearCart, unitPrice } = useCart();
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
   const [wilayaCode, setWilayaCode] = useState("");
@@ -293,7 +293,7 @@ function CheckoutContent() {
               <div className="mt-7 space-y-2 border-t border-border pt-5 text-sm">
                 <div className="flex justify-between text-muted-foreground"><span>{t("form.subtotal")}</span><span>{formatDzd(subtotal)}</span></div>
                 <div className="flex justify-between text-muted-foreground"><span>{t("form.shipping")}</span><span>{rate ? (freeShipping ? t("form.shippingFree") : formatDzd(shippingFee)) : "—"}</span></div>
-                <CouponInput subtotal={subtotal} value={coupon} onChange={setCoupon} />
+                <CouponInput subtotal={subtotal} items={items.map((i) => ({ product_id: i.product_id, quantity: i.quantity, unit_price: unitPrice(i) }))} value={coupon} onChange={setCoupon} />
                 {discount > 0 ? (
                   <div className="flex justify-between text-primary"><span>{t("form.discount")} ({coupon?.code})</span><span>−{formatDzd(discount)}</span></div>
                 ) : null}
