@@ -121,5 +121,13 @@
   "coupon.invalid": "Code promo invalide",
   "form.discount": "Remise",
   "coupon.appliedOn": "Réduction appliquée sur : {products}",
-  "coupon.notEligible": "Ce code ne s'applique pas aux produits de votre panier"
+  "coupon.notEligible": "Ce code ne s'applique pas aux produits de votre panier",
+  "pwa": {
+    "title": "Installer l'application",
+    "desc": "Accédez à la boutique en un geste depuis votre écran d'accueil.",
+    "install": "Installer",
+    "later": "Plus tard",
+    "iosTitle": "Installer sur iPhone",
+    "iosSteps": "Touchez Partager puis « Sur l'écran d'accueil »."
+  }
 }
