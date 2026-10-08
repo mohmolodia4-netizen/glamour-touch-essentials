@@ -119,5 +119,7 @@
   "coupon.applied": "تم تطبيق الرمز {code}",
   "coupon.remove": "إزالة الرمز",
   "coupon.invalid": "رمز التخفيض غير صالح",
-  "form.discount": "التخفيض"
+  "form.discount": "التخفيض",
+  "coupon.appliedOn": "تم تطبيق التخفيض على: {products}",
+  "coupon.notEligible": "هذا الرمز لا ينطبق على منتجات سلتك"
 }

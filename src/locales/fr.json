@@ -119,5 +119,7 @@
   "coupon.applied": "Code {code} appliqué",
   "coupon.remove": "Retirer le code",
   "coupon.invalid": "Code promo invalide",
-  "form.discount": "Remise"
+  "form.discount": "Remise",
+  "coupon.appliedOn": "Réduction appliquée sur : {products}",
+  "coupon.notEligible": "Ce code ne s'applique pas aux produits de votre panier"
 }

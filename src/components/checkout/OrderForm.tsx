@@ -539,7 +539,7 @@ export function OrderForm({ product }: { product: Product }) {
             {rate ? (freeShipping ? t("form.shippingFree") : formatDzd(shippingFee)) : "—"}
           </span>
         </div>
-        <CouponInput subtotal={subtotal} value={coupon} onChange={setCoupon} />
+        <CouponInput subtotal={subtotal} items={[{ product_id: product.id, quantity, unit_price: unit }]} value={coupon} onChange={setCoupon} />
         {discount > 0 ? (
           <div className="flex justify-between text-primary">
             <span>{t("form.discount")} ({coupon?.code})</span>
