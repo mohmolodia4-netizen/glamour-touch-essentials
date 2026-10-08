@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Pencil, Plus, Trash2 } from "lucide-react";
+import { Pencil, Plus, Trash2, X } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -39,9 +39,13 @@ type Draft = {
   starts_at: string;
   expires_at: string;
   active: boolean;
+  scope: "all" | "selected";
+  productIds: string[];
 };
 
-const empty: Draft = { code: "", type: "percent", value: "", min_order: "", max_uses: "", starts_at: "", expires_at: "", active: true };
+type ProductLite = { id: string; name: string; image_url: string | null; image_urls: string[] | null };
+
+const empty: Draft = { code: "", type: "percent", value: "", min_order: "", max_uses: "", starts_at: "", expires_at: "", active: true, scope: "all", productIds: [] };
 const db = () => (supabase as any).from("coupons");
 const toLocal = (iso: string | null) => (iso ? new Date(new Date(iso).getTime() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16) : "");
 
@@ -58,7 +62,28 @@ export function CouponsTab() {
       return data as Coupon[];
     },
   });
-  const refresh = () => qc.invalidateQueries({ queryKey: ["admin", "coupons"] });
+  const { data: links = [] } = useQuery({
+    queryKey: ["admin", "coupon_products"],
+    queryFn: async () => {
+      const { data, error } = await (supabase as any).from("coupon_products").select("coupon_id, product_id");
+      if (error) throw new Error(error.message);
+      return data as { coupon_id: string; product_id: string }[];
+    },
+  });
+  const { data: products = [] } = useQuery({
+    queryKey: ["admin", "coupon_product_options"],
+    queryFn: async () => {
+      const { data, error } = await (supabase as any).from("products").select("id, name, image_url, image_urls").order("name");
+      if (error) throw new Error(error.message);
+      return data as ProductLite[];
+    },
+  });
+  const [search, setSearch] = useState("");
+  const productIdsOf = (id: string) => links.filter((l) => l.coupon_id === id).map((l) => l.product_id);
+  const refresh = () => {
+    qc.invalidateQueries({ queryKey: ["admin", "coupons"] });
+    qc.invalidateQueries({ queryKey: ["admin", "coupon_products"] });
+  };
 
   async function save() {
     if (!draft) return;
@@ -75,10 +100,20 @@ export function CouponsTab() {
       expires_at: draft.expires_at ? new Date(draft.expires_at).toISOString() : null,
       active: draft.active,
     };
+    if (draft.scope === "selected" && draft.productIds.length === 0) { toast.error("Sélectionnez au moins un produit"); return; }
     setSaving(true);
-    const { error } = draft.id ? await db().update(payload).eq("id", draft.id) : await db().insert(payload);
+    const res = draft.id ? await db().update(payload).eq("id", draft.id).select("id").single() : await db().insert(payload).select("id").single();
+    if (res.error) { setSaving(false); toast.error(res.error.code === "23505" ? "Ce code existe déjà" : res.error.message); return; }
+    const couponId = res.data.id as string;
+    const cp = (supabase as any).from("coupon_products");
+    const del = await cp.delete().eq("coupon_id", couponId);
+    let linkErr = del.error;
+    if (!linkErr && draft.scope === "selected") {
+      const ins = await (supabase as any).from("coupon_products").insert(draft.productIds.map((product_id) => ({ coupon_id: couponId, product_id })));
+      linkErr = ins.error;
+    }
     setSaving(false);
-    if (error) { toast.error(error.code === "23505" ? "Ce code existe déjà" : error.message); return; }
+    if (linkErr) { toast.error(linkErr.message); refresh(); return; }
     toast.success("Code promo enregistré");
     setDraft(null);
     refresh();
@@ -119,6 +154,9 @@ export function CouponsTab() {
                   {c.expires_at ? ` · expire le ${new Date(c.expires_at).toLocaleDateString("fr-DZ")}` : ""}
                 </p>
               </div>
+              <span className="rounded-sm bg-muted px-2 py-0.5 text-xs">
+                {productIdsOf(c.id).length === 0 ? "Tous les produits" : `${productIdsOf(c.id).length} produit(s)`}
+              </span>
               <span className="text-xs text-muted-foreground">
                 Utilisé {c.used_count}{c.max_uses ? ` / ${c.max_uses}` : ""}
               </span>
@@ -126,6 +164,7 @@ export function CouponsTab() {
               <Button size="icon" variant="ghost" onClick={() => setDraft({
                 id: c.id, code: c.code, type: c.type, value: String(c.value), min_order: Number(c.min_order) ? String(c.min_order) : "",
                 max_uses: c.max_uses ? String(c.max_uses) : "", starts_at: toLocal(c.starts_at), expires_at: toLocal(c.expires_at), active: c.active,
+                scope: productIdsOf(c.id).length ? "selected" : "all", productIds: productIdsOf(c.id),
               })} aria-label="Modifier"><Pencil className="size-4" /></Button>
               <Button size="icon" variant="ghost" onClick={() => void remove(c)} aria-label="Supprimer"><Trash2 className="size-4" /></Button>
             </div>
@@ -158,6 +197,49 @@ export function CouponsTab() {
                   <Input type="datetime-local" value={draft.expires_at} onChange={(e) => setDraft({ ...draft, expires_at: e.target.value })} /></div>
               </div>
               <label className="flex items-center gap-2 text-sm"><Switch checked={draft.active} onCheckedChange={(v) => setDraft({ ...draft, active: v })} /> Actif</label>
+              <div className="grid gap-2 border-t border-border pt-3">
+                <Label>Produits concernés</Label>
+                <div className="flex gap-4 text-sm">
+                  <label className="flex items-center gap-2"><input type="radio" checked={draft.scope === "all"} onChange={() => setDraft({ ...draft, scope: "all" })} /> Tous les produits</label>
+                  <label className="flex items-center gap-2"><input type="radio" checked={draft.scope === "selected"} onChange={() => setDraft({ ...draft, scope: "selected" })} /> Produits sélectionnés</label>
+                </div>
+                {draft.scope === "selected" ? (() => {
+                  const filtered = products.filter((p) => p.name.toLowerCase().includes(search.trim().toLowerCase()));
+                  const toggleP = (id: string) => setDraft({ ...draft, productIds: draft.productIds.includes(id) ? draft.productIds.filter((x) => x !== id) : [...draft.productIds, id] });
+                  return (
+                    <div className="grid gap-2">
+                      {draft.productIds.length > 0 ? (
+                        <div className="flex flex-wrap gap-1">
+                          {draft.productIds.map((id) => (
+                            <span key={id} className="flex items-center gap-1 rounded-sm bg-accent px-2 py-0.5 text-xs">
+                              {products.find((p) => p.id === id)?.name ?? "—"}
+                              <button type="button" onClick={() => toggleP(id)} aria-label="Retirer"><X className="size-3" /></button>
+                            </span>
+                          ))}
+                        </div>
+                      ) : null}
+                      <div className="flex gap-2">
+                        <Input placeholder="Rechercher un produit…" value={search} onChange={(e) => setSearch(e.target.value)} />
+                        <Button type="button" variant="outline" size="sm" onClick={() => setDraft({ ...draft, productIds: Array.from(new Set([...draft.productIds, ...filtered.map((p) => p.id)])) })}>Tout sélectionner</Button>
+                        <Button type="button" variant="ghost" size="sm" onClick={() => setDraft({ ...draft, productIds: [] })}>Effacer</Button>
+                      </div>
+                      <div className="grid max-h-56 gap-1 overflow-y-auto rounded-sm border border-border p-1">
+                        {filtered.map((p) => {
+                          const img = p.image_urls?.[0] ?? p.image_url;
+                          return (
+                            <label key={p.id} className="flex cursor-pointer items-center gap-2 rounded-sm p-1 text-sm hover:bg-muted">
+                              <input type="checkbox" checked={draft.productIds.includes(p.id)} onChange={() => toggleP(p.id)} />
+                              {img ? <img src={img} alt="" className="size-8 rounded-sm object-cover" /> : <span className="size-8 rounded-sm bg-muted" />}
+                              <span className="truncate">{p.name}</span>
+                            </label>
+                          );
+                        })}
+                        {filtered.length === 0 ? <p className="p-2 text-xs text-muted-foreground">Aucun produit.</p> : null}
+                      </div>
+                    </div>
+                  );
+                })() : null}
+              </div>
             </div>
           ) : null}
           <DialogFooter>
