@@ -146,6 +146,51 @@ export type Database = {
         }
         Relationships: []
       }
+      coupons: {
+        Row: {
+          active: boolean
+          code: string
+          created_at: string
+          expires_at: string | null
+          id: string
+          max_uses: number | null
+          min_order: number
+          starts_at: string | null
+          type: string
+          updated_at: string
+          used_count: number
+          value: number
+        }
+        Insert: {
+          active?: boolean
+          code: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          max_uses?: number | null
+          min_order?: number
+          starts_at?: string | null
+          type?: string
+          updated_at?: string
+          used_count?: number
+          value: number
+        }
+        Update: {
+          active?: boolean
+          code?: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          max_uses?: number | null
+          min_order?: number
+          starts_at?: string | null
+          type?: string
+          updated_at?: string
+          used_count?: number
+          value?: number
+        }
+        Relationships: []
+      }
       cross_sell_products: {
         Row: {
           created_at: string
@@ -227,9 +272,11 @@ export type Database = {
         Row: {
           adresse: string | null
           commune: string
+          coupon_code: string | null
           created_at: string
           delivery_type: string
           desk_code: string | null
+          discount_amount: number
           full_name: string
           id: string
           phone: string
@@ -248,9 +295,11 @@ export type Database = {
         Insert: {
           adresse?: string | null
           commune: string
+          coupon_code?: string | null
           created_at?: string
           delivery_type: string
           desk_code?: string | null
+          discount_amount?: number
           full_name: string
           id?: string
           phone: string
@@ -269,9 +318,11 @@ export type Database = {
         Update: {
           adresse?: string | null
           commune?: string
+          coupon_code?: string | null
           created_at?: string
           delivery_type?: string
           desk_code?: string | null
+          discount_amount?: number
           full_name?: string
           id?: string
           phone?: string
@@ -494,6 +545,14 @@ export type Database = {
         Returns: Json
       }
       claim_first_admin: { Args: never; Returns: boolean }
+      coupon_apply: {
+        Args: { _code: string; _consume: boolean; _subtotal: number }
+        Returns: {
+          code: string
+          discount: number
+          error: string
+        }[]
+      }
       discounted_unit: {
         Args: { _min: number; _pct: number; _price: number; _qty: number }
         Returns: number
@@ -528,19 +587,34 @@ export type Database = {
         }
         Returns: boolean
       }
-      place_cart_order: {
-        Args: {
-          _adresse: string
-          _commune: string
-          _delivery_type: string
-          _desk_code: string
-          _full_name: string
-          _items: Json
-          _phone: string
-          _wilaya_code: number
-        }
-        Returns: string
-      }
+      place_cart_order:
+        | {
+            Args: {
+              _adresse: string
+              _commune: string
+              _delivery_type: string
+              _desk_code: string
+              _full_name: string
+              _items: Json
+              _phone: string
+              _wilaya_code: number
+            }
+            Returns: string
+          }
+        | {
+            Args: {
+              _adresse: string
+              _commune: string
+              _coupon_code: string
+              _delivery_type: string
+              _desk_code: string
+              _full_name: string
+              _items: Json
+              _phone: string
+              _wilaya_code: number
+            }
+            Returns: string
+          }
       place_order:
         | {
             Args: {
@@ -569,21 +643,41 @@ export type Database = {
             }
             Returns: string
           }
-      place_order_items: {
-        Args: {
-          _adresse: string
-          _commune: string
-          _delivery_type: string
-          _desk_code: string
-          _full_name: string
-          _items: Json
-          _phone: string
-          _product_id: string
-          _wilaya_code: number
-        }
-        Returns: string
-      }
+      place_order_items:
+        | {
+            Args: {
+              _adresse: string
+              _commune: string
+              _delivery_type: string
+              _desk_code: string
+              _full_name: string
+              _items: Json
+              _phone: string
+              _product_id: string
+              _wilaya_code: number
+            }
+            Returns: string
+          }
+        | {
+            Args: {
+              _adresse: string
+              _commune: string
+              _coupon_code: string
+              _delivery_type: string
+              _desk_code: string
+              _full_name: string
+              _items: Json
+              _phone: string
+              _product_id: string
+              _wilaya_code: number
+            }
+            Returns: string
+          }
       qty_discount_on: { Args: never; Returns: boolean }
+      validate_coupon: {
+        Args: { _code: string; _subtotal: number }
+        Returns: Json
+      }
     }
     Enums: {
       app_role: "admin" | "user"

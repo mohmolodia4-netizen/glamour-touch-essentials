@@ -113,5 +113,11 @@
   "product.qtyDiscount": "اشتري {n}، ووفّري {p}%",
   "upsell.title": "أكملي إطلالتك",
   "form.shippingFree": "مجاني",
-  "form.freeShippingFrom": "التوصيل مجاني ابتداءً من {amount}"
+  "form.freeShippingFrom": "التوصيل مجاني ابتداءً من {amount}",
+  "coupon.label": "رمز التخفيض",
+  "coupon.apply": "تطبيق",
+  "coupon.applied": "تم تطبيق الرمز {code}",
+  "coupon.remove": "إزالة الرمز",
+  "coupon.invalid": "رمز التخفيض غير صالح",
+  "form.discount": "التخفيض"
 }

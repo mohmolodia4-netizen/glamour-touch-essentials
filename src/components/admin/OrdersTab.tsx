@@ -43,6 +43,8 @@ type Order = {
   adresse: string | null;
   delivery_type: string;
   shipping_fee: number;
+  coupon_code?: string | null;
+  discount_amount?: number | null;
   total: number;
   status: string;
   order_items: OrderItem[] | null;
@@ -354,6 +356,9 @@ export function OrdersTab() {
                   </p>
                   <p className="mt-1 text-xs text-muted-foreground">
                     Livraison {formatDzd(Number(order.shipping_fee))} ·{" "}
+                    {Number(order.discount_amount) > 0
+                      ? `Code promo ${order.coupon_code ?? ""} −${formatDzd(Number(order.discount_amount))} · `
+                      : ""}
                     {new Date(order.created_at).toLocaleString("fr-DZ")}
                   </p>
                   </div>

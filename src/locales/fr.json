@@ -113,5 +113,11 @@
   "product.qtyDiscount": "Achetez {n}, économisez {p}%",
   "upsell.title": "Complétez votre look",
   "form.shippingFree": "Gratuite",
-  "form.freeShippingFrom": "Livraison gratuite dès {amount}"
+  "form.freeShippingFrom": "Livraison gratuite dès {amount}",
+  "coupon.label": "Code promo",
+  "coupon.apply": "Appliquer",
+  "coupon.applied": "Code {code} appliqué",
+  "coupon.remove": "Retirer le code",
+  "coupon.invalid": "Code promo invalide",
+  "form.discount": "Remise"
 }

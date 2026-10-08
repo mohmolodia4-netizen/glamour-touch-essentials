@@ -26,6 +26,7 @@ import {
 import { useI18n } from "@/lib/i18n";
 import { publicSettingsQuery } from "@/lib/store";
 import { resolveFeature, useFreeShippingThreshold } from "@/lib/features";
+import { CouponInput, type AppliedCoupon } from "@/components/checkout/CouponInput";
 import { useNavigate } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/checkout")({
@@ -93,7 +94,9 @@ function CheckoutContent() {
   const freeShipping = freeShippingFrom !== null && subtotal >= freeShippingFrom;
   const shippingFee =
     rate && !freeShipping ? (deliveryType === "domicile" ? rate.domicile_fee : rate.stopdesk_fee) : 0;
-  const total = subtotal + shippingFee;
+  const [coupon, setCoupon] = useState<AppliedCoupon>(null);
+  const discount = coupon ? Math.min(coupon.discount, subtotal) : 0;
+  const total = subtotal - discount + shippingFee;
 
   const wilayaOptions = useMemo(
     () =>
@@ -144,6 +147,7 @@ function CheckoutContent() {
         deliveryType,
         adresse: address,
         deskCode,
+        couponCode: coupon?.code ?? null,
       });
       setDoneSnapshot({
         lines: items.map((i) => ({
@@ -289,6 +293,10 @@ function CheckoutContent() {
               <div className="mt-7 space-y-2 border-t border-border pt-5 text-sm">
                 <div className="flex justify-between text-muted-foreground"><span>{t("form.subtotal")}</span><span>{formatDzd(subtotal)}</span></div>
                 <div className="flex justify-between text-muted-foreground"><span>{t("form.shipping")}</span><span>{rate ? (freeShipping ? t("form.shippingFree") : formatDzd(shippingFee)) : "—"}</span></div>
+                <CouponInput subtotal={subtotal} value={coupon} onChange={setCoupon} />
+                {discount > 0 ? (
+                  <div className="flex justify-between text-primary"><span>{t("form.discount")} ({coupon?.code})</span><span>−{formatDzd(discount)}</span></div>
+                ) : null}
                 {freeShippingFrom !== null ? (
                   <p className="text-xs text-primary">
                     {t("form.freeShippingFrom", { amount: formatDzd(freeShippingFrom) })}

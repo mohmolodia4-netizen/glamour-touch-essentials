@@ -87,6 +87,8 @@ Deno.serve(async (req) => {
       ref_article: order.product_ref || "",
       note: order.note || "",
       status,
+      code_promo: order.coupon_code || "",
+      remise: Number(order.discount_amount) || 0,
     });
 
     const sheetUrl = settings?.google_sheet_webhook_url?.trim();
@@ -182,6 +184,9 @@ Deno.serve(async (req) => {
       `<b>Livraison:</b> ${isStopdesk ? "Stopdesk" : "À domicile"}`,
       order.adresse ? `<b>Adresse:</b> ${order.adresse}` : "",
       `<b>Frais:</b> ${order.shipping_fee} DA`,
+      Number(order.discount_amount) > 0
+        ? `<b>Code promo:</b> ${order.coupon_code} (−${order.discount_amount} DA)`
+        : "",
       `<b>Total:</b> ${order.total} DA`,
     ].filter(Boolean);
 
