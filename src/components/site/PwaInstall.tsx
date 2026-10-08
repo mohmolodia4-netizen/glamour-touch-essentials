@@ -55,7 +55,8 @@ function PwaCleanup() {
 
 function PwaActive() {
   const cfg = useFeatureConfig<PwaConfig>("pwa");
-  const { t } = useI18n();
+  const { t: tk } = useI18n();
+  const t = tk as (key: string) => string;
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [deferred, setDeferred] = useState<BIPEvent | null>(null);
   const [ios, setIos] = useState(false);
