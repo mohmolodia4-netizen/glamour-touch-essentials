@@ -303,6 +303,19 @@ export function OrdersTab() {
           </Button>
           <Button
             type="button"
+            variant="destructive"
+            size="sm"
+            className="rounded-sm"
+            disabled={deleteBusy}
+            onClick={() => {
+              setDeleteConfirmText("");
+              setDeleteOpen(true);
+            }}
+          >
+            <Trash2 className="mr-1 size-3.5" /> Supprimer
+          </Button>
+          <Button
+            type="button"
             variant="outline"
             size="sm"
             className="rounded-sm"
