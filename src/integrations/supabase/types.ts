@@ -146,6 +146,36 @@ export type Database = {
         }
         Relationships: []
       }
+      coupon_products: {
+        Row: {
+          coupon_id: string
+          product_id: string
+        }
+        Insert: {
+          coupon_id: string
+          product_id: string
+        }
+        Update: {
+          coupon_id?: string
+          product_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coupon_products_coupon_id_fkey"
+            columns: ["coupon_id"]
+            isOneToOne: false
+            referencedRelation: "coupons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "coupon_products_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       coupons: {
         Row: {
           active: boolean
@@ -553,6 +583,15 @@ export type Database = {
           error: string
         }[]
       }
+      coupon_apply_items: {
+        Args: { _code: string; _consume: boolean; _items: Json }
+        Returns: {
+          code: string
+          discount: number
+          error: string
+          products: string[]
+        }[]
+      }
       discounted_unit: {
         Args: { _min: number; _pct: number; _price: number; _qty: number }
         Returns: number
@@ -674,10 +713,12 @@ export type Database = {
             Returns: string
           }
       qty_discount_on: { Args: never; Returns: boolean }
-      validate_coupon: {
-        Args: { _code: string; _subtotal: number }
-        Returns: Json
-      }
+      validate_coupon:
+        | { Args: { _code: string; _subtotal: number }; Returns: Json }
+        | {
+            Args: { _code: string; _items: Json; _subtotal: number }
+            Returns: Json
+          }
     }
     Enums: {
       app_role: "admin" | "user"

@@ -92,6 +92,13 @@
       "when": 1791419561098,
       "tag": "0012_coupons",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1791422114480,
+      "tag": "0013_coupon_products",
+      "breakpoints": true
     }
   ]
 }
