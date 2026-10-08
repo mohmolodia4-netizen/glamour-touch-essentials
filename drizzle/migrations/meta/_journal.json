@@ -85,6 +85,13 @@
       "when": 1791389151045,
       "tag": "0011_delivery_active_and_free_shipping",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1791419561098,
+      "tag": "0012_coupons",
+      "breakpoints": true
     }
   ]
 }
