@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Boxes, LayoutDashboard, LogOut, Package, Settings, ShoppingBag, Tags, TicketPercent, Truck } from "lucide-react";
+import { Boxes, LayoutDashboard, LogOut, Package, Settings, ShoppingBag, Smartphone, Tags, TicketPercent, Truck } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
@@ -19,7 +19,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 
-export type AdminTab = "dashboard" | "orders" | "products" | "categories" | "delivery" | "coupons" | "settings";
+export type AdminTab = "dashboard" | "orders" | "products" | "categories" | "delivery" | "coupons" | "pwa" | "settings";
 
 const items = [
   { tab: "dashboard" as const, label: "Tableau de bord", icon: LayoutDashboard },
@@ -28,6 +28,7 @@ const items = [
   { tab: "categories" as const, label: "Catégories", icon: Tags },
   { tab: "delivery" as const, label: "Livraison", icon: Truck },
   { tab: "coupons" as const, label: "Codes promo", icon: TicketPercent },
+  { tab: "pwa" as const, label: "Application (PWA)", icon: Smartphone },
   { tab: "settings" as const, label: "Paramètres", icon: Settings },
 ];
 

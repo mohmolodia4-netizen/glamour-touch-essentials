@@ -13,6 +13,7 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Toaster } from "@/components/ui/sonner";
+import { PwaInstall } from "@/components/site/PwaInstall";
 import { PixelLoader } from "@/components/site/PixelLoader";
 import { CartProvider } from "@/lib/cart";
 import { I18nProvider } from "@/lib/i18n";
@@ -140,6 +141,7 @@ function RootComponent() {
       <I18nProvider>
         <CartProvider>
           <Outlet />
+          <PwaInstall />
         </CartProvider>
       </I18nProvider>
     </QueryClientProvider>

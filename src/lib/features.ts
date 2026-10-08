@@ -15,6 +15,7 @@ export const FEATURES: { key: string; label: string; default: boolean }[] = [
   { key: "dashboard", label: "Tableau de bord (admin)", default: false },
   { key: "free_shipping", label: "Livraison gratuite", default: false },
   { key: "coupons", label: "Codes promo", default: false },
+  { key: "pwa", label: "Application (PWA)", default: false },
 ];
 
 export function resolveFeature(
