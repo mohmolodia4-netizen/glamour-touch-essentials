@@ -86,6 +86,9 @@ export function OrdersTab() {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [bulkStatus, setBulkStatus] = useState("confirmed");
   const [bulkBusy, setBulkBusy] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleteBusy, setDeleteBusy] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState("");
 
   const { range, from, to } = adminRoute.useSearch();
   const navigate = adminRoute.useNavigate();
