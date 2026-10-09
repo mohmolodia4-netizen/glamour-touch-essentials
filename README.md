@@ -232,10 +232,6 @@ The deployed Edge Function receives an order ID and reloads the order and its li
 - Treats notification failures separately from order creation so a customer order can still succeed.
 - Sends the Stopdesk code to the Sheets integration for Stopdesk orders.
 
-### `/api/public/migrate-helper`
-
-This TanStack server route exposes protected migration diagnostics over `GET` and `POST`. Every request requires the configured access header. Its `ping` action reports whether the required server environment is available. It is not used by the storefront checkout flow.
-
 ## Tech stack
 
 - React 19
@@ -259,14 +255,12 @@ This TanStack server route exposes protected migration diagnostics over `GET` an
 | `/product/:id` | Product details and direct checkout |
 | `/checkout` | Multi-product cart checkout |
 | `/admin` | Authenticated administration dashboard |
-| `/api/public/migrate-helper` | Access-key-protected migration diagnostics endpoint |
 
 ## Deployment notes
 
 - The current project is connected to Lovable Cloud, which provides its Supabase-compatible backend.
 - Public browser access requires `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY`. The generated client can also use the corresponding server-side public values during rendering.
 - The `send-order-notifications` Edge Function requires its platform-provided database URL and service-role credential. Telegram and Google Sheets values are read from the protected `app_settings` row, not exposed through `get_public_settings()`.
-- `/api/public/migrate-helper` requires `MIGRATE_HELPER_ACCESS_KEY`, `SUPABASE_DB_URL`, and `SUPABASE_SERVICE_ROLE_KEY` in the server runtime.
 - Never expose service-role credentials, Telegram tokens, database URLs, migration access keys, or other private values in client code or committed files.
 - Database changes live under `supabase/migrations`. The consolidated schema reference is `supabase/schema/full_schema_baseline.sql`.
 - The storefront itself performs public reads and checkout RPC calls with the publishable client; administrator writes remain protected by authentication and RLS.
