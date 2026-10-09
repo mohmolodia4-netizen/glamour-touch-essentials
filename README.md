@@ -232,10 +232,6 @@ The deployed Edge Function receives an order ID and reloads the order and its li
 - Treats notification failures separately from order creation so a customer order can still succeed.
 - Sends the Stopdesk code to the Sheets integration for Stopdesk orders.
 
-### `/api/public/migrate-helper`
-
-This TanStack server route exposes protected migration diagnostics over `GET` and `POST`. Every request requires the configured access header. Its `ping` action reports whether the required server environment is available. It is not used by the storefront checkout flow.
-
 ## Tech stack
 
 - React 19
