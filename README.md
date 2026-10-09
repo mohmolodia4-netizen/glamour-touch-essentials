@@ -255,7 +255,6 @@ The deployed Edge Function receives an order ID and reloads the order and its li
 | `/product/:id` | Product details and direct checkout |
 | `/checkout` | Multi-product cart checkout |
 | `/admin` | Authenticated administration dashboard |
-| `/api/public/migrate-helper` | Access-key-protected migration diagnostics endpoint |
 
 ## Deployment notes
 
