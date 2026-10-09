@@ -15,7 +15,6 @@ import { Route as BoutiqueRouteImport } from './routes/boutique'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as ManifestDotwebmanifestRouteImport } from './routes/manifest[.]webmanifest'
 import { Route as ProductIdRouteImport } from './routes/product.$id'
-import { Route as ApiPublicMigrateHelperRouteImport } from './routes/api/public/migrate-helper'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -47,11 +46,6 @@ const ProductIdRoute = ProductIdRouteImport.update({
   path: '/product/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiPublicMigrateHelperRoute = ApiPublicMigrateHelperRouteImport.update({
-  id: '/api/public/migrate-helper',
-  path: '/api/public/migrate-helper',
-  getParentRoute: () => rootRouteImport,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -60,7 +54,6 @@ export interface FileRoutesByFullPath {
   '/checkout': typeof CheckoutRoute
   '/manifest.webmanifest': typeof ManifestDotwebmanifestRoute
   '/product/$id': typeof ProductIdRoute
-  '/api/public/migrate-helper': typeof ApiPublicMigrateHelperRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -69,7 +62,6 @@ export interface FileRoutesByTo {
   '/checkout': typeof CheckoutRoute
   '/manifest.webmanifest': typeof ManifestDotwebmanifestRoute
   '/product/$id': typeof ProductIdRoute
-  '/api/public/migrate-helper': typeof ApiPublicMigrateHelperRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -79,7 +71,6 @@ export interface FileRoutesById {
   '/checkout': typeof CheckoutRoute
   '/manifest.webmanifest': typeof ManifestDotwebmanifestRoute
   '/product/$id': typeof ProductIdRoute
-  '/api/public/migrate-helper': typeof ApiPublicMigrateHelperRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -90,7 +81,6 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/manifest.webmanifest'
     | '/product/$id'
-    | '/api/public/migrate-helper'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -99,7 +89,6 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/manifest.webmanifest'
     | '/product/$id'
-    | '/api/public/migrate-helper'
   id:
     | '__root__'
     | '/'
@@ -108,7 +97,6 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/manifest.webmanifest'
     | '/product/$id'
-    | '/api/public/migrate-helper'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -118,7 +106,6 @@ export interface RootRouteChildren {
   CheckoutRoute: typeof CheckoutRoute
   ManifestDotwebmanifestRoute: typeof ManifestDotwebmanifestRoute
   ProductIdRoute: typeof ProductIdRoute
-  ApiPublicMigrateHelperRoute: typeof ApiPublicMigrateHelperRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -165,13 +152,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProductIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/public/migrate-helper': {
-      id: '/api/public/migrate-helper'
-      path: '/api/public/migrate-helper'
-      fullPath: '/api/public/migrate-helper'
-      preLoaderRoute: typeof ApiPublicMigrateHelperRouteImport
-      parentRoute: typeof rootRouteImport
-    }
   }
 }
 
@@ -182,7 +162,6 @@ const rootRouteChildren: RootRouteChildren = {
   CheckoutRoute: CheckoutRoute,
   ManifestDotwebmanifestRoute: ManifestDotwebmanifestRoute,
   ProductIdRoute: ProductIdRoute,
-  ApiPublicMigrateHelperRoute: ApiPublicMigrateHelperRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
