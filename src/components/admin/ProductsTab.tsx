@@ -416,7 +416,7 @@ export function ProductsTab() {
             <input
               ref={fileInput}
               type="file"
-              accept="image/*"
+              accept="image/*,.heic,.heif"
               multiple
               onChange={(event) => handleFiles(event.target.files)}
               className="text-sm"
@@ -498,7 +498,7 @@ export function ProductsTab() {
                   <Label className="text-xs">Image</Label>
                   <input
                     type="file"
-                    accept="image/*"
+                    accept="image/*,.heic,.heif"
                     onChange={(event) =>
                       void handleVariantImage(position, event.target.files?.[0])
                     }

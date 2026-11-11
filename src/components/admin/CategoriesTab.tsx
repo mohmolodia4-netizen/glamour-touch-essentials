@@ -140,7 +140,7 @@ export function CategoriesTab() {
               <Label>Image</Label>
               <input
                 type="file"
-                accept="image/*"
+                accept="image/*,.heic,.heif"
                 className="text-sm"
                 onChange={async (event) => {
                   const file = event.target.files?.[0];

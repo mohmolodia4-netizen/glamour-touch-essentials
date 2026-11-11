@@ -191,7 +191,7 @@ export function SettingsTab() {
               <label className="inline-flex cursor-pointer items-center gap-2 text-sm text-primary">
                  {uploading === "logo" ? <Loader2 className="size-4 animate-spin" /> : <Upload className="size-4" />}
                  {uploading === "logo" ? "Envoi..." : "Importer"}
-                 <input type="file" accept="image/*" className="sr-only" disabled={!!uploading} onChange={(event) => { void handleImage(event.target.files?.[0], "logo_url"); event.target.value = ""; }} />
+                 <input type="file" accept="image/*,.heic,.heif" className="sr-only" disabled={!!uploading} onChange={(event) => { void handleImage(event.target.files?.[0], "logo_url"); event.target.value = ""; }} />
               </label>
               {form.logo_url ? <Button variant="ghost" size="icon" type="button" aria-label="Supprimer le logo" onClick={() => setForm({ ...form, logo_url: "" })}><X className="size-4" /></Button> : null}
             </div>
@@ -220,7 +220,7 @@ export function SettingsTab() {
               <label className="inline-flex cursor-pointer items-center gap-2 text-sm text-primary">
                 {uploading === "hero" ? <Loader2 className="size-4 animate-spin" /> : <Upload className="size-4" />}
                 {uploading === "hero" ? "Envoi..." : "Importer"}
-                <input id="hero-image" type="file" accept="image/*" className="sr-only" disabled={!!uploading} onChange={(event) => { void handleImage(event.target.files?.[0], "hero_image_url"); event.target.value = ""; }} />
+                <input id="hero-image" type="file" accept="image/*,.heic,.heif" className="sr-only" disabled={!!uploading} onChange={(event) => { void handleImage(event.target.files?.[0], "hero_image_url"); event.target.value = ""; }} />
               </label>
               {form.hero_image_url ? <Button variant="ghost" size="icon" type="button" aria-label="Retirer l'image de la bannière" onClick={() => setForm({ ...form, hero_image_url: "" })}><X className="size-4" /></Button> : null}
             </div>
