@@ -24,7 +24,6 @@ import {
   type Product,
 } from "@/lib/store";
 import { uploadImage } from "@/lib/upload";
-import { convertProductImage } from "@/lib/product-image";
 import { useFeature } from "@/lib/features";
 
 type VariantDraft = {
@@ -128,7 +127,7 @@ export function ProductsTab() {
     setUploading(true);
     try {
       const urls: string[] = [];
-      for (const file of Array.from(files)) urls.push(await uploadImage(await convertProductImage(file)));
+      for (const file of Array.from(files)) urls.push(await uploadImage(file));
       setDraft({ ...draft, images: [...draft.images, ...urls] });
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Échec de l'envoi");
@@ -155,7 +154,7 @@ export function ProductsTab() {
     if (!file) return;
     setUploading(true);
     try {
-      const url = await uploadImage(await convertProductImage(file));
+      const url = await uploadImage(file);
       updateVariant(position, { image_url: url });
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Échec de l'envoi");
@@ -430,7 +429,7 @@ export function ProductsTab() {
             <div className="mt-2 flex flex-wrap gap-3">
               {draft.images.map((image) => (
                 <div key={image} className="relative size-24 overflow-hidden rounded-sm">
-                  <img loading="lazy" src={image} alt="" className="size-full object-cover" />
+                  <img src={image} alt="" className="size-full object-cover" />
                   <button
                     type="button"
                     aria-label="Retirer l'image"
@@ -507,7 +506,7 @@ export function ProductsTab() {
                   />
                 </div>
                 {variant.image_url ? (
-                  <img loading="lazy"
+                  <img
                     src={variant.image_url}
                     alt=""
                     className="size-12 rounded-sm object-cover"

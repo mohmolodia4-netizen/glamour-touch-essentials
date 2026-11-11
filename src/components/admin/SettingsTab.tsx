@@ -187,7 +187,7 @@ export function SettingsTab() {
           <div className="grid gap-2">
             <Label>Logo</Label>
             <div className="flex min-h-10 items-center gap-3">
-              {form.logo_url ? <img loading="lazy" src={form.logo_url} alt="Logo actuel" className="max-h-12 max-w-28 object-contain" /> : <ImageIcon className="size-5 text-muted-foreground" />}
+              {form.logo_url ? <img src={form.logo_url} alt="Logo actuel" className="max-h-12 max-w-28 object-contain" /> : <ImageIcon className="size-5 text-muted-foreground" />}
               <label className="inline-flex cursor-pointer items-center gap-2 text-sm text-primary">
                  {uploading === "logo" ? <Loader2 className="size-4 animate-spin" /> : <Upload className="size-4" />}
                  {uploading === "logo" ? "Envoi..." : "Importer"}
@@ -216,7 +216,7 @@ export function SettingsTab() {
           <div className="grid gap-2 sm:col-span-2">
             <Label htmlFor="hero-image">Image de la bannière</Label>
             <div className="flex flex-wrap items-center gap-3">
-              {form.hero_image_url ? <img loading="lazy" src={form.hero_image_url} alt="Image actuelle de la bannière" className="h-20 w-28 rounded-sm object-cover" /> : <ImageIcon className="size-5 text-muted-foreground" />}
+              {form.hero_image_url ? <img src={form.hero_image_url} alt="Image actuelle de la bannière" className="h-20 w-28 rounded-sm object-cover" /> : <ImageIcon className="size-5 text-muted-foreground" />}
               <label className="inline-flex cursor-pointer items-center gap-2 text-sm text-primary">
                 {uploading === "hero" ? <Loader2 className="size-4 animate-spin" /> : <Upload className="size-4" />}
                 {uploading === "hero" ? "Envoi..." : "Importer"}

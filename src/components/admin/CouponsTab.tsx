@@ -229,7 +229,7 @@ export function CouponsTab() {
                           return (
                             <label key={p.id} className="flex cursor-pointer items-center gap-2 rounded-sm p-1 text-sm hover:bg-muted">
                               <input type="checkbox" checked={draft.productIds.includes(p.id)} onChange={() => toggleP(p.id)} />
-                              {img ? <img loading="lazy" src={img} alt="" className="size-8 rounded-sm object-cover" /> : <span className="size-8 rounded-sm bg-muted" />}
+                              {img ? <img src={img} alt="" className="size-8 rounded-sm object-cover" /> : <span className="size-8 rounded-sm bg-muted" />}
                               <span className="truncate">{p.name}</span>
                             </label>
                           );

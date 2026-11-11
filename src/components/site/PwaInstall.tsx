@@ -110,7 +110,7 @@ function PwaActive() {
       </button>
       <div className="flex items-start gap-3 pe-5">
         {cfg?.icon_192 ? (
-          <img loading="lazy" src={cfg.icon_192} alt="" className="size-11 shrink-0 rounded-md object-cover" />
+          <img src={cfg.icon_192} alt="" className="size-11 shrink-0 rounded-md object-cover" />
         ) : null}
         <div className="min-w-0 flex-1">
           <p className="font-display text-base">{ios && !deferred ? t("pwa.iosTitle") : t("pwa.title")}</p>

@@ -13,7 +13,7 @@ export function SiteFooter() {
       <div className="mx-auto grid max-w-6xl gap-10 px-5 py-14 md:grid-cols-3">
         <div>
           {settings?.logo_url ? (
-            <img loading="lazy" src={settings.logo_url} alt={settings.site_name || "Glamour Touch"} className="max-h-14 max-w-44 object-contain" />
+            <img src={settings.logo_url} alt={settings.site_name || "Glamour Touch"} className="max-h-14 max-w-44 object-contain" />
           ) : (
             <p className="font-display text-xl text-primary">{settings?.site_name || "Glamour Touch"}</p>
           )}

@@ -73,7 +73,7 @@ function Home() {
             </div>
           </div>
           <div className="hero-image-enter overflow-hidden rounded-sm shadow-soft">
-            <img loading="lazy"
+            <img
               src={settings?.hero_image_url || heroBag}
               alt={t("home.heroAlt")}
               width={1600}
