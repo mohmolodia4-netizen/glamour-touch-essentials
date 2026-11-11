@@ -77,7 +77,7 @@ export function SiteHeader() {
 
         <Link to="/" className="flex min-w-0 flex-col items-center text-center" aria-label={settings?.site_name || "Glamour Touch"}>
           {settings?.logo_url ? (
-            <img src={settings.logo_url} alt={settings.site_name || "Glamour Touch"} className="max-h-10 max-w-36 object-contain" />
+            <img loading="lazy" src={settings.logo_url} alt={settings.site_name || "Glamour Touch"} className="max-h-10 max-w-36 object-contain" />
           ) : (
             <span className="font-display text-xl leading-none text-primary sm:text-2xl">
               {settings?.site_name || "Glamour Touch"}

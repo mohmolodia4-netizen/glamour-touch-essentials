@@ -116,7 +116,7 @@ function ProductPage() {
             <div className="min-w-0">
               <div className="relative aspect-4/5 overflow-hidden rounded-sm bg-secondary">
                 {images[index] ? (
-                  <img
+                  <img loading="lazy"
                     src={images[index]}
                     alt={product.name}
                     className="size-full object-cover"

@@ -163,7 +163,7 @@ export function CategoriesTab() {
             </div>
           </div>
           {draft.image_url ? (
-            <img
+            <img loading="lazy"
               src={draft.image_url}
               alt=""
               className="size-24 rounded-sm object-cover"

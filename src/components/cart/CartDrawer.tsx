@@ -17,7 +17,7 @@ export function CartLines() {
         <li key={`${item.product_id}-${item.color_name}`} className="flex gap-3 py-4">
           <div className="size-16 shrink-0 overflow-hidden rounded-sm bg-secondary">
             {item.image_url ? (
-              <img src={item.image_url} alt="" className="size-full object-cover" />
+              <img loading="lazy" src={item.image_url} alt="" className="size-full object-cover" />
             ) : (
               <ImageIcon className="m-auto mt-5 size-5 text-muted-foreground" />
             )}

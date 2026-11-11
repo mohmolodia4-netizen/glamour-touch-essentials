@@ -111,7 +111,7 @@ export function PwaTab() {
                   <Label>Icône {key === "icon_192" ? "192 × 192" : "512 × 512"} (PNG)</Label>
                   <div className="flex items-center gap-3">
                     <div className="flex size-16 items-center justify-center overflow-hidden rounded-md border border-border bg-muted">
-                      {form[key] ? <img src={form[key]} alt="" className="size-full object-cover" /> : null}
+                      {form[key] ? <img loading="lazy" src={form[key]} alt="" className="size-full object-cover" /> : null}
                     </div>
                     <Button asChild variant="outline" size="sm" className="rounded-sm">
                       <label className="cursor-pointer">

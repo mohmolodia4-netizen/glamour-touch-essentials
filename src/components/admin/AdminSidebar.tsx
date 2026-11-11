@@ -54,7 +54,7 @@ export function AdminSidebar({ activeTab, logoUrl, storeName, mutedTabs = [], on
         >
           <div className="flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-md border border-sidebar-border bg-background">
             {logoUrl ? (
-              <img src={logoUrl} alt="" className="size-full object-contain p-1" />
+              <img loading="lazy" src={logoUrl} alt="" className="size-full object-contain p-1" />
             ) : (
               <Boxes className="size-4 text-primary" />
             )}
