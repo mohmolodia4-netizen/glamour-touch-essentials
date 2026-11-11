@@ -111,7 +111,6 @@ function Home() {
                     <img
                       src={category.image_url}
                       alt={category.name}
-                      loading="lazy"
                       className="size-full object-cover transition-transform duration-700 group-hover:scale-105"
                     />
                   ) : null}

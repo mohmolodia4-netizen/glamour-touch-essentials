@@ -190,7 +190,6 @@ export function CategoriesTab() {
                   <img
                     src={category.image_url}
                     alt=""
-                    loading="lazy"
                     className="size-full object-cover"
                   />
                 ) : null}

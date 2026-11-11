@@ -169,7 +169,6 @@ function ProductPage() {
                       <img
                         src={image}
                         alt=""
-                        loading="lazy"
                         className="size-full object-cover"
                       />
                     </button>

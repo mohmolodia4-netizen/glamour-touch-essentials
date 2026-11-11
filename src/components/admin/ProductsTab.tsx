@@ -604,7 +604,6 @@ export function ProductsTab() {
                     <img
                       src={cover}
                       alt=""
-                      loading="lazy"
                       className="size-full object-cover"
                     />
                   ) : (
